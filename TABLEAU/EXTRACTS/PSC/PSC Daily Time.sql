@@ -1,5 +1,3 @@
---test
-
 SELECT
 "Date"
 ,IsHoliday
