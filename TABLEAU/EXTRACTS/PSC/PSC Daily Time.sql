@@ -112,7 +112,7 @@ FROM (SELECT DISTINCT ShortDate "Date"
     LEFT JOIN (SELECT PartyEmployeeID
                             , CompletedDate
                             , Sum(ProductivityCredit) AS ProdCredits 
-                    FROM  PROD_DMA_VW.ACTIVITY_FCT_VW
+                    FROM  PROD_DMA_VW.PSC_MART_VW
                     WHERE CompletedIndicator = 1 AND CompletedDate BETWEEN Add_Months(Current_Date, -3) 
                         AND Current_Date + INTERVAL '10' DAY
                     GROUP BY 1,2) T4
@@ -124,3 +124,5 @@ FROM (SELECT DISTINCT ShortDate "Date"
                         AND T2.PartyEmployeeID = T5.PartyEmployeeID
     WHERE ShortDate BETWEEN Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
     GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13) T1
+WHERE "Date" = '2018-06-28'
+		AND Employee = 'Beauchamp, Elizabeth'
