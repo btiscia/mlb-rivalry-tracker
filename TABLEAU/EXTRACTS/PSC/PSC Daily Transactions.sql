@@ -1,13 +1,15 @@
-SELECT TransactionTypeName
-,SourceActivityID
+SELECT TransactionTypeName As "Transaction Type"
+,SourceActivityID As "ActivityID"
 ,T1.SourceTransactionID AS "Source Transaction ID"
 ,HoldingKey AS "Policy Number"
+,ItemCount AS "Transaction Count"
 ,CASE 
-     WHEN TRANSACTIONTYPEID = 1 THEN ReceivedDate
-     WHEN TRANSACTIONTYPEID = 2 THEN LoadDate
-     WHEN TRANSACTIONTYPEID = 3 THEN CompletedDate
+     WHEN TRANSACTIONTYPEID = 1 THEN  cast(ReceivedDate as TIMESTAMP(6))
+     WHEN TRANSACTIONTYPEID = 2 THEN cast(LoadDate as TIMESTAMP(6))
+     WHEN TRANSACTIONTYPEID = 3 THEN LongCompletedDate
 END AS "Date"    
 ,LoggedDate AS "Logged Date"
+,TransDate AS "Transaction Date"
 ,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
 ,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
 ,EmployeeRoleName AS "Employee Role Name"
@@ -17,6 +19,7 @@ END AS "Date"
 ,WorkEventName    AS "Work Event Name"
 ,Priority    
 ,AdminSystem AS "Admin System"    
+,SystemName AS "System Name"
 ,ServiceChannelName    AS "Service Channel Code"
 ,PartyTypeName    AS "Party Type Name"
 ,SiteName AS "Site Name"
