@@ -1,44 +1,42 @@
 SELECT 
 Pending.*
-,coalesce("Completed Date", PreviousBusinessDay) as "Date" 
-,coalesce("Completed Count", 0) as "Completed Count" 
+,Coalesce("Completed Date", PreviousBusinessDay) AS "Date" 
+,Coalesce("Completed Count", 0) AS "Completed Count" 
 FROM
 (SELECT 
-LoadDate as "Pending Date"
+LoadDate AS "Pending Date"
 ,DD.PreviousBusinessDay
-,PartyTypeName as "Party Type Name"
-,ServiceChannelName as "Service Channel Code"
-,TeamName as "Team Name"
-,FunctionName as "Function Name"
-,SegmentName as "Segment Name"
-,WorkEventName as "Work Event Name" 
-,SUM(ItemCount) as "Pending Count"
+,PartyTypeName AS "Party Type Name"
+,ServiceChannelName AS "Service Channel Code"
+,TeamName AS "Team Name"
+,FunctionName AS "Function Name"
+,SegmentName AS "Segment Name"
+,WorkEventName AS "Work Event Name" 
+,Sum(ItemCount) AS "Pending Count"
 FROM PROD_DMA_VW.PSC_MART_PIT_IVW PIV
 LEFT JOIN PROD_DMA_VW.DATE_DIM_VW DD
 ON PIV.LoadDate = DD.ShortDate
 WHERE (WorkEventDepartmentID = 4
 OR DepartmentID = 4) 
-AND LeadTimeIndicator = 1
-AND PendingIndicator = 1
-AND LoadDate >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7,8) as Pending
+AND TransactionTypeID = 2
+AND LoadDate >= Current_Date - INTERVAL '5' YEAR
+GROUP BY 1,2,3,4,5,6,7,8) AS Pending
 LEFT JOIN 
 (SELECT 
-CompletedDate as "Completed Date"
-,PartyTypeName as "Party Type Name"
-,ServiceChannelName as "Service Channel Code"
-,TeamName as "Team Name"
-,FunctionName as "Function Name"
-,SegmentName as "Segment Name"
-,WorkEventName as "Work Event Name" 
-,SUM(ItemCount) as "Completed Count"
+CompletedDate AS "Completed Date"
+,PartyTypeName AS "Party Type Name"
+,ServiceChannelName AS "Service Channel Code"
+,TeamName AS "Team Name"
+,FunctionName AS "Function Name"
+,SegmentName AS "Segment Name"
+,WorkEventName AS "Work Event Name" 
+,Sum(ItemCount) AS "Completed Count"
 FROM PROD_DMA_VW.PSC_MART_PIT_IVW
 WHERE (WorkEventDepartmentID = 4
 OR DepartmentID = 4) 
-AND LeadTimeIndicator = 1
-AND CompletedIndicator = 1
-AND CompletedDate >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7) as Completed
+AND TransactionTypeID = 3
+AND CompletedDate >= Current_Date - INTERVAL '5' YEAR
+GROUP BY 1,2,3,4,5,6,7) AS Completed
 ON Pending.PreviousBusinessDay = Completed."Completed Date"
 AND Pending."Party Type Name" = Completed."Party Type Name"
 AND Pending."Service Channel Code" = Completed."Service Channel Code"
