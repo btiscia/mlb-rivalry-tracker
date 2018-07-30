@@ -65,11 +65,11 @@ FROM
 	    ,Coalesce(Sum(ActualExcusedHours),0) "Actual Excused Hours"
 	    ,Coalesce(Sum(ActualMakeupHours),0) "Actual Makeup Hours" 
 	    ,Coalesce(Sum(AllDayOOO),0) "All Day OOO"
-	FROM PROD_DMA_VW.SCHEDULE_DIM_VW T1
-	INNER JOIN PROD_DMA_VW.EMPLOYEE_CURR_DIM_VW T2 ON T1.MMID = T2.MMID AND EndDate > Current_Date
+	FROM PROD_DMA_VW.SCHEDULE_DIM_VW T1 -- Base dataset is the Employee's schedule
+	INNER JOIN PROD_DMA_VW.EMPLOYEE_CURR_DIM_VW T2 ON T1.MMID = T2.MMID AND EndDate > Current_Date -- current Employee info
     INNER JOIN PROD_DMA_VW.DATE_DIM_VW T3 ON T1.DayOfWeek = T3.DayOfWeek --return date info                                                                       
-    LEFT JOIN PROD_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW  T5 ON ShortDate = T5.MeetingDate AND T2.PartyEmployeeID = T5.PartyEmployeeID 
-	WHERE T1.EndDt = '9999-12-31'
+    LEFT JOIN PROD_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW  T5 ON ShortDate = T5.MeetingDate AND T2.PartyEmployeeID = T5.PartyEmployeeID -- Non-Prod TimeOut Data
+	WHERE T1.EndDt = '9999-12-31' -- Latest Schedule record for each HR_ID
 	AND ShortDate BETWEEN Add_Months(Current_Date, -13) AND Current_Date - INTERVAL '1' DAY
 	AND parentTimeCategory IS NOT NULL
-	GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17) T1 --return time events info
+	GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17) T1 
