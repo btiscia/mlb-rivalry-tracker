@@ -1,4 +1,4 @@
-SELECT "Date" 
+SELECT "Date"  --DAate
 ,"DayName"
 ,CASE 
     WHEN FTE < 1 THEN 'Non-Production'
