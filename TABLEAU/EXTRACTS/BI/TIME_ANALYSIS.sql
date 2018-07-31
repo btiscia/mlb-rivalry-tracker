@@ -1,8 +1,8 @@
 SELECT DISTINCT ShortDate "Date" 
 	    ,T3.DayName
 	    ,T2.FTE  
-		,CASE WHEN T2.FTE < 1 THEN 'Non-Production'
-		    ELSE 'Production'
+	    ,CASE WHEN T2.FTE < 1 THEN 'Non-Production'
+		ELSE 'Production'
 		END AS "Employee Type" 
 	    ,T3.IsHoliday 
 	    ,T3.IsWeekday 
@@ -18,7 +18,8 @@ SELECT DISTINCT ShortDate "Date"
 	    ,ParentTimeCategory 
 	    ,TimeCategory 
 	    ,PlannedActual
-		,CASE WHEN PlannedActual = 'PLANNED-ACTUAL' THEN 'Planned'
+	    ,(SELECT GoalValue FROM PROD_DMA_VW.GOAL_DIM_VW WHERE EndDate = '9999-12-31' AND DepartmentID = T2.DepartmentID  AND GoalTypeID = 4 AND RoleName = "Employee Role Name")  as "Non Prod Goal"--return non prod goal 
+	    ,CASE WHEN PlannedActual = 'PLANNED-ACTUAL' THEN 'Planned'
 		  WHEN PlannedActual = 'ACTUAL' THEN 'Unplanned'
 		  END AS "Planned or Actual"
 	    ,Coalesce(Sum(ActualFlexHours),0) "Actual Flex Hours"
@@ -29,17 +30,17 @@ SELECT DISTINCT ShortDate "Date"
 	    ,Coalesce(Sum(ActualExcusedHours),0) "Actual Excused Hours"
 	    ,Coalesce(Sum(ActualMakeupHours),0) "Actual Makeup Hours" 
 	    ,Coalesce(Sum(AllDayOOO),0) "All Day OOO"
-		,CASE WHEN "All Day OOO" = 1 OR ("Actual OOO Hours" >= "Working Hours" AND "Working Hours" <> 0) THEN 0
+	    ,CASE WHEN "All Day OOO" = 1 OR ("Actual OOO Hours" >= "Working Hours" AND "Working Hours" <> 0) THEN 0
 		    WHEN ("Working Hours" + "Actual OT Hours" + "Actual Makeup Hours") = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR "Working Hours" = 0) AND ("Actual OT Hours" + "Actual Makeup Hours") = 0 THEN  0
 		    ELSE "Actual Prod Hours"
 		    END AS "Actual Production Hours"
-		,CASE WHEN "All Day OOO" = 1 OR ("Actual OOO Hours" >= "Working Hours" AND "Working Hours" <> 0) THEN 0
+	     ,CASE WHEN "All Day OOO" = 1 OR ("Actual OOO Hours" >= "Working Hours" AND "Working Hours" <> 0) THEN 0
 		    WHEN ("Working Hours" + "Actual OT Hours" + "Actual Makeup Hours") = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR "Working Hours" = 0) AND ("Actual OT Hours" + "Actual Makeup Hours") = 0 THEN  0
 		    ELSE "Actual Non-Prod Hours"
 		    END AS "Actual Non-Production Hours" 
-		,CASE WHEN "All Day OOO" = 1 OR ("Actual OOO Hours" >= "Working Hours" AND "Working Hours" <> 0) THEN "Working Hours" 
+	    ,CASE WHEN "All Day OOO" = 1 OR ("Actual OOO Hours" >= "Working Hours" AND "Working Hours" <> 0) THEN "Working Hours" 
 		    ELSE "Actual OOO Hours"
 		    END AS "Actual OOO Hrs"
 	FROM PROD_DMA_VW.SCHEDULE_DIM_VW T1 -- Base dataset is the Employee's schedule
@@ -49,4 +50,7 @@ SELECT DISTINCT ShortDate "Date"
 	WHERE T1.EndDt = '9999-12-31' -- Latest Schedule record for each HR_ID
 	AND ShortDate BETWEEN Add_Months(Current_Date, -13) AND Current_Date - INTERVAL '1' DAY
 	AND parentTimeCategory IS NOT NULL
+	AND TimeOutReportInd = 1 --filter timeout applicable users only
+	
 	GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19
+	
