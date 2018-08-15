@@ -106,20 +106,20 @@ FROM (SELECT DISTINCT ShortDate "Date"
     INNER JOIN (SELECT MMID, PartyEmployeeID, RoleID, EmployeeLastName, EmployeeFirstName, ManagerLastName, ManagerFirstName, TeamName, RoleName, FTE, DepartmentID 
                         FROM PROD_DMA_VW.EMPLOYEE_CURR_DIM_VW 
                         WHERE EndDate = '9999-12-31' 
-                            AND DepartmentID = 4 AND TimeOutReportInd = 1
+                            AND DepartmentID = 6 AND TimeOutReportInd = 1
                         ) T2 ON T1.MMID = T2.MMID
     INNER JOIN PROD_DMA_VW.DATE_DIM_VW T3 ON T1.DayOfWeek = T3.DayOfWeek
     LEFT JOIN (SELECT PartyEmployeeID
                             , CompletedDate
                             , Sum(ProductivityCredit) AS ProdCredits 
-                    FROM  PROD_DMA_VW.PSC_MART_VW
-                    WHERE CompletedIndicator = 1 AND CompletedDate BETWEEN Add_Months(Current_Date, -3) 
+                    FROM  PROD_DMA_VW.ACT_DIC_INTEGRATED_FCT_VW
+                    WHERE TransactionTypeID = 3 AND CompletedDate BETWEEN Add_Months(Current_Date, -3) 
                         AND Current_Date + INTERVAL '10' DAY
                     GROUP BY 1,2) T4
                     ON T2.PartyEmployeeID = T4.PartyEmployeeID AND T3.ShortDate = T4.CompletedDate
     LEFT JOIN (SELECT DISTINCT * 
                     FROM PROD_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW 
-                    WHERE DepartmentID = 4 AND MeetingDate BETWEEN Add_Months(Current_Date, -3) 
+                    WHERE DepartmentID = 6 AND MeetingDate BETWEEN Add_Months(Current_Date, -3) 
                         AND Current_Date + INTERVAL '10' DAY) T5 ON ShortDate = T5.MeetingDate
                         AND T2.PartyEmployeeID = T5.PartyEmployeeID
     WHERE ShortDate BETWEEN Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
