@@ -108,23 +108,18 @@ FROM (SELECT DISTINCT ShortDate "Date"
     ,Coalesce(Sum(ActualMakeupHours),0) "Actual Makeup Hours"
     ,Coalesce(Sum(PlannedMakeupHours),0) "Planned Makeup Hours"
     ,Coalesce(Sum(AllDayOOO),0) "All Day OOO"
-FROM (SELECT * FROM PROD_DMA_VW.EMPLOYEE_CURR_DIM_VW T1 INNER JOIN variables T2 ON T1.DepartmentID = T2.deptID) T1
-INNER JOIN (SELECT * FROM PROD_DMA_VW.SCHEDULE_DIM_VW WHERE EndDt = '9999-12-31') T2 ON T1.MMID = T2.MMID  
---) After Release the Current Dimension will be used      
-/*		    INNER JOIN PROD_DMA_VW.SCHEDULE_CURR_DIM_VW T2 ON T1.PartyEmployeeID = T2.PartyEmployeeID      */
-INNER JOIN PROD_DMA_VW.DATE_DIM_VW T3 ON T2.DayOfWeek = T3.DayOfWeek
+FROM (SELECT * FROM DEV_DMA_VW.EMPLOYEE_CURR_DIM_VW T1 INNER JOIN variables T2 ON T1.DepartmentID = T2.deptID) T1
+INNER JOIN DEV_DMA_VW.SCHEDULE_CURR_DIM_VW T2 ON T1.PartyEmployeeID = T2.PartyEmployeeID      
+INNER JOIN DEV_DMA_VW.DATE_DIM_VW T3 ON T2.DayOfWeek = T3.DayOfWeek
 LEFT JOIN (SELECT PartyEmployeeID, CompletedDate, Sum(ProductivityCredit) AS ProdCredits 
-						FROM  PROD_DMA_VW.PSC_MART_VW
+						FROM  DEV_DMA_VW.PSC_MART_VW
 						WHERE TransactionTypeID = 3 AND CompletedDate BETWEEN Add_Months(Current_Date, -3) 
 							AND Current_Date + INTERVAL '10' DAY
 						GROUP BY 1,2) T4 ON T1.PartyEmployeeID = T4.PartyEmployeeID AND T3.ShortDate = T4.CompletedDate
-LEFT JOIN (SELECT DISTINCT * FROM PROD_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW 
+LEFT JOIN (SELECT DISTINCT * FROM DEV_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW 
 						WHERE MeetingDate BETWEEN Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY) T5 
 						ON ShortDate = T5.MeetingDate AND T1.PartyEmployeeID = T5.PartyEmployeeID
-LEFT JOIN (SELECT * FROM PROD_DMA_VW.GOAL_DIM_VW WHERE GoalTypeID = 3 AND EndDate = '9999-12-31') T6 ON T1.DepartmentID = T6.DepartmentID AND T1.RoleID = T6.RoleID
-LEFT JOIN (SELECT * FROM PROD_DMA_VW.GOAL_DIM_VW WHERE GoalTypeID = 4 AND EndDate = '9999-12-31') T7 ON T1.DepartmentID = T7.DepartmentID AND T1.RoleID = T7.RoleID
---) After Release the Current Dimension will be used
-/*			LEFT JOIN (SELECT * FROM PROD_DMA_VW.GOAL_CURR_DIM_VW WHERE GoalTypeID = 3) T6 ON T1.DepartmentID = T6.DepartmentID AND T1.RoleID = T6.RoleID
-			LEFT JOIN (SELECT * FROM PROD_DMA_VW.GOAL_CURR_DIM_VW WHERE GoalTypeID = 4) T7 ON T1.DepartmentID = T7.DepartmentID AND T1.RoleID = T7.RoleID*/
-WHERE ShortDate BETWEEN Add_Months(Current_Date, -36) AND Current_Date + INTERVAL '10' DAY
+LEFT JOIN (SELECT * FROM DEV_DMA_VW.GOAL_CURR_DIM_VW WHERE GoalTypeID = 3) T6 ON T1.DepartmentID = T6.DepartmentID AND T1.RoleID = T6.RoleID
+LEFT JOIN (SELECT * FROM DEV_DMA_VW.GOAL_CURR_DIM_VW WHERE GoalTypeID = 4) T7 ON T1.DepartmentID = T7.DepartmentID AND T1.RoleID = T7.RoleID
+WHERE ShortDate BETWEEN Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15) T1

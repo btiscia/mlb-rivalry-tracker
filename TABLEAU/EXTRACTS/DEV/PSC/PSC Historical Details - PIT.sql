@@ -2,10 +2,13 @@ SELECT
 TransactionTypeName AS "Transaction Type"
 ,SourceTransactionID AS "Source Transaction ID"
 ,HoldingKey AS "Policy Number"
-,CASE WHEN TRANSACTIONTYPEID = 1 THEN ReceivedDate
+        
+,CASE 
+     WHEN TRANSACTIONTYPEID = 1 THEN ReceivedDate
      WHEN TRANSACTIONTYPEID = 2 THEN LoadDate
      WHEN TRANSACTIONTYPEID = 3 THEN CompletedDate
 END AS "Date"    
+     
 ,EmployeeRoleName AS "Employee Role Name"
 ,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
 ,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
@@ -35,7 +38,7 @@ END AS "Date"
 ,TransDate AS "Transaction Date"
 ,ShortComment AS "Short Comments"
 ,ItemCount AS "Transaction Count"
-,TAT AS "Total TAT Days"
+,DaysPastTAT AS "Total TAT Days"
 ,CASE WHEN MetExpectedIndicator = 1 AND DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 ,MetExpectedIndicator AS "Met Expected Ind Count"
 ,CurrentProdCredit AS "Productivity Credits"
@@ -49,10 +52,8 @@ END AS "Date"
 ,CASE WHEN DaysPastTAT = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 ,CASE WHEN DaysPastTAT = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 ,CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
-FROM PROD_DMA_VW.PSC_MART_CURR_IVW T1
+FROM PROD_DMA_VW.PSC_MART_PIT_IVW T1
 LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_DIM_VW WHERE EndDate = '9999-12-31' AND GoalTypeID = 5) T2 
 ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID
---) After Release the Current Dimension will be used
-/*LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_CURR_DIM_VW WHERE GoalTypeID = 5) T2
-ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID*/
-WHERE (WorkEventDepartmentID = 4 OR T1. DepartmentID = 4)
+WHERE (WorkEventDepartmentID = 4
+OR T1. DepartmentID = 4)

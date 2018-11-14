@@ -49,10 +49,7 @@ END AS "Date"
 ,CASE WHEN DaysPastTAT = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 ,CASE WHEN DaysPastTAT = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 ,CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
-FROM PROD_DMA_VW.PSC_MART_CURR_IVW T1
-LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_DIM_VW WHERE EndDate = '9999-12-31' AND GoalTypeID = 5) T2 
+FROM DEV_DMA_VW.PSC_MART_CURR_IVW T1
+LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM DEV_DMA_VW.GOAL_CURR_DIM_VW WHERE GoalTypeID = 5) T2
 ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID
---) After Release the Current Dimension will be used
-/*LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_CURR_DIM_VW WHERE GoalTypeID = 5) T2
-ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID*/
 WHERE (WorkEventDepartmentID = 4 OR T1. DepartmentID = 4)
