@@ -1,4 +1,4 @@
-SELECT T1.[PolicyNum] AS [Policy Number]
+SELECT T1.[PolicyNum] AS [Policy Number] -- Policy Number
 ,(SELECT NEXT_BD
 	FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
     WHERE NBSubmitDate = [SHORT_DT]) AS [SE2 Report Date]
