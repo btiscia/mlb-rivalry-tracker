@@ -1,4 +1,4 @@
-SELECT DISTINCT
+SELECT DISTINCT --Bill's Test Notes
 
 --Suitability Current Status   ---CT Dash
 
