@@ -36,7 +36,7 @@ Left Join
 		SELECT 'Submitted WTD Prem' AS Volumetric
 		, NewBusinessSubmitDate AS ShortDate
 		, ProductCategory AS ProductType
-		, Channel
+		, Channel AS ChannelType
 		, SUM(AnticipatedPremium) AS Measure
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW
 		GROUP BY 1,2,3,4
@@ -46,7 +46,7 @@ Left Join
 		SELECT 'Reported Premium' AS Volumetric
 		, IssueDate AS ShortDate
 		, ProductCategory AS ProductType
-		, Channel
+		, Channel AS ChannelType
 		, SUM(DepositAmount) AS Measure
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW
 		GROUP BY 1,2,3,4
@@ -56,7 +56,7 @@ Left Join
 		SELECT  'Submitted Counts' AS Volumetric
 		, NewBusinessSubmitDate AS ShortDate
 		, ProductCategory AS ProductType
-		, Channel
+		, Channel AS ChannelType
 		, CAST (COUNT(NewBusinessSubmitDate) AS DECIMAL(8,2)) AS Measure
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW
 		GROUP BY 1,2,3,4
@@ -66,7 +66,7 @@ Left Join
 		SELECT 'Issued Counts' AS Volumetric
 		, IssueDate AS ShortDate
 		, ProductCategory AS ProductType
-		, Channel
+		, Channel AS ChannelType
 		,Cast (COUNT(IssueDate) as DECIMAL(8,2)) AS Measure
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW
 		GROUP BY 1,2,3,4
