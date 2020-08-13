@@ -1,3 +1,6 @@
+--Tableau Extract: ANB Inventory Modern Data
+--Application Level
+
 SELECT T1.INVENTORYID 
     , T1.APPLICATIONNATURALKEYUUID
     , T1.ORDERENTRYID
