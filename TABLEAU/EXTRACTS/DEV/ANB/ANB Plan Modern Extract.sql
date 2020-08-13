@@ -1,6 +1,9 @@
+--Tableau Extract: ANB Modern Plan-Prod
+--Contract  Level
+
 SELECT T1.Volumetric as PlanMetric
 , T1.ShortDate
-,T1.ShortDate as "Submit Date"
+,T1.ShortDate as "SubmitDate"
 , T1.ChannelType as Channel
 , T1.ProductType as Product
 ,'0' as "Submit Date Is Holiday"
