@@ -1,3 +1,5 @@
+--Tableau Data Source: DI Claims - Current Pending Inventory
+
 SELECT
 T1.LoadDate
 ,T1.IntegratedActivityID AS "Integrated Activity ID"
@@ -39,15 +41,15 @@ WHEN T1.SystemName = 'MEDVOC' THEN 'MEDVOC'
 ELSE 'UNKNOWN' END AS "System"
 ,T1.PriorityName AS "Prioirty"
 ,T1.ReviewStatus as "Work Status"
-,T2.AppealIndicator AS " Appeal Indicator"
+,T2.AppealIndicator AS "Appeal Indicator"
 ,T2.ContestableIndicator AS "Contestable Indicator"
 ,T2.ERISAIndicator AS "ERISA Indicator"
 ,T2.LateNoticeIndicator AS "Late Notice Indicator"
-,T2.QuickDecisionIndicator AS "Quick  Decision Indicator"
+,T2.QuickDecisionIndicator AS "Quick Decision Indicator"
 ,COUNT(DISTINCT T1.IntegratedActivityID) AS "Transaction Count"    
 ,MAX(T1.TransDate)	AS "Transaction Date"
 
-FROM Prod_DMA_VW.ACT_DIC_CURR_INTEGRATED_VW T1
+FROM PROD_DMA_VW.ACT_DIC_CURR_INTEGRATED_VW T1
 INNER JOIN PROD_DMA_VW.DI_CLAIM_CURR_DIM_VW T2 ON T1.CLAIMNUMBER = T2.CLAIMNUMBER
 
 WHERE
