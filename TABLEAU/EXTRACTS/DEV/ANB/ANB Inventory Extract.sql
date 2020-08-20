@@ -15,7 +15,7 @@ SELECT T1.INVENTORYID
     , T1.AGENTID
     , T8.LST_NM || ', ' || T8.FIRST_NM AS "Advisor"
     , T1.AGENCYNUMBER
-    , OREPLACE(COALESCE(T4.PRODUCTNAME,T5.PROD_TYP_NME),'MassMutual ','') AS "Product"
+    , OREPLACE(COALESCE(T5.PROD_TYP_NME,T4.PRODUCTNAME),'MassMutual ','') AS "Product"
     , CASE WHEN "Product" LIKE '%RetireEase%' THEN 'Income Annuity'
             WHEN "Product" = 'Index Horizons' THEN 'Fixed Indexed'
             ELSE "Product" END AS "Product Category"
@@ -85,3 +85,4 @@ LEFT JOIN   (Select ShortDate
                                             End as "InventoryCurrDayInd"                      
 From PROD_DMA_VW.DATE_DIM_VW ) as ReportDate on "Date" = ShortDate
 WHERE Date >= '2020-01-01'
+
