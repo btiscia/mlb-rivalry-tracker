@@ -1,9 +1,9 @@
 --ANB Modern Policy Details
 --Contract Level
 
-SELECT '10' as "CalDayssuitCmpltToNBRcvd"
+SELECT '10' as
 
-, HoldingKey
+ HoldingKey
 , OrderEntryID
 , AgreementID
 , PolicyNumber
@@ -48,23 +48,26 @@ SELECT '10' as "CalDayssuitCmpltToNBRcvd"
 , WithdrawnDate
 , CAST(Current_Date AS DATE) - ApplicationSubmitDate AS CalDaysSinceSub
 , CAST(Current_Date AS DATE) - NewBusinessEndDate AS CalDaysSinceNBSub
-, IssueDate - ApplicationSignDate AS CalDaysSignToIssue
+, IssueDate - ApplicationSignDate AS CalDaysSignToIssue  --Cycle Time Dashboard
 , ApplicationSignDate - ApplicationSubmitDate AS CalDaysSignToSub
-, OriginalOrderSubmitDate - ApplicationSignDate AS CalDaysAppSignToSuitSub
-, NewBusinessEndDate - ApplicationSignDate AS CalDaysSignToNBSub
-, IssueDate - ApplicationSubmitDate AS "SubtoIssueCycleTime"
+, OriginalOrderSubmitDate - ApplicationSignDate AS CalDaysAppSignToSuitSub   ---Cycle Time Dash
+
+, NewBusinessSubmitDate - ApplicationSignDate AS CalDaysSignToNBSub  --Cycle Time Dash
+
+, IssueDate - ApplicationSubmitDate AS "SubtoIssueCycleTime"  ---Cycle Time Dashboard
 , SuitabilityApprovalDate - ApplicationSubmitDate AS CalDaysSubToSuitApvd
 , NewBusinessSubmitDate - ApplicationSubmitDate AS CalDaysSubToNBSub
-, IssueDate - NewBusinessSubmitDate AS CalDaysNBRcvdToIssued
+, IssueDate - NewBusinessSubmitDate AS CalDaysNBRcvdToIssued --Cycle Time dashboard
 , BINGODate - NewBusinessSubmitDate AS NBSubToBINGO
-, NewBusinessSubmitDate - PAWDate AS CalDaysNBSubToPAW
-, SuitabilityApprovalDate - SuitabilitySubmitDate AS CalDaysSuitSubToSuitApvd
+, PAWDate-NewBusinessSubmitDate AS CalDaysNBSubToPAW  --Cycle Time Dashboard
+, SuitabilityApprovalDate - SuitabilitySubmitDate AS CalDaysSuitSubToSuitApvd  ---Cycle Time Dashboard
 , NewBusinessSubmitDate - SuitabilityApprovalDate AS CalDaysSuitApvdToNBSub
-, CAST(OrderChangeDate AS DATE) - SuitabilityApprovalDate AS CalDaysSuitApvdToSuitTrans
-, CAST(OrderChangeDate AS DATE) - SuitabilitySubmitDate AS CalDaysSuitSubToSuitTrans
-, IssueDate - SuitabilitySubmitDate AS CalDaysSuitSubToIssue
+, CAST(OrderChangeDate AS DATE) - SuitabilityApprovalDate AS CalDaysSuitApvdToSuitTrans  ---Cycle Time Dashboard
+, CAST(OrderChangeDate AS DATE) - SuitabilitySubmitDate AS CalDaysSuitSubToSuitTrans --Cycle Time Dashboard 
+, IssueDate - SuitabilitySubmitDate AS CalDaysSuitSubToIssue  ---Cycle Time Dashboard
+, NewBusinessSubmitDate -  CAST(OrderChangeDate AS DATE) AS "CalDayssuitCmpltToNBRcvd"  ---Cycle Time Dashboard
 , PAWDate - BINGODate AS CalDaysBINGOToPAW
 , TOADate - BINGODate AS CalDaysBINGOToTOA
-, IssueDate - TOADate AS CalDaysTOAToIssue
+, IssueDate - TOADate AS CalDaysTOAToIssue --Cycle Time Dashboard
 
 FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
