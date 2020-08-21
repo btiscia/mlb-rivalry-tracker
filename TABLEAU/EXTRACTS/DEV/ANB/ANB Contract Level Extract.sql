@@ -1,8 +1,7 @@
 --ANB Modern Policy Details
 --Contract Level
 
-SELECT '10' as
-
+SELECT 
  HoldingKey
 , OrderEntryID
 , AgreementID
@@ -51,11 +50,9 @@ SELECT '10' as
 , IssueDate - ApplicationSignDate AS CalDaysSignToIssue  --Cycle Time Dashboard
 , ApplicationSignDate - ApplicationSubmitDate AS CalDaysSignToSub
 , OriginalOrderSubmitDate - ApplicationSignDate AS CalDaysAppSignToSuitSub   ---Cycle Time Dash
-
 , NewBusinessSubmitDate - ApplicationSignDate AS CalDaysSignToNBSub  --Cycle Time Dash
-
 , IssueDate - ApplicationSubmitDate AS "SubtoIssueCycleTime"  ---Cycle Time Dashboard
-, SuitabilityApprovalDate - ApplicationSubmitDate AS CalDaysSubToSuitApvd
+--, SuitabilityApprovalDate - ApplicationSubmitDate AS CalDaysSubToSuitApvd  --- This should be no diff than CalDaysSuitSubToSuitApvd
 , NewBusinessSubmitDate - ApplicationSubmitDate AS CalDaysSubToNBSub
 , IssueDate - NewBusinessSubmitDate AS CalDaysNBRcvdToIssued --Cycle Time dashboard
 , BINGODate - NewBusinessSubmitDate AS NBSubToBINGO
