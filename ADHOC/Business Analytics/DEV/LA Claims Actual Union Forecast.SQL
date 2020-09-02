@@ -10,7 +10,7 @@ When SegmentName = 'Life Setup' then 'Setup'
 End as "Transaction Type" 
 ,TRUNC(ReceivedDate,'MON') as "Date"
 ,EmployeeRoleName
-,Cast (Null as char (50))as "Role"
+,Cast (Null as char (50))as  "WorkRole"
 ,coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') as "Employee"    
 ,coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unkonwn') as "Manager"
 ,TeamName
@@ -59,7 +59,7 @@ ForecastID
 ,CAST (Null as  VARCHAR (40))  HOLDINGKEY 
 , Cast (Metric as Varchar(50)) as Metric
 ,'Forecast'  as "Transaction Type" 
-,"ForecastDate"
+,"ForecastDate" as "Date"
 ,Cast (Null as Varchar (50)) as EmployeeRoleName
 ,"WorkRole"
 ,cast (Null as Varchar (100))  as "Employee" 
