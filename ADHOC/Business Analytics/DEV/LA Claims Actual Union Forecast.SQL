@@ -1,10 +1,9 @@
 
-
 SELECT 
 Null as ForecastID
 ,SourceTransactionID  
 ,HoldingKey
-,'Actual' as "Metric"
+,Cast ('Actual' as Varchar(50)) as "Metric"
 , Case 
 when SegmentName like ('Life 1st Notice%') Then 'Life 1st Notice' 
 When SegmentName = 'Life Setup' then 'Setup'
@@ -58,15 +57,15 @@ Select
 ForecastID
 ,Null as SourceTransactionID 
 ,CAST (Null as  VARCHAR (40))  HOLDINGKEY 
-,Metric--
+, Cast (Metric as Varchar(50)) as Metric
 ,'Forecast'  as "Transaction Type" 
-,"Date"
+,"ForecastDate"
 ,Cast (Null as Varchar (50)) as EmployeeRoleName
-,"Role"
+,"WorkRole"
 ,cast (Null as Varchar (100))  as "Employee" 
 ,Cast (Null As Varchar (100)) as "Manager"
 ,Cast (Null As Varchar (100)) as TeamName
-,cast("Function" as Varchar(50)) as "Function"
+,cast("WorkFunction" as Varchar(50)) as "Function"
 ,Cast (Null As Varchar (100)) as SegmentName  
 ,Cast (Null As Varchar (100)) as WorkEventName   
 ,Cast (Null As Varchar (100)) as Priority       
@@ -91,35 +90,6 @@ ForecastID
 ,ComplexityLevel
 ,Cast (Null as DATE) as    "MaxTransDate"
 ,Measure as  Measure 
---,Sum (T1.Measure)  as  Measure 
 ,Null as "ProductivityCredits"
-/*
-ForecastID
-,Metric
-,Role
-,"Function"
-,"Date"
-,Null as "Example"
-,Sum(Measure) as "Measure"
-*/
 
-From
-   (Select
-    ForecastID
-   ,Metric
-  ,"Role"
-   ,"Function"
-  ,ComplexityLevel
- ,"Date"
-  ,Measure
-From DMA_GRP_DL.RT20_00002983_LC_Forecast) T1
---Group by 
---ForecastID
---,Metric
---,"Role"
---,"Function"
---,"Date"
-
-
-
---Select Count(*) From T 
+From DMA_GRP_DL.RT20_00002983_LC_Forecast
