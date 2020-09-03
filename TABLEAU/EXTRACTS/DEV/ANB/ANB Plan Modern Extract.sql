@@ -3,10 +3,9 @@
 
 SELECT T1.Volumetric as PlanMetric
 , T1.ShortDate
-,T1.ShortDate as "SubmitDate"
+,T1.IsHoliday as "Submit Date Is Holiday"
 , T1.ChannelType as Channel
 , T1.ProductType as Product
-,'0' as "Submit Date Is Holiday"
 , Measure
 , DailyKPIPlan
 , DailyMTDPlan
@@ -14,6 +13,7 @@ SELECT T1.Volumetric as PlanMetric
 FROM 
 
 (SELECT DISTINCT T1.SHORTDATE
+,T2.IsHoliday 
 , CASE GROUPING(VOLUMETRIC) WHEN 1 THEN 'Total' ELSE VOLUMETRIC END AS Volumetric
 , CASE GROUPING(PRODUCTTYPE) WHEN 1 THEN 'Total' ELSE PRODUCTTYPE END AS ProductType
 , CASE GROUPING(CHANNELTYPE) WHEN 1 THEN 'Total' ELSE CHANNELTYPE END AS ChannelType
@@ -25,7 +25,7 @@ Inner Join PROD_DMA_VW.Date_DIM_VW as T2 ON T1.ShortDate = T2.ShortDate
 WHERE CHANNELTYPE <> 'Total'
 AND DEPARTMENTID = 47
 --AND IsHoliday = 0
-GROUP BY ROLLUP(VOLUMETRIC,CHANNELTYPE,PRODUCTTYPE),1) T1
+GROUP BY ROLLUP(VOLUMETRIC,CHANNELTYPE,PRODUCTTYPE,IsHoliday ),1,2) T1
 
 Left Join
 (
@@ -62,6 +62,7 @@ Left Join
 		, Channel AS ChannelType
 		, CAST (COUNT(NewBusinessSubmitDate) AS DECIMAL(8,2)) AS Measure
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW
+		---LEFT JOIN PROD_DMA_VW.DATE_DIM_VW as 
 		GROUP BY 1,2,3,4
 		
 		UNION ALL
