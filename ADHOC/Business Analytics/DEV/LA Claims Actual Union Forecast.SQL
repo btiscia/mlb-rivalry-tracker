@@ -1,19 +1,24 @@
 
 SELECT 
-Null as ForecastID
+TransactionTypeName
+,Null as ForecastID
 ,SourceTransactionID  
 ,HoldingKey
 ,Cast ('Actual' as Varchar(50)) as "Metric"
 , Case 
-when SegmentName like ('Life 1st Notice%') Then 'Life 1st Notice' 
-When SegmentName = 'Life Setup' then 'Setup'
-End as "Transaction Type" 
+when FunctionName ='Operations 1st Notice' or FunctionName =  'Life 1st Notice' Then 'Life Claim Examiner'
+When SegmentName = 'Life Setup' and FunctionName = 'Operations Setup'  then 'Operations Setup'
+End as "Workrole" 
 ,TRUNC(ReceivedDate,'MON') as "Date"
 ,EmployeeRoleName
 ,coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') as "Employee"    
 ,coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unkonwn') as "Manager"
 ,TeamName
-,FunctionName as "Function"
+,FunctionName 
+,Case 
+when FunctionName ='Operations 1st Notice' or FunctionName =  'Life 1st Notice' Then 'Life 1st Notice'
+When SegmentName = 'Life Setup' and FunctionName = 'Operations Setup'  then 'Operations Setup'
+End as "WorkFunction" 
 ,SegmentName
 ,WorkEventName
 ,Priority    
@@ -37,33 +42,36 @@ End as "Transaction Type"
 ,ShortComment
 ,Cast (Null as SmallInt) as ComplexityLevel
 ,MAX(TransDate) as "MaxTransDate"
-,COUNT(distinct HoldingKey)  as "Measure"
+,COUNT(distinct IntegratedActivityID)  as "Measure"
 ,SUM(CurrentProdCredit) as "ProductivityCredits" 
 
 FROM PROD_DMA_VW.ACT_LAC_PIT_INTEGRATED_VW
 WHERE  (WorkEventDepartmentID in (8)
 OR DepartmentID in (8))
+AND TransactionTypeID = 1
 AND SequenceNumber = 1
 AND AdminSystem <> 'PALLM'
 AND EXTRACT(YEAR FROM ReceivedDate) >= EXTRACT(YEAR FROM CURRENT_DATE)-5
 AND (FunctionName in('Operations 1st Notice', 'Life 1st Notice') OR  ( FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup'))
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34
 
 
 UNION All 
 
 Select 
-ForecastID
+Cast ('Forecast' as VARCHAR (50)) as "TransactionTypeName"
+,ForecastID
 ,Null as SourceTransactionID 
 ,CAST (Null as  VARCHAR (40))  HOLDINGKEY 
 , Cast (Metric as Varchar(50)) as Metric
-,Workrole  as "Transaction Type" 
+,Workrole   
 ,"ForecastDate" as "Date"
 ,Cast (Null as Varchar (50)) as EmployeeRoleName
 ,cast (Null as Varchar (100))  as "Employee" 
 ,Cast (Null As Varchar (100)) as "Manager"
 ,Cast (Null As Varchar (100)) as TeamName
-,cast("WorkFunction" as Varchar(50)) as "Function"
+,cast(Null  as Varchar(50)) as "FunctionName"  
+,"WorkFunction" 
 ,Cast (Null As Varchar (100)) as SegmentName  
 ,Cast (Null As Varchar (100)) as WorkEventName   
 ,Cast (Null As Varchar (100)) as Priority       
