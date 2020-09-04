@@ -1,6 +1,3 @@
---ANB Modern Policy Details
---Contract Level
-
 SELECT 
  HoldingKey
 , OrderEntryID
@@ -17,7 +14,6 @@ SELECT
 , Distributor
 , Channel
 , ChannelType
-, ProductCode
 , Product
 , ProductCategory
 , AnticipatedPremium
@@ -66,5 +62,14 @@ SELECT
 , PAWDate - BINGODate AS CalDaysBINGOToPAW
 , TOADate - BINGODate AS CalDaysBINGOToTOA
 , IssueDate - TOADate AS CalDaysTOAToIssue --Cycle Time Dashboard
+, CASE WHEN NewBusinessDocType = 'NB Purchase w App' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW 	WHERE SHORTDATE = IssueDate) - T2.BUSINESSDAY
+	WHEN NewBusinessDocType = 'Incoming Transfer' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = TOADate) - T2.BUSINESSDAY
+	WHEN NewBusinessDocType = 'Annuity Application' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = PAWDate) - T2.BUSINESSDAY
+	END AS TAT
+, GOALVALUE AS SLA
 
 FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
+
+LEFT JOIN PROD_DMA_VW.DATE_DIM_VW T2 ON BINGODate = T2.ShortDate
+
+LEFT JOIN PROD_DMA_VW.GOAL_CURR_DIM_VW T3 ON T1.NewBusinessDocType = T3.TransactionTypeName
