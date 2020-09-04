@@ -97,5 +97,5 @@ Cast ('Forecast' as VARCHAR (50)) as "TransactionTypeName"
 ,Cast (Null as DATE) as    "MaxTransDate"
 ,Measure as  Measure 
 ,Null as "ProductivityCredits"
-From DMA_GRP_DL.RT20_00002983_LC_Forecast
-where ForecastID = (Select Max(ForecastID) as ForecastID From DMA_GRP_DL.RT20_00002983_LC_Forecast)
+From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat
+where ForecastID = (Select Max(ForecastID) as ForecastID From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat)
