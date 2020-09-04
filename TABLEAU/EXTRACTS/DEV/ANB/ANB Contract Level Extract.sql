@@ -6,7 +6,7 @@ SELECT
 , NewBusinessDocType
 , ContractState
 , ResidenceState
-, Null as "Region"
+, RegionName
 , AgentID
 , Advisor
 , AgencyNumber
