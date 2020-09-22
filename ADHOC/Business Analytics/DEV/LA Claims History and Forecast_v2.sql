@@ -43,7 +43,7 @@ End AS "WorkFunction"
 ,CASt (Null AS SmallInt) AS ComplexityLevel
 ,MAX(TransDate) AS "MaxTransDate"
 ,COUNT(distinct IntegratedActivityID)  AS "Volume"
-,SUM(CurrentProdCredit) /60 AS "Demand" 
+,SUM(CurrentProdCredit)/(60*1.5) AS "Demand"
 
 ,CAST (NULL as Integer) as  ForecastVolume_high95
 ,CAST (NULL as Integer) as  ForecastVolume_high80
@@ -113,6 +113,6 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , ForecAStDemand_low80
 , ForecAStDemand_low95
 From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat
-where ForecastID = (Select Max(ForecastID) as ForecastID From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat)
+--where ForecastID = (Select Max(ForecastID) as ForecastID From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat)
 
 
