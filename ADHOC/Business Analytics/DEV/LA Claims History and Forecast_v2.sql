@@ -1,10 +1,12 @@
+
+
 SELECT 
 TransactionTypeName
 ,Null AS ForecastID
 ,SourceTransactionID  
 ,HoldingKey
 , CASe 
-when FunctionName ='Operations 1st Notice' or FunctionName =  'Life 1st Notice' Then 'Life Claim Examiner'
+when FunctionName ='Operations 1st Notice' Then 'Life Claim Examiner'
 When SegmentName = 'Life Setup' and FunctionName = 'Operations Setup'  then 'Operations Setup'
 End AS "Workrole" 
 ,TRUNC(ReceivedDate,'MON') AS "Date"
@@ -14,11 +16,11 @@ End AS "Workrole"
 ,TeamName
 ,FunctionName 
 ,CASe 
-when FunctionName ='Operations 1st Notice' or FunctionName =  'Life 1st Notice' Then 'Life 1st Notice'
 When SegmentName = 'Life Setup' and FunctionName = 'Operations Setup'  then 'Operations Setup'
+Else FunctionName 
 End AS "WorkFunction" 
 ,SegmentName
-,WorkEventName
+,WorkEventName   
 ,Priority    
 ,AdminSystem    
 ,ProcessName    
@@ -59,7 +61,7 @@ AND TransactionTypeID = 1
 AND SequenceNumber = 1
 AND AdminSystem <> 'PALLM'
 AND EXTRACT(YEAR FROM ReceivedDate) >= EXTRACT(YEAR FROM CURRENT_DATE)-5
-AND (FunctionName in('Operations 1st Notice', 'Life 1st Notice') OR  ( FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup'))
+AND (FunctionName in('Operations 1st Notice') OR  ( FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup'))
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34
 
 UNION ALL
@@ -78,7 +80,7 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 ,CAST(NULL  AS Varchar(50)) AS "FunctionName"  
 ,WorkFunction
 ,CAST (NULL AS Varchar (100)) AS SegmentName  
-,CAST (NULL AS Varchar (100)) AS WorkEventName   
+,CAST ('Forecast' AS Varchar (100)) AS WorkEventName   
 ,CAST (NULL AS Varchar (100)) AS Priority       
 ,CAST (NULL AS Varchar (100)) AS AdminSystem     
 ,CAST (NULL AS Varchar (100)) AS ProcessName   
@@ -112,3 +114,5 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , ForecAStDemand_low95
 From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat
 where ForecastID = (Select Max(ForecastID) as ForecastID From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat)
+
+
