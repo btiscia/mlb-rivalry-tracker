@@ -1,31 +1,31 @@
 
-
-SELECT 
+SELECT
 TransactionTypeName
 ,Null AS ForecastID
-,SourceTransactionID  
+,SourceTransactionID
 ,HoldingKey
-, CASe 
-when FunctionName ='Operations 1st Notice' Then 'Life Claim Examiner'
-When SegmentName = 'Life Setup' and FunctionName = 'Operations Setup'  then 'Operations Setup'
-End AS "Workrole" 
+, CASE
+WHEN (FunctionName in('Operations 1st Notice', 'Life Proofs', 'Life Complex', 'Bene Admin BAU', 'Life 2nd Exam', 'Life Other', 'Life Holds') OR (FunctionName = 'Phone Claims' AND WorkEventName in ('{LC} TC Live Claim Call', '{LC} TC OUTBOUND CLAIM')) OR (FunctionName = 'Life Follow Ups' AND SegmentName <> 'Life Follow Ups RM'))  THEN 'Life Claim Examiner'
+WHEN FunctionName LIKE 'Life Pay%' THEN 'Life Pay'
+WHEN FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup' THEN 'Operations Setup'
+END AS "Workrole"
 ,TRUNC(ReceivedDate,'MON') AS "Date"
 ,EmployeeRoleName
-,coalesce(EmployeeLAStName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
+,coalesce(EmployeeLAStName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"   
 ,coalesce(ManagerlAStName || ', ' || ManagerFirstName, 'Unkonwn') AS "Manager"
 ,TeamName
-,FunctionName 
-,CASe 
-When SegmentName = 'Life Setup' and FunctionName = 'Operations Setup'  then 'Operations Setup'
-Else FunctionName 
-End AS "WorkFunction" 
+,FunctionName
+,CASE
+WHEN FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup' THEN 'Operations Setup'
+ELSE FunctionName
+END AS "WorkFunction"
 ,SegmentName
-,WorkEventName   
-,Priority    
-,AdminSystem    
-,ProcessName    
+,WorkEventName
+,Priority   
+,AdminSystem   
+,ProcessName   
 ,ProcessID
-,ProcessOrder  
+,ProcessOrder
 ,ServiceChannelName
 ,PartyTypeName
 ,EmployeeOrganizationName
@@ -34,16 +34,18 @@ End AS "WorkFunction"
 ,WorkEventOranizationName
 ,WorkEventDepartmentName
 ,PrimaryRoleName
-,SystemName 
+,SystemName
 ,WorkEventNumber
 ,DepartmentCode
 ,DivisionCode
 ,TAT
 ,ShortComment
-,CASt (Null AS SmallInt) AS ComplexityLevel
+,CAST (Null AS SmallInt) AS ComplexityLevel
 ,MAX(TransDate) AS "MaxTransDate"
 ,COUNT(distinct IntegratedActivityID)  AS "Volume"
-,SUM(CurrentProdCredit)/(60*1.5) AS "Demand"
+,CASE WHEN "WorkFunction" <> 'Operations 1st Notice' THEN SUM(CurrentProdCredit)/(60*1.5)
+ELSE SUM(28.5)/(60*1.5)
+END AS "Demand"
 
 ,CAST (NULL as Integer) as  ForecastVolume_high95
 ,CAST (NULL as Integer) as  ForecastVolume_high80
@@ -60,8 +62,9 @@ OR DepartmentID in (8))
 AND TransactionTypeID = 1
 AND SequenceNumber = 1
 AND AdminSystem <> 'PALLM'
+AND EmployeeRoleName IS NOT NULL
 AND EXTRACT(YEAR FROM ReceivedDate) >= EXTRACT(YEAR FROM CURRENT_DATE)-5
-AND (FunctionName in('Operations 1st Notice') OR  ( FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup'))
+AND "WorkRole" in ('Life Claim Examiner', 'Operations Setup', 'Life Pay')
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34
 
 UNION ALL
@@ -112,7 +115,8 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , ForecAStDemand_high80
 , ForecAStDemand_low80
 , ForecAStDemand_low95
-From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat
+From DMA_GRP_DL.RT20_00002983_LC_Forecast_New
 --where ForecastID = (Select Max(ForecastID) as ForecastID From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat)
+
 
 
