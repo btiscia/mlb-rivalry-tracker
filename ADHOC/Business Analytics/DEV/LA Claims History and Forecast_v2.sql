@@ -15,10 +15,7 @@ END AS "Workrole"
 ,coalesce(ManagerlAStName || ', ' || ManagerFirstName, 'Unkonwn') AS "Manager"
 ,TeamName
 ,FunctionName
-,CASE
-WHEN FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup' THEN 'Operations Setup'
-ELSE FunctionName
-END AS "WorkFunction"
+,FunctionName AS "WorkFunction"   ---Is this needed? 
 ,SegmentName
 ,WorkEventName
 ,Priority   
@@ -38,13 +35,13 @@ END AS "WorkFunction"
 ,WorkEventNumber
 ,DepartmentCode
 ,DivisionCode
-,TAT
-,ShortComment
+--,TAT
+--,ShortComment
 ,CAST (Null AS SmallInt) AS ComplexityLevel
 ,MAX(TransDate) AS "MaxTransDate"
 ,COUNT(distinct IntegratedActivityID)  AS "Volume"
-,CASE WHEN "WorkFunction" <> 'Operations 1st Notice' THEN SUM(CurrentProdCredit)/(60*1.5)
-ELSE SUM(28.5)/(60*1.5)
+,CASE WHEN "WorkFunction" <> 'Operations 1st Notice' THEN (SUM(CurrentProdCredit))/90  ---60 min X 1.5 policies per claim
+ELSE SUM(.317) --(28.5)/(60*1.5) do to no productivity credit assigned to Operations 1st Notice function
 END AS "Demand"
 
 ,CAST (NULL as Integer) as  ForecastVolume_high95
@@ -65,7 +62,7 @@ AND AdminSystem <> 'PALLM'
 AND EmployeeRoleName IS NOT NULL
 AND EXTRACT(YEAR FROM ReceivedDate) >= EXTRACT(YEAR FROM CURRENT_DATE)-5
 AND "WorkRole" in ('Life Claim Examiner', 'Operations Setup', 'Life Pay')
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
 
 UNION ALL
 
@@ -101,8 +98,8 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 ,CAST(NULL AS Integer) AS  WorkEventNumber 
 ,CAST (NULL AS Varchar (2)) AS  DepartmentCode 
 ,CAST (NULL AS Varchar (2)) AS  DivisionCode 
-,CAST (NULL AS integer) AS TAT
-,CAST (NULL AS Varchar (50)) AS  ShortComment 
+--,CAST (NULL AS integer) AS TAT
+--,CAST (NULL AS Varchar (50)) AS  ShortComment 
 ,ComplexityLevel
 ,CAST (NULL AS DATE) AS    "MaxTransDate"
 , ForecAStVolume AS Volume
@@ -117,6 +114,5 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , ForecAStDemand_low95
 From DMA_GRP_DL.RT20_00002983_LC_Forecast_New
 --where ForecastID = (Select Max(ForecastID) as ForecastID From DMA_GRP_DL.RT20_00002983_LC_Forecast_Flat)
-
 
 
