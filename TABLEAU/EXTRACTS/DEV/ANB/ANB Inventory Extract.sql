@@ -1,4 +1,4 @@
-SELECT	InventoryID
+SELECT	DISTINCT InventoryID
 	, ApplicationNaturalKeyUUID
 	, OrderEntryID
 	, AgreementID
