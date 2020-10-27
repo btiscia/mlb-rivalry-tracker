@@ -10,7 +10,17 @@ SELECT	DISTINCT InventoryID
 	, AgentID
 	, Advisor
 	, AgencyNumber
-	, Product
+--	, Product
+	, CASE
+   		WHEN T1.[PlanCode] LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
+   		WHEN T1.[PlanCode] LIKE ('%Transitions Select%') THEN 'Transition Select'
+  		WHEN T1.[PlanCode] LIKE ('%RetireEase Choice%') THEN 'RetireEase Choice'
+   		WHEN T1.[PlanCode] LIKE ('%RetireEase%') THEN 'RetireEase'
+   		WHEN T1.[PlanCode] LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
+   		WHEN T1.[PlanCode] LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
+   		WHEN T1.[PlanCode] LIKE ('%Index Horizons%') THEN 'Index Horizons'
+   		ELSE 'Unknown'
+	  END AS [Product]
 	, ProductCategory AS "Product Category"
 	, Firm
 	, FirmID

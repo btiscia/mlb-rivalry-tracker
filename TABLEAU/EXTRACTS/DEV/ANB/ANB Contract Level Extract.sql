@@ -1,3 +1,4 @@
+--ANB Modern Policy Details
 --Contract Level Extract
 
 SELECT 
@@ -16,7 +17,17 @@ SELECT
 , Distributor
 , Channel
 , ChannelType
-, Product
+--, Product
+, CASE
+   		WHEN Product LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
+   		WHEN Product LIKE ('%Transitions Select%') THEN 'Transition Select'
+  		WHEN Product LIKE ('%RetireEase Choice%') THEN 'RetireEase Choice'
+   		WHEN Product LIKE ('%RetireEase%') THEN 'RetireEase'
+   		WHEN Product LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
+   		WHEN Product LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
+   		WHEN Product LIKE ('%Index Horizons%') THEN 'Index Horizons'
+   		ELSE 'Unknown'
+	  END AS Product
 , ProductCategory
 , AnticipatedPremium
 , DepositAmount
