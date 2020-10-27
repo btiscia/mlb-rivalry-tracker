@@ -7,17 +7,7 @@ SELECT T1.Volumetric as PlanMetric
 , T1.IsHoliday as "IsHoliday"
 , T1.IsWeekday
 , T1.ChannelType as Channel
---, T1.ProductType as Product
-, CASE
-   		WHEN T1.ProductType LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
-   		WHEN T1.ProductType LIKE ('%Transitions Select%') THEN 'Transition Select'
-  		WHEN T1.ProductType LIKE ('%RetireEase Choice%') THEN 'RetireEase Choice'
-   		WHEN T1.ProductType LIKE ('%RetireEase%') THEN 'RetireEase'
-   		WHEN T1.ProductType LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
-   		WHEN T1.ProductType LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
-   		WHEN T1.ProductType LIKE ('%Index Horizons%') THEN 'Index Horizons'
-   		ELSE 'Unknown'
-	  END AS Product
+, T1.ProductType as Product
 , Measure
 , DailyKPIPlan
 , DailyMTDPlan
