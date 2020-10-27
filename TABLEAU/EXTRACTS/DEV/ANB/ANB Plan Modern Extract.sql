@@ -4,7 +4,7 @@
 
 SELECT T1.Volumetric as PlanMetric
 , T1.ShortDate
-, T1.IsHoliday as "Submit Date Is Holiday"
+, T1.IsHoliday as "IsHoliday"
 , T1.IsWeekday
 , T1.ChannelType as Channel
 --, T1.ProductType as Product
