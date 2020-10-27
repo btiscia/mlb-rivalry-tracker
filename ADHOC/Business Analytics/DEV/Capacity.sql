@@ -18,7 +18,6 @@ ShortDate AS "Date"
 , ActualFlexHours AS "Actual Flex Hours"
 
 
-,ActualOTHours AS "Actual OT Hours"
 
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
@@ -26,8 +25,7 @@ ShortDate AS "Date"
     ELSE ActualWorkingHours
     END AS "Actual Production Hours"
 
-,ActualExcusedHours AS "Actual Excused Hours"
-,ActualMakeupHours AS "Actual Makeup Hours"
+
 ,PlannedFlexHours AS "Planned Flex Hours"
 
 ,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
@@ -50,20 +48,16 @@ ShortDate AS "Date"
 
 ,PlannedExcusedHours AS "Planned Excused Hours"
 ,PlannedMakeupHours AS "Planned Makeup Hours"
-,ScheduledHours AS "Working Hours"
+
 
 ,Coalesce(ProductivityCredits,0) AS "Productivity Credits"
 ,AllDayOOO AS "All Day OOO"
 
-,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
-    END AS "Productivity Hours"
-    
-,"Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
+-------
+------use this case statement for testing only - to be deleted
+-------
 
-,CASE ----use this case statement for testing only - to be deleted
+,CASE 
 --             WHEN AllDayOOO >= 1 OR  (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 'A' 
 --   WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 'B'
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  'C'
@@ -74,8 +68,29 @@ ShortDate AS "Date"
     WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then  'E_Calc'
     ELSE 'Final_Calc'--     
     END AS "CalcID" --Jay Added
+---------------
+---
+--Parts of actual production
+--
+-------------
 
-,ActualMakeupHours
+,ScheduledHours AS "Working Hours"
+,CASE 
+    --WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
+    --WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
+    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
+    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  0
+    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ScheduledHours
+    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ScheduledHours
+    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then 0
+    ELSE ScheduledHours
+    END AS "Actual Working Hours"
+    
+,ActualOTHours AS "Actual OT Hours"
+,ActualMakeupHours AS "Actual Makeup Hours"
+,ActualExcusedHours AS "Actual Excused Hours"
+
 ,CASE 
     --WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
     --WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
@@ -87,11 +102,11 @@ ShortDate AS "Date"
     WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     END AS "ACT Capacity Available Production" --Jay Added
-
+---------------
+-----
+----Parts of Shrinkage
+-----
 -----------------
-------------------
-
-----AdminTime
 ,CASE 
                 --WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
    -- WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
@@ -102,7 +117,7 @@ ShortDate AS "Date"
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   AdminTime
     WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then 0
     ELSE  AdminTime
-    END AS "Admin Time"        --Jay Added  
+    END AS "Admin Time"
 
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
@@ -114,10 +129,8 @@ ShortDate AS "Date"
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
     ELSE ActualOOOHours
     END AS "Actual OOO Hours"
-    
    
------------
------------
+   
 
 ,CASE 
                 --WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
@@ -127,11 +140,16 @@ ShortDate AS "Date"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ( "Actual Non-Production Hours" + "Actual OOO Hours" + AdminTime)
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hours" + "Actual OOO Hours")   ---Review with DAN!!!!!!!!
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ("Actual Non-Production Hours" + "Actual OOO Hours"+ AdminTime)
-    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then ("Actual Non-Production Hours" +  "Actual OOO Hours" ) ---Maybe take out Non Prod hrs.  !!!!!!!!!1
+    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then ( "Actual OOO Hours" )
     ELSE ( "Actual Non-Production Hours" +  "Actual OOO Hours"+ AdminTime)
-    END AS "ACT Capacity Shrinkage"        --Jay Added
+    END AS "ACT Capacity Shrinkage"
+    
+-----------
+-----------
 
-                        
+-----------
+---used for productivitiey calcs in production dashboards
+----------                      
 ,CASE WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
@@ -153,7 +171,15 @@ ShortDate AS "Date"
     WHEN (ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) >= 6 THEN  (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime)
     ELSE (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime) 
     END AS "Planned Available Time"
+
+,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
+    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
+    END AS "Productivity Hours"
     
+,"Productivity Hours" + "Actual Production Hours" AS "Hours Productive"  
+  
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
 JOIN ( Select --Get the max date to use above for a current EE Termination identifier
