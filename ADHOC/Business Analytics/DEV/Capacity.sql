@@ -1,3 +1,6 @@
+--test
+
+
 
 SELECT
 ShortDate AS "Date"
@@ -5,9 +8,9 @@ ShortDate AS "Date"
 ,IsWeekday
 ,T2.MMID
 ,EmployeeLastName || ', ' || EmployeeFirstName AS Employee
-,Case When T3.MaxEndDate = '9999-12-31' then 'Curr Employee'
-                                                else 'Termed Emplyee'
-                                                End as "Active Schedule Ident"
+,CASE WHEN T3.MaxEndDate = '9999-12-31' THEN 'Curr Employee'
+                                                ELSE 'Termed Emplyee'
+                                                END AS "Active Schedule Ident"
 
 , ManagerLastName || ', ' || ManagerFirstName AS Manager
 , TeamName AS "Team Name"
@@ -50,7 +53,7 @@ ShortDate AS "Date"
 ,PlannedMakeupHours AS "Planned Makeup Hours"
 
 
-,Coalesce(ProductivityCredits,0) AS "Productivity Credits"
+,COALESCE(ProductivityCredits,0) AS "Productivity Credits"
 ,AllDayOOO AS "All Day OOO"
 
 -------
@@ -65,7 +68,7 @@ ShortDate AS "Date"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  'B_Calc'---                                                
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  'C_Calc'----         
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  'D_Calc'-----    
-    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then  'E_Calc'
+    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  'E_Calc'
     ELSE 'Final_Calc'--     
     END AS "CalcID" --Jay Added
 ---------------
@@ -83,7 +86,7 @@ ShortDate AS "Date"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  0
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ScheduledHours
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ScheduledHours
-    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then 0
+    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     ELSE ScheduledHours
     END AS "Actual Working Hours"
     
@@ -99,7 +102,7 @@ ShortDate AS "Date"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
-    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
+    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     END AS "ACT Capacity Available Production" --Jay Added
 ---------------
@@ -115,7 +118,7 @@ ShortDate AS "Date"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (AdminTime)
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   AdminTime
-    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then 0
+    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     ELSE  AdminTime
     END AS "Admin Time"
 
@@ -140,7 +143,7 @@ ShortDate AS "Date"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ( "Actual Non-Production Hours" + "Actual OOO Hours" + AdminTime)
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hours" + "Actual OOO Hours")   ---Review with DAN!!!!!!!!
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ("Actual Non-Production Hours" + "Actual OOO Hours"+ AdminTime)
-    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) Then ( "Actual OOO Hours" )
+    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hours" )
     ELSE ( "Actual Non-Production Hours" +  "Actual OOO Hours"+ AdminTime)
     END AS "ACT Capacity Shrinkage"
     
@@ -175,27 +178,27 @@ ShortDate AS "Date"
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
+    ELSE COALESCE(CAST("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
     END AS "Productivity Hours"
     
 ,"Productivity Hours" + "Actual Production Hours" AS "Hours Productive"  
   
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-JOIN ( Select --Get the max date to use above for a current EE Termination identifier
+JOIN ( SELECT --Get the max date to use above for a current EE Termination identifier
                                                                                                 MMID
-                                                                                               , Max(ENDDate) as MaxEndDate
+                                                                                               , MAX(ENDDate) AS MaxEndDate
                                                                                                FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW
-                                                                                                where  DepartmentID IN (8) --to Get all EE's in Claims.  Not using T1 
-                                                                                                and  RoleID in (15,16,17,19,22) 
+                                                                                                WHERE  DepartmentID IN (8) --to Get all EE's in Claims.  Not using T1 
+                                                                                                AND  RoleID IN (15,16,17,19,22) 
                                                                                                 AND PartyTypeName = 'EMPLOYEE'
-                                                                                                And TimeOutReportInd = 1  --filter timeout applicable users only Per Angela workflow
-                                                                                                Group by 1) T3 on T2.MMID = T3.MMID
+                                                                                                AND TimeOutReportInd = 1  --filter timeout applicable users only Per Angela workflow
+                                                                                                GROUP BY 1) T3 ON T2.MMID = T3.MMID
 -- WHERE "Date" BETWEEN  Add_Months(Current_Date, -60) AND Current_Date + INTERVAL '10' DAY
 AND T1.DepartmentID IN (8) --to Get all EE's in Claims.
-and  RoleID in (15,16,17,19,22) AND
+AND  RoleID IN (15,16,17,19,22) AND
 PartyTypeName = 'EMPLOYEE'
-And TimeOutReportInd = 1  --filter timeout applicable users only Per Angela workflow
+AND TimeOutReportInd = 1  --filter timeout applicable users only Per Angela workflow
 
 
  
