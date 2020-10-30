@@ -1,6 +1,3 @@
---test
-
-
 
 SELECT
 ShortDate AS "Date"
@@ -19,18 +16,7 @@ ShortDate AS "Date"
 , ProductionGoal AS "Prod Goal"
 , NonProductionGoal AS "Non Prod Goal"
 , ActualFlexHours AS "Actual Flex Hours"
-
-
-
-,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE ActualWorkingHours
-    END AS "Actual Production Hours"
-
-
 ,PlannedFlexHours AS "Planned Flex Hours"
-
 ,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
@@ -51,11 +37,8 @@ ShortDate AS "Date"
 
 ,PlannedExcusedHours AS "Planned Excused Hours"
 ,PlannedMakeupHours AS "Planned Makeup Hours"
-
-
 ,COALESCE(ProductivityCredits,0) AS "Productivity Credits"
 ,AllDayOOO AS "All Day OOO"
-
 -------
 ------use this case statement for testing only - to be deleted
 -------
@@ -150,19 +133,7 @@ ShortDate AS "Date"
 -----------
 -----------
 
------------
----used for productivitiey calcs in production dashboards
-----------                      
-,CASE WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours)
-    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) > 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours - AdminTime)
-    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours)
-    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours - AdminTime)
-    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours - AdminTime) 
-    END AS "Available Time"
-
+                
 ,PlannedNonWorkingHours
 
 ,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
@@ -175,13 +146,6 @@ ShortDate AS "Date"
     ELSE (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime) 
     END AS "Planned Available Time"
 
-,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE COALESCE(CAST("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
-    END AS "Productivity Hours"
-    
-,"Productivity Hours" + "Actual Production Hours" AS "Hours Productive"  
   
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
