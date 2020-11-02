@@ -87,7 +87,7 @@ ShortDate AS "Date"
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
     WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
-    END AS "ACT Capacity Available Production" --Jay Added
+    END AS "ACT Capacity" --Jay Added
 ---------------
 -----
 ----Parts of Shrinkage
@@ -128,7 +128,7 @@ ShortDate AS "Date"
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ("Actual Non-Production Hours" + "Actual OOO Hours"+ AdminTime)
     WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hours" )
     ELSE ( "Actual Non-Production Hours" +  "Actual OOO Hours"+ AdminTime)
-    END AS "ACT Capacity Shrinkage"
+    END AS "ACT Shrinkage"
     
 -----------
 -----------
