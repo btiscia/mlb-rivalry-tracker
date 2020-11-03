@@ -1,3 +1,13 @@
+/*
+* This routine pulls IR NIGO Review Entries
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is  
+*  Author: Zach Dorvay/Lorraine Christian
+*  Created: 11/3/2020
+======================================================================
+                
+======================================================================*/
 SELECT  
 		 MAJOR_PROD_NME AS ReviewTypeCode
 		, ApplicationID AS OrderEntryID
