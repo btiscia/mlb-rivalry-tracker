@@ -16,24 +16,12 @@ ShortDate AS "Date"
 , ProductionGoal AS "Prod Goal"
 , NonProductionGoal AS "Non Prod Goal"
 , ActualFlexHours AS "Actual Flex Hours"
-,PlannedFlexHours AS "Planned Flex Hours"
-,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
-    ELSE PlannedNonWorkingHours
-    END AS "Planned Non-Production Hours"
 
 ,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
     ELSE PlannedOOOHourS
     END AS "Planned OOO Hours"
 
 ,PlannedOTHours AS "Planned OT Hours"
-
-,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
-    ELSE PlannedWorkingHours
-    END AS "Planned Prod Hours"
 
 ,PlannedExcusedHours AS "Planned Excused Hours"
 ,PlannedMakeupHours AS "Planned Makeup Hours"
@@ -71,11 +59,11 @@ ShortDate AS "Date"
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ScheduledHours
     WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     ELSE ScheduledHours
-    END AS "Actual Working Hours"
+    END AS "Actual Working Hrs"
     
-,ActualOTHours AS "Actual OT Hours"
-,ActualMakeupHours AS "Actual Makeup Hours"
-,ActualExcusedHours AS "Actual Excused Hours"
+,ActualOTHours AS "Actual OT Hrs"
+,ActualMakeupHours AS "Actual Makeup Hrs"
+,ActualExcusedHours AS "Actual Excused Hrs"
 
 ,CASE 
     --WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
@@ -109,12 +97,12 @@ ShortDate AS "Date"
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
     ELSE ActualNonWorkingHours
-    END AS "Actual Non-Production Hours"
+    END AS "Actual Non-Production Hrs"
 
 ,ActualOOOHours
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
     ELSE ActualOOOHours
-    END AS "Actual OOO Hours"
+    END AS "Actual OOO Hrs"
    
    
 
@@ -132,21 +120,6 @@ ShortDate AS "Date"
     
 -----------
 -----------
-
-                
-,PlannedNonWorkingHours
-
-,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
-    WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
-    WHEN (IsHoliday = 1) AND (PlannedOTHours + PlannedMakeupHours) < 6 THEN  (PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours)
-    WHEN (IsHoliday = 1) AND (PlannedOTHours + PlannedMakeupHours) > 6 THEN  (PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime)
-    WHEN (ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) < 6 THEN  (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours)
-    WHEN (ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) >= 6 THEN  (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime)
-    ELSE (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime) 
-    END AS "Planned Available Time"
-
-  
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
 JOIN ( SELECT --Get the max date to use above for a current EE Termination identifier
