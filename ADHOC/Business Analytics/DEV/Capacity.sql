@@ -27,7 +27,8 @@ ShortDate AS "Date"
 ,PlannedMakeupHours AS "Planned Makeup Hours"
 ,COALESCE(ProductivityCredits,0) AS "Productivity Credits"
 ,AllDayOOO AS "All Day OOO"
--------
+
+/*-------
 ------use this case statement for testing only - to be deleted
 -------
 
@@ -42,6 +43,7 @@ ShortDate AS "Date"
     WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  'E_Calc'
     ELSE 'Final_Calc'--     
     END AS "CalcID" --Jay Added
+*/
 ---------------
 ---
 --Parts of actual production
@@ -75,7 +77,7 @@ ShortDate AS "Date"
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
     WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
-    END AS "ACT Capacity" --Jay Added
+    END AS "Actual Capacity" --New
 ---------------
 -----
 ----Parts of Shrinkage
@@ -112,11 +114,11 @@ ShortDate AS "Date"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  "Actual OOO Hrs"
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs")
     WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs" + AdminTime)
-    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs")   ---Review with DAN!!!!!!!!
+    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs")
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ("Actual Non-Production Hrs" + "Actual OOO Hrs"+ AdminTime)
     WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hrs" )
     ELSE ( "Actual Non-Production Hrs" +  "Actual OOO Hrs"+ AdminTime)
-    END AS "ACT Shrinkage"
+    END AS "Actual Shrinkage"
     
 -----------
 -----------
