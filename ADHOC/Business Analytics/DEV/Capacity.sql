@@ -1,16 +1,25 @@
 SELECT
 ShortDate AS "Date"
+,EE_Startdate
+,RoleStartDate
+,EE_EndDate
+,Case 
+                When T2.RoleName Like ('%Consultant') Then CAST(11 AS INTEGER)
+                When (ShortDate -RoleStartDate) Month(4) >9 Then CAST(10 AS INTEGER)
+				Else  CAST(((ShortDate -RoleStartDate) Month(4)) AS INTEGER)
+				End as Experience
+
 ,IsHoliday
 ,IsWeekday
-,T2.MMID
 ,EmployeeLastName || ', ' || EmployeeFirstName AS Employee
-,CASE WHEN T3.MaxEndDate = '9999-12-31' THEN 'Curr Employee'
+,CASE WHEN T3.EE_EndDate = '9999-12-31' THEN 'Curr Employee'
                                                 ELSE 'Termed Emplyee'
                                                 END AS "Active Schedule Ident"
 
 , ManagerLastName || ', ' || ManagerFirstName AS Manager
 , TeamName AS "Team Name"
-, RoleName AS "Role Name"
+,T2.RoleID
+,T2.RoleName AS "Role Name"
 , RoleGradeName AS "Role Grade Name"
 , ProductionGoal AS "Prod Goal"
 , NonProductionGoal AS "Non Prod Goal"
@@ -137,18 +146,26 @@ ShortDate AS "Date"
 
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-JOIN ( SELECT --Get the max date to use above for a current EE Termination identifier
-                                                                                                MMID
-                                                                                               , MAX(ENDDate) AS MaxEndDate
-                                                                                               FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW
-                                                                                                WHERE  DepartmentID IN (8) --to Get all EE's in Claims.  Not using T1 
-                                                                                                AND  RoleID IN (15,16,17,19,22) 
-                                                                                                AND PartyTypeName = 'EMPLOYEE'
-                                                                                                AND TimeOutReportInd = 1  --filter timeout applicable users only Per Angela workflow
-                                                                                                GROUP BY 1) T3 ON T2.MMID = T3.MMID
+JOIN ( SELECT Distinct MMID
+											,RoleID
+											,RoleName
+											,Min(Case 
+											                               When Extract(Year From StartDate) = '1900' Then HireDate
+											                               Else StartDate
+											                               End) OVER (PARTITION  BY MMID) as EE_Startdate
+											,MIN(Case 
+											                               When Extract(Year From StartDate) = '1900' Then HireDate
+											                               Else StartDate
+											                               End) OVER (PARTITION BY MMID,ROLEID) as RoleStartDate  ---New
+											,MAX(EndDate) OVER (PARTITION BY MMID) as EE_EndDate
+											FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW
+											    WHERE  DepartmentID IN (8) 
+											    AND  RoleID IN (15,16,17,19,22) 
+											    AND PartyTypeName = 'EMPLOYEE'
+											    AND TimeOutReportInd = 1) T3 ON T2.MMID = T3.MMID and T2.RoleID = T3.RoleID
 -- WHERE "Date" BETWEEN  Add_Months(Current_Date, -60) AND Current_Date + INTERVAL '10' DAY
 AND T1.DepartmentID IN (8) --to Get all EE's in Claims.
-AND  RoleID IN (15,16,17,19,22) AND
+AND T2.RoleID IN (15,16,17,19,22) AND
 PartyTypeName = 'EMPLOYEE'
 AND TimeOutReportInd = 1  --filter timeout applicable users only Per Angela workflow
 
