@@ -1,3 +1,4 @@
+
 SELECT
 ShortDate AS "Date"
 ,EE_Startdate
@@ -8,6 +9,12 @@ ShortDate AS "Date"
                 When (ShortDate -RoleStartDate) Month(4) >9 Then CAST(10 AS INTEGER)
 				Else  CAST(((ShortDate -RoleStartDate) Month(4)) AS INTEGER)
 				End as Experience
+
+,Case 
+                When T2.RoleName Like ('%Consultant') Then 'Consultant'
+                When (ShortDate -RoleStartDate) Month(4) >9 Then 'Experianced'
+				Else  'New Hire'
+				End as EE_TYPE
 
 ,IsHoliday
 ,IsWeekday
@@ -171,5 +178,5 @@ PartyTypeName = 'EMPLOYEE'
 AND TimeOutReportInd = 1  --filter timeout applicable users only Per Angela workflow
 
 
- 
+
  
