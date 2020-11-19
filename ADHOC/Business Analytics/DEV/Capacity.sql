@@ -11,6 +11,7 @@ ShortDate AS "Date"
 
 ,IsHoliday
 ,IsWeekday
+,T2.MMID
 ,EmployeeLastName || ', ' || EmployeeFirstName AS Employee
 ,CASE WHEN T3.EE_EndDate = '9999-12-31' THEN 'Curr Employee'
                                                 ELSE 'Termed Emplyee'
