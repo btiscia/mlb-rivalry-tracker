@@ -1,4 +1,3 @@
-
 SELECT
 ShortDate AS "Date"
 ,IsHoliday
@@ -122,6 +121,20 @@ ShortDate AS "Date"
     
 -----------
 -----------
+,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
+    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
+    END AS "Productivity Hours"
+  
+,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
+    ELSE ActualWorkingHours
+    END AS "Actual Production Hours"
+    
+,"Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
+
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
 JOIN ( SELECT --Get the max date to use above for a current EE Termination identifier
