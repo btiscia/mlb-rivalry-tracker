@@ -5,6 +5,7 @@
 *  Source for this routine is  
 *  Author: Zach Dorvay/Lorraine Christian
 *  Created: 11/3/2020
+* Revision:  Added IssueDateIsHoliday and BINGO Status (lines 48,50-52, 64 )
 ======================================================================
                 
 ======================================================================*/
@@ -44,7 +45,13 @@ SELECT
         END AS InitialReviewIndicator
     , T5.IRMarketTypeName
     , IRProductID
-    , CAST(IssueDate AS DATE) AS IssueDate
+
+    , CAST(T12.IssueDate AS DATE) AS IssueDate 
+
+ --THESE ARE THE NEW FIELDS ADDED
+    , (SELECT IsHoliday FROM PROD_DMA_VW.DATE_DIM_VW WHERE T12.IssueDate = ShortDate) AS "IssueDateIsHoliday"  
+	, BINGOStatus
+	
 FROM    PROD_DMA_VW.ANB_IR_FORMS_VW T1
 LEFT JOIN PROD_DMA_VW.ANB_IR_SUBMIT_TYPES_VW T2 ON T1.IRSubmissionTypeID = T2.IRSubmissionTypeID
 LEFT JOIN PROD_DMA_VW.ANB_IR_REPL_TYPES_VW T3 ON T1.IRReplacementTypeID = T3.IRReplacementTypeID
@@ -55,4 +62,4 @@ LEFT JOIN PROD_DMA_VW.FIRM_DIM_VW T8 ON T1.AGENCYNUMBER = T8.ORIGINALFIRMCODE
 LEFT JOIN PROD_USIG_STND_VW.PDCR_DEMOGRAPHICS_VW T9 ON T1.AGENTID = SUBSTR(TRIM(T9.BUSINESS_PARTNER_ID), CHARACTER_LENGTH(TRIM(T9.BUSINESS_PARTNER_ID)) - 5 FOR 6)  
 LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T10 ON T1. CreatedByHRID = T10.HRID AND CAST(T1.CreatedAtDateTimestamp AS DATE) BETWEEN T10.StartDate AND T10.EndDate
 LEFT JOIN PROD_DMA_VW.ANB_APPLICATION_FCT_VW T11 ON T1.INITIALREVIEWID = T11.INITIALREVIEWID
-ORDER BY T1.TRANSDATE DESC
+LEFT JOIN PROD_DMA_VW.ANB_APPLICATION_RPT_VW T12 ON T11.AgreementID = T12.AgreementID 
