@@ -96,7 +96,7 @@ ShortDate AS "Date"
     ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     END AS "Actual Capacity" --New
     
-,("Actual Capacity" *T4.Effective)  as "Actual Effient Capacity"  
+,("Actual Capacity" * T4.Effective)  as "Actual Effient Capacity"  
 ,("Actual Capacity" - "Actual Effient Capacity") as "Actual Effiency Loss"
     
 ---------------
