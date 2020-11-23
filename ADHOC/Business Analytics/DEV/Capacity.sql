@@ -9,6 +9,7 @@ ShortDate AS "Date"
                 When (ShortDate -RoleStartDate) Month(4) >9 Then CAST(10 AS INTEGER)
 				Else  CAST(((ShortDate -RoleStartDate) Month(4)) AS INTEGER)
 				End as Experience
+,T4.Effective
 
 ,Case 
                 When T2.RoleName Like ('%Consultant') Then 'Consultant'
@@ -94,6 +95,10 @@ ShortDate AS "Date"
     WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
     END AS "Actual Capacity" --New
+    
+,("Actual Capacity" *T4.Effective)  as "Actual Effient Capacity"  
+,("Actual Capacity" * "Actual Effient Capacity") as "Actual Effiency Loss"
+    
 ---------------
 -----
 ----Parts of Shrinkage
@@ -171,6 +176,12 @@ JOIN ( SELECT Distinct MMID
 											    AND  RoleID IN (15,16,17,19,22) 
 											    AND PartyTypeName = 'EMPLOYEE'
 											    AND TimeOutReportInd = 1) T3 ON T2.MMID = T3.MMID and T2.RoleID = T3.RoleID
+Left Join DMA_GRP_DL.RT20_LC_Capacity_ExperianceLOV T4 on 
+																							Case 
+																						                When T2.RoleName Like ('%Consultant') Then CAST(11 AS INTEGER)
+																						                When (ShortDate -RoleStartDate) Month(4) >9 Then CAST(10 AS INTEGER)
+																										Else  CAST(((ShortDate -RoleStartDate) Month(4)) AS INTEGER)
+																										End = T4.Experiance
 -- WHERE "Date" BETWEEN  Add_Months(Current_Date, -60) AND Current_Date + INTERVAL '10' DAY
 AND T1.DepartmentID IN (8) --to Get all EE's in Claims.
 AND T2.RoleID IN (15,16,17,19,22) AND
@@ -179,4 +190,3 @@ AND TimeOutReportInd = 1  --filter timeout applicable users only Per Angela work
 
 
 
- 
