@@ -97,7 +97,7 @@ ShortDate AS "Date"
     END AS "Actual Capacity" --New
     
 ,("Actual Capacity" *T4.Effective)  as "Actual Effient Capacity"  
-,("Actual Capacity" * "Actual Effient Capacity") as "Actual Effiency Loss"
+,("Actual Capacity" - "Actual Effient Capacity") as "Actual Effiency Loss"
     
 ---------------
 -----
