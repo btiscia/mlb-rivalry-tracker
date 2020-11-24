@@ -100,7 +100,8 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
     WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ("Actual Non-Production Hrs" + "Actual OOO Hrs"+ AdminTime)
     WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hrs" )
     ELSE ( "Actual Non-Production Hrs" +  "Actual OOO Hrs"+ AdminTime)
-    END AS "Shrinkage"    
+    END AS "Shrinkage Hrs" 
+, CAST (NULL AS INTEGER) AS "Shrinkage"       
 , CAST(NULL AS INTEGER) AS "ForecastShrinkage_high95"
 , CAST(NULL AS INTEGER) AS "ForecastShrinkage_high80"
 , CAST(NULL AS INTEGER) AS "ForecastShrinkage_low80"
@@ -196,6 +197,7 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS INTEGER) AS "Actual Non-Production Hrs"
 , CAST(NULL AS INTEGER) AS "ActualOOOHours"
 , CAST(NULL AS INTEGER) AS "Actual OOO Hrs"   
+, CAST(NULL AS INTEGER) AS "Shrinkage Hrs" 
 , F.ForecastShrinkage AS "Shrinkage"
 , F.ForecastShrinkage_high95
 , F.ForecastShrinkage_high80
