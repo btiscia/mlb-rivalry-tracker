@@ -31,7 +31,8 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
                 When (ShortDate-RoleStartDate) Month(4) >9 Then 'Experienced'
 				Else  'New Hire'
 				End as EE_TYPE
-, T4.Effective AS "EffectiveFTE"
+, T4.Effective AS "%Effective"
+,CAST(NULL AS INTEGER) AS "EffectiveFTE"
 , CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_high95"
 , CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_high80"
 , CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_low80"
@@ -166,6 +167,7 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS INTEGER) AS "IsWeekday"
 , CAST(NULL AS INTEGER) AS "Experience"
 , CAST(NULL AS VARCHAR(100)) AS "EE_TYPE"
+,Cast(NULL AS INTEGER) AS "%Effective"
 , F.ForecastEffectiveFTE "EffectiveFTE"
 , F.ForecastEffectiveFTE_high95
 , F.ForecastEffectiveFTE_high80
