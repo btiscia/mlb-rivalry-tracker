@@ -101,11 +101,11 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
     WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hrs" )
     ELSE ( "Actual Non-Production Hrs" +  "Actual OOO Hrs"+ AdminTime)
     END AS "Shrinkage Hrs" 
-, CAST (NULL AS INTEGER) AS "%Shrinkage"       
-, CAST(NULL AS INTEGER) AS "ForecastShrinkage_high95"
-, CAST(NULL AS INTEGER) AS "ForecastShrinkage_high80"
-, CAST(NULL AS INTEGER) AS "ForecastShrinkage_low80"
-, CAST(NULL AS INTEGER) AS "ForecastShrinkage_low95"
+, CAST (NULL AS FLOAT) AS "%Shrinkage"       
+, CAST(NULL AS FLOAT) AS "ForecastShrinkage_high95"
+, CAST(NULL AS FLOAT) AS "ForecastShrinkage_high80"
+, CAST(NULL AS FLOAT) AS "ForecastShrinkage_low80"
+, CAST(NULL AS FLOAT) AS "ForecastShrinkage_low95"
 , CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
