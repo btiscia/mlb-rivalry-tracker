@@ -1,5 +1,6 @@
 SELECT T1.OrderEntryID
 , T1.OriginalOrderSubmitDate AS "Suitability Submit Date"
+, CASE WHEN T1.ParentCancelDate IS NOT NULL THEN 1 ELSE 0 END AS "ResubmitIndicator"
 , T1.PendDate
 , T1.CancelReworkDate
 , T1.TransmitDate
