@@ -9,13 +9,8 @@ SELECT T1.OrderEntryID
 ,CASE WHEN COALESCE(T1.ApprovedDate,T1.TransmitDate) IS NOT NULL THEN 'Approved'
             WHEN T1.RejectDate IS NOT NULL THEN 'Rejected'
             WHEN T1.CancelDate IS NOT NULL THEN 'Cancelled'
-END AS "Order Status"
-
+	END AS "Order Status"
 , COALESCE(T1.TransmitDate, T1.ApprovedDate, T1.RejectDate, T1.CancelDate) AS "Order Status Date"
-, T1.SourceSystemID
-, T1.RunID
-, T1.UpdateRunID
-, T1.TransDate
 , CASE WHEN CAS_IND = 'N' AND TO_NUMBER(T2.AGENCYNUMBER) IS NOT NULL THEN 'CAB'	
 		WHEN TO_NUMBER(T2.AGENCYNUMBER) IS NOT NULL THEN 'CAS'
 		ELSE 'Unknown' END AS "Distributor"
@@ -26,8 +21,25 @@ END AS "Order Status"
 						WHEN PRODUCTNAME LIKE '%Index Horizons%' THEN 'Fixed Indexed' END,T2.PRODUCTTYPE) AS "Product Category"
 , T2.AGENTID
 , T6.LST_NM||', '||T6.FIRST_NM AS "Advisor"
+, CASE WHEN FirmCodeWithPrefix IS NULL THEN FirmCode
+	ELSE FirmCodeWithPrefix END AS Firm
+, CASE WHEN T2.AGENCYNUMBER = 'FIL' THEN '244' 
+	ELSE T2.AGENCYNUMBER END AS FirmNum
+, CASE WHEN FirmNum = 'EDJ' THEN '999 - Edward Jones'
+	WHEN FirmCodeWithPrefix IS NULL AND FirmNum IS NULL THEN '999 - Unknown'
+	WHEN FirmCodeWithPrefix IS NULL THEN '999 - ' || FirmNum
+	ELSE FirmDisplayName END AS FirmName
+, CASE WHEN DistributionChannelType = 'DISO' OR FirmCodeWithPrefix IN ('A000','A199') THEN 'CLOSED AGENCIES'
+	WHEN DistributionChannelType IN ('DDC','OTHR') OR OriginalFirmCodeWithPrefix IN ('A113','A119','A226','A244','A249') THEN 'Direct Brokerage'
+	WHEN OriginalFirmCodeWithPrefix = 'A109' THEN 'Lifebridge Agency'
+	WHEN FirmCodeWithPrefix IN ('A020','A028') THEN 'UPPER MIDWEST'
+	WHEN FirmCodeWithPrefix IN ('A253','A275') THEN 'MIDWEST-SOCA'
+	WHEN FirmCodeWithPrefix = 'A271' THEN 'SE-MW'
+	WHEN FirmCodeWithPrefix = 'A262' THEN 'VIRGINA-NORTH'
+	WHEN FirmCode IN ('FIL','FILI') THEN 'Fidelity'
+	WHEN FirmCodeWithPrefix IS NULL THEN 'UNKNOWN' 
+	ELSE Region END AS RegionName
 , T3.HLDG_KEY AS "Holding Key"
---, T2.NewBusinessSubmitDate
 , T2.AutoApprovedIndicator
 , CASE WHEN T5.NBPURCHASEWITHAPPINDICATOR = 1 THEN 'NB Purchase w App'
 	WHEN T5.INCOMINGTRANSFERINDICATOR = 1 THEN 'Incoming Transfer'
@@ -40,6 +52,7 @@ END AS "Order Status"
 , CASE WHEN NIGODATE IS NOT NULL THEN 'Nigo' ELSE 'Bingo' END AS "BINGO Status"
 , CASE WHEN NIGODATE IS NOT NULL THEN '0' ELSE '1' END AS "BINGO Indicator"
 , CAST(T1.TransmitDate AS DATE) - CAST(T1.PendDate AS DATE) AS InitialReviewCycleTime
+, T1.TransDate
 
 FROM PROD_DMA_VW.IPIPELINE_ORDER_FCT_VW T1
 
@@ -59,6 +72,8 @@ LEFT JOIN (SELECT DISTINCT AGREEMENTID
 LEFT JOIN (SELECT * FROM PROD_DMA_VW.SE2_DOC_TYPE_HISTORY_VW WHERE TYPE2CURRENTFLAG = 1) T5 ON TRIM(LEADING '0' FROM T3.HLDG_KEY) = T5.CONTRACTNUMBER
 
 LEFT JOIN PROD_USIG_STND_VW.PDCR_DEMOGRAPHICS_VW T6 ON T2.AGENTID = SUBSTR(TRIM(T6.BUSINESS_PARTNER_ID), CHARACTER_LENGTH(TRIM(T6.BUSINESS_PARTNER_ID)) - 5 FOR 6)			
+
+LEFT JOIN PROD_DMA_VW.FIRM_DIM_VW T7 ON T2.AGENCYNUMBER = T7.ORIGINALFIRMCODE
 
 WHERE CAST("Order Status Date" AS DATE) >= '2019-07-01' 
 
