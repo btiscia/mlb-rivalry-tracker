@@ -39,7 +39,6 @@ END AS "Order Status"
 	ELSE 'N/A' END AS "NB Doc Type"
 , CASE WHEN NIGODATE IS NOT NULL THEN 'Nigo' ELSE 'Bingo' END AS "BINGO Status"
 , CASE WHEN NIGODATE IS NOT NULL THEN '0' ELSE '1' END AS "BINGO Indicator"
-, CAST(T1.TransmitDate AS DATE) - CAST(T1.OriginalOrderSubmitDate AS DATE) AS SuitabilityCycleTime
 , CAST(T1.TransmitDate AS DATE) - CAST(T1.PendDate AS DATE) AS InitialReviewCycleTime
 
 FROM PROD_DMA_VW.IPIPELINE_ORDER_FCT_VW T1
