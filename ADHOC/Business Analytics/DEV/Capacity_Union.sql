@@ -75,7 +75,7 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high80"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_low80"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_low95" 
-, ("Actual Capacity" - "Effective Capacity") as "Actual Effiency Loss"   
+, ("Actual Capacity" - "Effective Capacity") as "Efficiency Loss"   
 , CASE 
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
@@ -126,17 +126,17 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
 JOIN ( SELECT Distinct MMID
-											, RoleID
-											, RoleName
-											, Min(Case 
-											                               When Extract(Year From StartDate) = '1900' Then HireDate
-											                               Else StartDate
-											                               End) OVER (PARTITION  BY MMID) as EE_Startdate
-											, MIN(Case 
-											                               When Extract(Year From StartDate) = '1900' Then HireDate
-											                               Else StartDate
-											                               End) OVER (PARTITION BY MMID,ROLEID) as RoleStartDate  ---New
-											, MAX(EndDate) OVER (PARTITION BY MMID) as EE_EndDate
+							, RoleID
+							, RoleName
+							, Min(Case 
+							                  When Extract(Year From StartDate) = '1900' Then HireDate
+				                               Else StartDate
+				                               End) OVER (PARTITION  BY MMID) as EE_Startdate
+							, MIN(Case 
+				                               When Extract(Year From StartDate) = '1900' Then HireDate
+				                               Else StartDate
+				                               End) OVER (PARTITION BY MMID,ROLEID) as RoleStartDate  ---New
+							, MAX(EndDate) OVER (PARTITION BY MMID) as EE_EndDate
 				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW
     			WHERE  DepartmentID IN (8) 
     			AND  RoleID IN (15,16,17,19,22) 
@@ -169,7 +169,8 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS DATE) AS "EE_Startdate"
 , CAST(NULL AS DATE) AS "RoleStartDate"
 , CAST(NULL AS DATE) AS "EE_EndDate"
-,( F.ForecastDate - INTERVAL '1'YEAR) AS "Date"   ----Minus 1 year so I can test the design of the dashboard
+,F.ForecastDate AS "Date" 
+--,( F.ForecastDate - INTERVAL '1'YEAR) AS "Date"   ----Minus 1 year so I can test the design of the dashboard
 , CAST(NULL AS INTEGER) AS "IsHoliday"
 , CAST(NULL AS INTEGER) AS "IsWeekday"
 , CAST(NULL AS INTEGER) AS "Experience"
@@ -198,7 +199,7 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , F.ForecastCapacity_high80
 , F.ForecastCapacity_low80
 , F.ForecastCapacity_low95
-, CAST(NULL AS INTEGER) AS "Actual Effiency Loss"   
+, CAST(NULL AS INTEGER) AS "Efficiency Loss"   
 , CAST(NULL AS INTEGER) AS "Admin Time"
 , CAST(NULL AS INTEGER) AS "Actual Non-Production Hrs"
 , CAST(NULL AS INTEGER) AS "ActualOOOHours"
