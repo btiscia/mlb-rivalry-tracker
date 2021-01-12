@@ -43,7 +43,7 @@ END AS "WorkFunction"
 ,MAX(TransDate) AS "MaxTransDate"
 ,COUNT(distinct IntegratedActivityID)  AS "Volume"
 ,CASE WHEN "WorkFunction" <> 'Operations 1st Notice' THEN SUM(CurrentProdCredit)/(60*1.5) ---/90  ---60 min X 1.5 policies per claim
-ELSE SUM(30.0)/(60*1.5)  --(.317) --(28.5)/(60*1.5) do to no productivity credit assigned to Operations 1st Notice function
+ELSE SUM(28.5)/(60*1.5)  --(.317) --(28.5)/(60*1.5) do to no productivity credit assigned to Operations 1st Notice function
 END AS "Demand"
 
 ,CAST (NULL as Integer) as  ForecastVolume_high95
