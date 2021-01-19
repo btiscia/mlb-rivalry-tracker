@@ -214,3 +214,7 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS INTEGER) AS "Actual Production Hours"
 , CAST(NULL AS INTEGER) AS "Hours Productive"
 FROM DMA_GRP_DL.RT20_00002983_LC_Capacity F
+INNER JOIN
+	(SELECT MAX(ForecastID) as FxID 
+	FROM DMA_GRP_DL.RT20_00002983_LC_Capacity) D2
+	ON F.ForecastID = FxID
