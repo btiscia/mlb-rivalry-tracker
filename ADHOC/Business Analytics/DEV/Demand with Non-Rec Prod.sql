@@ -168,9 +168,33 @@ CAST ('Received' AS VARCHAR (50)) AS "TransactionTypeName"
 ,CAST (NULL AS INTEGER) AS ForecastDemand_high80
 ,CAST (NULL AS INTEGER) AS ForecastDemand_low80
 ,CAST (NULL AS INTEGER) AS ForecastDemand_low95
-FROM PROD_DMA_VW.TIMEOUT_ACTIVITY_PIT_IVW
+FROM (
+SELECT
+ RoleName
+,TRUNC(MeetingDate,'MON') AS "MeetingDate"
+,EmployeeFirstName
+,EmployeeLastName
+,ManagerFirstName
+,ManagerLastName
+,TeamName
+,OrganizationName  
+,DepartmentName
+,CASE
+WHEN (IsHoliday = 1) THEN 0
+WHEN (IsWeekday = 0) THEN 0
+WHEN AllDayOOO >= 1 THEN 0
+ELSE Duration 
+END AS "Duration"
+FROM PROD_DMA_VW.TIMEOUT_ACTIVITY_PIT_IVW A
+LEFT JOIN (
+SELECT
+	ShortDate,
+	IsHoliday,
+	IsWeekday
+FROM  PROD_DMA_VW.DATE_DIM_VW) B
+ON B.ShortDate=A.MeetingDate
 WHERE DepartmentID = 8
 AND TimeType = 'Production'
 AND ParentTimeCategory = 'Non-Recorded Production'
 AND EXTRACT(YEAR FROM MeetingDate) >= EXTRACT(YEAR FROM CURRENT_DATE)-5
-AND "WorkRole" IN ('Life Claim Examiner', 'Operations Setup', 'Life Pay', 'Life Calc and Quotes')
+AND RoleName IN ('Life Claim Examiner', 'Operations Setup', 'Life Pay', 'Life Calc and Quotes')) C
