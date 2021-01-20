@@ -33,7 +33,7 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 			Else  'New Hire'
 			End as EE_TYPE
 , T4.Effective AS "%Effective"
-, CAST(NULL AS INTEGER) AS "EffectiveFTE"
+, CAST(NULL AS FLOAT) AS "EffectiveFTE"
 , CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_high95"
 , CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_high80"
 , CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_low80"
@@ -218,3 +218,4 @@ INNER JOIN
 	(SELECT MAX(ForecastID) as FxID 
 	FROM DMA_GRP_DL.RT20_00002983_LC_Capacity) D2
 	ON F.ForecastID = FxID
+	
