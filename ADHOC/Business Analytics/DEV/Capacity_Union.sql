@@ -33,11 +33,11 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 			Else  'New Hire'
 			End as EE_TYPE
 , T4.Effective AS "%Effective"
-, CAST(NULL AS FLOAT) AS "EffectiveFTE"
-, CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_high95"
-, CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_high80"
-, CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_low80"
-, CAST(NULL AS INTEGER) AS "ForecastEffectiveFTE_low95"
+, CAST(NULL AS FLOAT ) AS "EffectiveFTE"
+, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_high95"
+, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_high80"
+, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_low80"
+, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_low95"
 , ActualFlexHours AS "Actual Flex Hours"
 , CASE 
 			WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
