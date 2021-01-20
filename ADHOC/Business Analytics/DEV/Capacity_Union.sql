@@ -139,7 +139,7 @@ JOIN ( SELECT Distinct MMID
 							, MAX(EndDate) OVER (PARTITION BY MMID) as EE_EndDate
 				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW
     			WHERE  DepartmentID IN (8) 
-    			AND  RoleID IN (15,16,17,19,22) 
+    			AND  RoleID IN (13,15,16,17,19,22) 
     			AND PartyTypeName = 'EMPLOYEE'
    				 AND TimeOutReportInd = 1) T3 ON T2.MMID = T3.MMID and T2.RoleID = T3.RoleID
 Join DMA_GRP_DL.RT20_LC_Capacity_ExperianceLOV T4 on 
@@ -149,7 +149,7 @@ Join DMA_GRP_DL.RT20_LC_Capacity_ExperianceLOV T4 on
 																												Else  CAST(((ShortDate-RoleStartDate) Month(4)) AS INTEGER)
 																										End = T4.Experiance
 AND T1.DepartmentID IN (8)
-AND T2.RoleID IN (15,16,17,19,22) AND
+AND T2.RoleID IN (13,15,16,17,19,22) AND
 PartyTypeName = 'EMPLOYEE'
 AND TimeOutReportInd = 1
 
