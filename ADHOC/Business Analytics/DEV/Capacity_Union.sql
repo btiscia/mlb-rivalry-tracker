@@ -1,3 +1,4 @@
+
 SELECT
 CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 , NULL AS ForecastID
@@ -137,17 +138,13 @@ JOIN ( SELECT Distinct MMID
 				                               Else StartDate
 				                               End) OVER (PARTITION BY MMID,ROLEID) as RoleStartDate  ---New
 							, MAX(EndDate) OVER (PARTITION BY MMID) as EE_EndDate
-				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW
-    			WHERE  DepartmentID IN (8) 
-    			AND  RoleID IN (13,15,16,17,19,22) 
-    			AND PartyTypeName = 'EMPLOYEE'
-   				 AND TimeOutReportInd = 1) T3 ON T2.MMID = T3.MMID and T2.RoleID = T3.RoleID
+				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW ) T3 ON T2.MMID = T3.MMID and T2.RoleID = T3.RoleID
 Join DMA_GRP_DL.RT20_LC_Capacity_ExperianceLOV T4 on 
-																										Case 
-							                																	When T2.RoleName Like ('%Consultant') Then CAST(11 AS INTEGER)
-							               																		When (ShortDate-RoleStartDate) Month(4) >9 Then CAST(10 AS INTEGER)
-																												Else  CAST(((ShortDate-RoleStartDate) Month(4)) AS INTEGER)
-																										End = T4.Experiance
+																				Case 
+	                																	When T2.RoleName Like ('%Consultant') Then CAST(11 AS INTEGER)
+	               																		When (ShortDate-RoleStartDate) Month(4) >9 Then CAST(10 AS INTEGER)
+																						Else  CAST(((ShortDate-RoleStartDate) Month(4)) AS INTEGER)
+																				End = T4.Experiance
 AND T1.DepartmentID IN (8)
 AND T2.RoleID IN (13,15,16,17,19,22) AND
 PartyTypeName = 'EMPLOYEE'
@@ -218,4 +215,3 @@ INNER JOIN
 	(SELECT MAX(ForecastID) as FxID 
 	FROM DMA_GRP_DL.RT20_00002983_LC_Capacity) D2
 	ON F.ForecastID = FxID
-	
