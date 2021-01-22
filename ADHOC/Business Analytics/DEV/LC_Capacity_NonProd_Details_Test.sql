@@ -1,4 +1,3 @@
-With T As (
 
 Select 
 T2.MMID
@@ -59,12 +58,6 @@ AND T2.RoleID IN (13,15,16,17,19,22) AND
 PartyTypeName = 'EMPLOYEE'
 AND TimeOutReportInd = 1
 And "Actual Non-Production Hrs" <>0
-
-
-)
-
---Select Count(*) From T
-
-Select * From T 
---where MMID = 'MM34917'
---And "Date" ='2019-04-11'
+--and TimeCategory not in ('Out of Office','Remote Work')
+And TimeType = 'Non-Production'
+and PlannedActual <> 'Planned'
