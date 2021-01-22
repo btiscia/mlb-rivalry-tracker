@@ -1,4 +1,4 @@
-----Vince modified some from what is used in production.  
+---Created to get Non Prod details logged in Time out, and Prod details of meetings loged.  
 
 
 SELECT 
@@ -63,5 +63,3 @@ And Department_ID = 8
 AND T1.RoleID in (13,15,16,17,19,22) 
 --And T1.Timeoutreportind <>1
 
-
-select * From PROD_DMA_VW.ACTIVITY_TO_FCT_VW
