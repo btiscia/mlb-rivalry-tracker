@@ -86,6 +86,7 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    ELSE  AdminTime
 		    END AS "Admin Time"
+		--  ,ActualNonWorkingHours
 , CASE 
 			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
@@ -146,8 +147,8 @@ Join DMA_GRP_DL.RT20_LC_Capacity_ExperianceLOV T4 on
 																						Else  CAST(((ShortDate-RoleStartDate) Month(4)) AS INTEGER)
 																				End = T4.Experiance
 AND T1.DepartmentID IN (8)
-AND T2.RoleID IN (13,15,16,17,19,22) AND
-PartyTypeName = 'EMPLOYEE'
+AND T2.RoleID IN (13,15,16,17,19,22) 
+AND PartyTypeName = 'EMPLOYEE'
 AND TimeOutReportInd = 1
 
 UNION ALL
@@ -166,8 +167,8 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS DATE) AS "EE_Startdate"
 , CAST(NULL AS DATE) AS "RoleStartDate"
 , CAST(NULL AS DATE) AS "EE_EndDate"
-,F.ForecastDate AS "Date" 
---,( F.ForecastDate - INTERVAL '1'YEAR) AS "Date"   ----Minus 1 year so I can test the design of the dashboard
+--,F.ForecastDate AS "Date" 
+,( F.ForecastDate - INTERVAL '1'YEAR) AS "Date"   ----Minus 1 year so I can test the design of the dashboard
 , CAST(NULL AS INTEGER) AS "IsHoliday"
 , CAST(NULL AS INTEGER) AS "IsWeekday"
 , CAST(NULL AS INTEGER) AS "Experience"
@@ -215,3 +216,4 @@ INNER JOIN
 	(SELECT MAX(ForecastID) as FxID 
 	FROM DMA_GRP_DL.RT20_00002983_LC_Capacity) D2
 	ON F.ForecastID = FxID
+
