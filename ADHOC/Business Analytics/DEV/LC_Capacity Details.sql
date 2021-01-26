@@ -1,5 +1,4 @@
 ---Created to get Non Prod details logged in Time out, and Prod details of meetings loged.  
---With T AS (
 
 SELECT 
 T1.RoleID
@@ -33,7 +32,15 @@ T1.RoleID
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE(Cast (ProdCredits/EE_Day_RowCnt as Decimal (12,5)) ,0)/60
-		    END AS  "Productivity Credits_Part"
+		    END AS  "Productivity Hours"
+
+, CASE 
+			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    ELSE COALESCE (ActualProdHours ,0)
+		    END AS  "Actual Production Hours"
+
 
 /*,T6.GoalValue AS PROD_GOAL
 ,T7.GoalValue AS NON_PROD_GOAL
@@ -103,79 +110,16 @@ AND T1.Timeoutreportind = 1
 
 
 
---) 
-
---Select * From T 
---Where MMID = 'MM08125'
---And "Date" = '2020-02-23'
 
 
 
+/*  --use for testing if needed. 
+Select * 
+From  PROD_DMA_VW.ACTIVITY_TO_FCT_VW T1
+Left Join (Select Distinct * From PROD_DMA_VW.SCHEDULE_PIT_DIM_VW where HRID IS not null) T2 on T1.HRID = T2.HRID and T1."MeetingDate" Between T2.StartDate and EndDate And td_day_of_week(T1.MeetingDate) = T2.DayofWeek
+Where  MMID = 'MM23268'
+And MeetingDate =  '2021-01-25'
 
 
 
-
-/*   -------Orginal way to get only Non Prod details ---tested values matched to performance fact.  Once above is finalized this can be deleted.  
-
-Select 
-T2.MMID
-, EmployeeLastName || ', ' || EmployeeFirstName AS Employee
-, CASE 
-			WHEN T3.EE_EndDate = '9999-12-31' THEN 'Curr Employee'
-            ELSE 'Termed Emplyee'
-            END AS "Active Schedule Ident"
-, ManagerLastName || ', ' || ManagerFirstName AS Manager
-, TeamName AS "Team Name"
-, T2.RoleID
-, T2.RoleName AS "Role Name"
-, CASE 
-		    WHEN T2.RoleName LIKE 'Life Claim%' THEN 'Life Claim Examiner'
-		    WHEN T2.RoleName LIKE 'Life Pay%' THEN 'Life Pay'
-		    ELSE T2.RoleName
-		    END AS "WorkRole" 
-, ShortDate AS "Date"
-, IsHoliday
-, IsWeekday
-, AllDayOOO AS "All Day OOO"
-, CASE 
-			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    ELSE ActualNonWorkingHours
-		    END AS "Actual Non-Production Hrs"
-
-,T6.MeetingTitle
-,T6.MeetingDescription
-,T6.TimeType
-,T6.PlannedActual
-,T6.Duration
-
-FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
-JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-JOIN ( SELECT Distinct MMID
-							, RoleID
-							, RoleName
-							, Min(Case 
-							                  When Extract(Year From StartDate) = '1900' Then HireDate
-				                               Else StartDate
-				                               End) OVER (PARTITION  BY MMID) as EE_Startdate
-							, MIN(Case 
-				                               When Extract(Year From StartDate) = '1900' Then HireDate
-				                               Else StartDate
-				                               End) OVER (PARTITION BY MMID,ROLEID) as RoleStartDate  ---New
-							, MAX(EndDate) OVER (PARTITION BY MMID) as EE_EndDate
-				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW ) T3 ON T2.MMID = T3.MMID and T2.RoleID = T3.RoleID
-
-Join (	Select MMID,MeetingDate,MeetingTitle,MeetingDescription,TimeType,PlannedActual,Timecategory,ParentTimeCategory,Duration
-				    From  PROD_DMA_VW.TIMEOUT_ACTIVITY_PIT_IVW T4
-					Join (Select Distinct * From PROD_DMA_VW.SCHEDULE_PIT_DIM_VW where HRID IS not null) T5 on T4.HRID = T5.HRID and T4."MeetingDate" Between T5.StartDate and EndDate And td_day_of_week(T4.MeetingDate) = T5.DayofWeek
-					)T6 on T2.MMID = T6.MMID and "Date" = T6.MeetingDate 
-
-AND T1.DepartmentID IN (8)
-AND T2.RoleID IN (13,15,16,17,19,22) 
-AND PartyTypeName = 'EMPLOYEE'
-AND TimeOutReportInd = 1
-And "Actual Non-Production Hrs" <>0
---and TimeCategory not in ('Out of Office','Remote Work')
-And TimeType = 'Non-Production'
-and PlannedActual <> 'Planned'*/
+*/
