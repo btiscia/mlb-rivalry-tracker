@@ -1,5 +1,5 @@
 ---Created to get Non Prod details logged in Time out, and Prod details of meetings loged.  
-
+--With T AS (
 
 SELECT 
 T1.RoleID
@@ -25,7 +25,15 @@ T1.RoleID
 ,ProdCredits AS PROD_CREDITS
 ,Count (*) Over (Partition By ShortDate, MMID) as EE_Day_RowCnt
 ,COALESCE(ProdCredits,0) AS "Productivity Credits_Whole"
-,COALESCE(ProdCredits/EE_Day_RowCnt ,0)"Productivity Credits_Part"
+,COALESCE(ProdCredits/EE_Day_RowCnt ,0)"Productivity Credits_Part_NoCase"
+,COALESCE(ActualMakeupHours ,0) AS ACTUAL_MAKEUP_HRS
+
+, CASE 
+			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    ELSE COALESCE(Cast (ProdCredits/EE_Day_RowCnt as Decimal (12,5)) ,0)/60
+		    END AS  "Productivity Credits_Part"
 
 /*,T6.GoalValue AS PROD_GOAL
 ,T7.GoalValue AS NON_PROD_GOAL
@@ -36,14 +44,14 @@ T1.RoleID
 ,ActualNonProdHours AS ACTUAL_NON_PROD_HRS
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ActualMakeupHours) = 0 THEN  0
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS +ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE( ActualNonProdHours,0)
 		    END AS  ACTUAL_NON_PROD_HRS_Test
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 'A'
-		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ActualMakeupHours) = 0 THEN 'B'
-		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ActualMakeupHours) = 0 THEN  'C'
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 'B'
+		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  'C'
 		    ELSE 'D'
 		    END AS  Test
 ,T5.TimeType
@@ -57,7 +65,7 @@ T1.RoleID
 ,PlannedProdHours AS PLANNED_PROD_HRS
 ,PlannedExcusedHours AS PLANNED_EXCUSED_HRS
 ,ActualExcusedHours AS ACTUAL_EXCUSED_HRS*/
-,ActualMakeupHours AS ACTUAL_MAKEUP_HRS
+--,ActualMakeupHours AS ACTUAL_MAKEUP_HRS
 --,PlannedMakeupHours AS PLANNED_MAKEUP_HRS
 --,AllDayOOO AS ALL_DAY_OOO
 FROM (SELECT * FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T1 WHERE DepartmentID IN (/*7,*/8)) T1
@@ -92,10 +100,14 @@ AND CURRENT_DATE + INTERVAL '10' DAY
 AND T1.RoleID in (13,15,16,17,19,22) 
 AND (PROD_CREDITS is not null  or Actual_Non_Prod_Hrs is not null or Actual_Prod_Hrs is not null)  --needs testing
 AND T1.Timeoutreportind = 1
----AND T5.TimeType <> 3 ---Cant filter out non prod records as they are needed for the case statement business rules.  
 
 
 
+--) 
+
+--Select * From T 
+--Where MMID = 'MM08125'
+--And "Date" = '2020-02-23'
 
 
 
