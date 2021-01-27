@@ -106,7 +106,7 @@ AND CURRENT_DATE + INTERVAL '10' DAY
 --And Department_ID = 8
 AND T1.RoleID in (13,15,16,17,19,22) 
 AND (PROD_CREDITS is not null  or Actual_Non_Prod_Hrs is not null or Actual_Prod_Hrs is not null)  --needs testing
-AND T1.Timeoutreportind = 1
+--AND T1.Timeoutreportind = 1
 
 
 
