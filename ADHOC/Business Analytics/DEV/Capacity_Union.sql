@@ -149,7 +149,7 @@ Join DMA_GRP_DL.RT20_LC_Capacity_ExperianceLOV T4 on
 AND T1.DepartmentID IN (8)
 AND T2.RoleID IN (13,15,16,17,19,22) 
 AND PartyTypeName = 'EMPLOYEE'
-AND TimeOutReportInd = 1
+--AND TimeOutReportInd = 1
 
 UNION ALL
 
