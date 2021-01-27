@@ -63,22 +63,25 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 , ActualMakeupHours AS "Actual Makeup Hrs"
 , ActualExcusedHours AS "Actual Excused Hrs"
 , CASE 
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours +ActualOTHours + ActualMakeupHours - ActualExcusedHours)
+		   WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)   
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
-		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
+		    
 		    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    END AS "Actual Capacity" --New    
 		    
 , CASE 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  'B'
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN    'A'  ---Needs to move to top row of case.
+			WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 'B'---New 
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  'C'
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   'D'  
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  'E.E'
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   'F'
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   'G' 
-		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN    'A'
 		    ELSE   'H'
 		    END AS "CASE  Test" --New    
 		    
@@ -95,43 +98,45 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (AdminTime)
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   AdminTime
-		    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    ELSE  AdminTime
 		    END AS "Admin Time"
 		--  ,ActualNonWorkingHours
 , CASE 
-			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE ActualNonWorkingHours
 		    END AS "Actual Non-Production Hrs"
 , ActualOOOHours
 , CASE 
-			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
 		    ELSE ActualOOOHours
 		    END AS "Actual OOO Hrs"   
 , CASE 
-	    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  "Actual OOO Hrs"
+		WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hrs" )
+	    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+	    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN 0 -- "Actual OOO Hrs"
 	    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs")
 	    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs" + AdminTime)
 	    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs")
 	    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ("Actual Non-Production Hrs" + "Actual OOO Hrs"+ AdminTime)
-	    WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hrs" )
 	    ELSE ( "Actual Non-Production Hrs" +  "Actual OOO Hrs"+ AdminTime)
 	    END AS "Shrinkage Hrs" 
+	    
 , CAST (NULL AS FLOAT) AS "%Shrinkage"       
 , CAST(NULL AS FLOAT) AS "ForecastShrinkage_high95"
 , CAST(NULL AS FLOAT) AS "ForecastShrinkage_high80"
 , CAST(NULL AS FLOAT) AS "ForecastShrinkage_low80"
 , CAST(NULL AS FLOAT) AS "ForecastShrinkage_low95"
 , CASE 
-			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
 		    END AS "Productivity Hours"  
 , CASE 
-			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE ActualWorkingHours
