@@ -71,6 +71,18 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    END AS "Actual Capacity" --New    
+		    
+, CASE 
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  'B'
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   'D'  
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  'E.E'
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   'F'
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   'G' 
+		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN    'A'
+		    ELSE   'H'
+		    END AS "CASE  Test" --New    
+		    
+		    
 , ("Actual Capacity" * T4.Effective)  as "Effective Capacity"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high95"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high80"
@@ -123,7 +135,8 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE ActualWorkingHours
-		    END AS "Actual Production Hours"
+		    END AS "Actual Production Hours"    
+		    
 , "Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
