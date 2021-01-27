@@ -70,7 +70,6 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
-		    
 		    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    END AS "Actual Capacity" --New    
 		    
