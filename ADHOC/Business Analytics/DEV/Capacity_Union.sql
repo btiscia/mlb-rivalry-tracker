@@ -51,20 +51,54 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 , AllDayOOO AS "All Day OOO"
 , ScheduledHours AS "Working Hours"
 , CASE 
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
+		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  0
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ScheduledHours
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ScheduledHours
-		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    ELSE ScheduledHours
 		    END AS "Actual Working Hrs"    
-, ActualOTHours AS "Actual OT Hrs"
-, ActualMakeupHours AS "Actual Makeup Hrs"
-, ActualExcusedHours AS "Actual Excused Hrs"
+, CASE 
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
+		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualOTHours
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualOTHours
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualOTHours 
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualOTHours  
+		    ELSE ActualOTHours
+		    END AS "Actual OT Hrs"
+
+, ActualOTHours
+
+, CASE 
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
+		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   ActualMakeupHours
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   ActualMakeupHours
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualMakeupHours
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualMakeupHours
+		    ELSE  ActualMakeupHours
+		    END AS  "Actual Makeup Hrs" --New   
+, ActualMakeupHours 
+
+, CASE 
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
+		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualExcusedHours
+		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualExcusedHours
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN ActualExcusedHours
+		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN ActualExcusedHours
+		    ELSE ActualExcusedHours
+		    END AS "Actual Excused Hrs" --New   
+, ActualExcusedHours 
 , CASE 
 			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
-		   WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
+		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)   
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
@@ -129,13 +163,13 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS FLOAT) AS "ForecastShrinkage_low80"
 , CAST(NULL AS FLOAT) AS "ForecastShrinkage_low95"
 , CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
 		    END AS "Productivity Hours"  
 , CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE ActualWorkingHours
@@ -205,8 +239,11 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS INTEGER) AS "Working Hours"
 , CAST(NULL AS INTEGER) AS "Actual Working Hrs"    
 , CAST(NULL AS INTEGER) AS "Actual OT Hrs"
+, CAST(NULL AS INTEGER) AS ActualOTHours
 , CAST(NULL AS INTEGER) AS "Actual Makeup Hrs"
+, CAST(NULL AS INTEGER) AS ActualMakeupHours
 , CAST(NULL AS INTEGER) AS "Actual Excused Hrs"
+, CAST(NULL AS INTEGER) AS ActualExcusedHours 
 , CAST(NULL AS INTEGER) AS "Actual Capacity"
 , F.ForecastCapacity AS "Effective Capacity"
 , F.ForecastCapacity_high95
@@ -232,5 +269,5 @@ INNER JOIN
 	(SELECT MAX(ForecastID) as FxID 
 	FROM DMA_GRP_DL.RT20_00002983_LC_Capacity) D2
 	ON F.ForecastID = FxID
-
+	
 
