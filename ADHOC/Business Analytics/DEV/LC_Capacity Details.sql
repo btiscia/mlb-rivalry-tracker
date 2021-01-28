@@ -28,7 +28,7 @@ T1.RoleID
 ,COALESCE(ActualMakeupHours ,0) AS ACTUAL_MAKEUP_HRS
 
 , CASE 
-			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+			WHEN All_Day_OOO = 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE(Cast (ProdCredits/EE_Day_RowCnt as Decimal (12,5)) ,0)/60
@@ -107,9 +107,6 @@ AND CURRENT_DATE + INTERVAL '10' DAY
 AND T1.RoleID in (13,15,16,17,19,22) 
 AND (PROD_CREDITS is not null  or Actual_Non_Prod_Hrs is not null or Actual_Prod_Hrs is not null)  --needs testing
 --AND T1.Timeoutreportind = 1
-
-
-
 
 
 
