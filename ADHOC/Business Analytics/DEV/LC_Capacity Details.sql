@@ -40,7 +40,7 @@ T1.RoleID
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE (ActualProdHours ,0)
 		    END AS  "Actual Production Hours"
-
+, "Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
 
 /*,T6.GoalValue AS PROD_GOAL
 ,T7.GoalValue AS NON_PROD_GOAL
