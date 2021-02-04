@@ -1,6 +1,8 @@
+--DI Claims Historical Details - Current
+
 SELECT
 TransactionTypeName AS "Transaction Type"  
-,TransDate as "Transaction Date"
+,TransDate AS "Transaction Date"
 ,SourceTransactionID AS "Source Transaction ID" 
 ,ShortClaimNumber AS "Short Claim Number" 
 ,BaseClaimNumber AS "Base Claim Number"
@@ -12,8 +14,8 @@ TransactionTypeName AS "Transaction Type"
      WHEN TRANSACTIONTYPEID = 4 THEN LoggedDate
 END AS "Date"    
 ,EmployeeRoleName AS "Employee Role Name"  
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"      
-,Coalesce(EmployeeManagerlastName || ', ' || EmployeeManagerFirstName, 'Unknown') AS "Manager"  
+,COALESCE(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"      
+,COALESCE(EmployeeManagerlastName || ', ' || EmployeeManagerFirstName, 'Unknown') AS "Manager"  
 ,EmployeeTeamName AS "Team Name"  
 ,WorkEventFunctionName AS "Function Name"  
 ,WorkEventSegmentName AS "Segment Name"  
@@ -30,7 +32,7 @@ END AS "Date"
 ,LoggedByTeamPartyID AS "Logged By Team Party ID"
 ,LoggedByPartyEmployeeID AS "Logged By Party Employee ID"
 ,CASE
-    WHEN TRANSACTIONTYPEID = 2 THEN Coalesce(DemandCredit,ProductivityCredit)
+    WHEN TRANSACTIONTYPEID = 2 THEN COALESCE(DemandCredit,ProductivityCredit)
     ELSE ProductivityCredit
 END AS "Productivity Credits"
 --,COALESCE(DemandCredit, ProductivityCredit) AS "Productivity Credits"
@@ -45,11 +47,11 @@ CASE WHEN WorkEventMetExpectedIndicator = 1 AND DaysPastTAT<=0 THEN 1 ELSE 0 END
 END AS "Met Expected Count"
 ,WorkEventMetExpectedIndicator AS "Met Expected Ind Count"  
 ---,WorkEventCurrentProdCredit AS "Event Productivity Credits"  
-,CASE WHEN DaysPastTAT <= 0 THEN 1 ELSE 0 END as "Met TAT Count"  
-,CASE WHEN DaysPastTAT = 1 THEN 1 ELSE 0 END as "Past TAT 1"  
-,CASE WHEN DaysPastTAT = 2 THEN 1 ELSE 0 END as "Past TAT 2"  
-,CASE WHEN DaysPastTAT = 3 THEN 1 ELSE 0 END as "Past TAT 3"  
-,CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END as "Past TAT 4+"  
+,CASE WHEN DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"  
+,CASE WHEN DaysPastTAT = 1 THEN 1 ELSE 0 END AS "Past TAT 1"  
+,CASE WHEN DaysPastTAT = 2 THEN 1 ELSE 0 END AS "Past TAT 2"  
+,CASE WHEN DaysPastTAT = 3 THEN 1 ELSE 0 END AS "Past TAT 3"  
+,CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"  
 ,CASE WHEN SystemName = 'CATS'  THEN 'CATS' 
 WHEN WorkEventSystemDepartmentName = 'Diary'  THEN 'DIBS Diary' 
 WHEN WorkEventSystemDepartmentName = 'Payment'   THEN 'DIBS Payment' 
@@ -60,18 +62,18 @@ WHEN  WorkEventSystemDepartmentName = 'TREX MAIL'   THEN 'TREX Mail'
 WHEN  WorkEventSystemDepartmentName = 'TREX WORK'   THEN 'TREX Work'
 WHEN SystemName = 'MEDVOC' THEN 'MEDVOC' 
 ELSE 'UNKNOWN' END AS "Processing System"
-,Coalesce(LogEmployeeLastName || ', ' || LogEmployeeFirstName, 'Unknown') AS "Logged by Employee" 
-,MedicalReviewRNL as "Medical Review"
+,COALESCE(LogEmployeeLastName || ', ' || LogEmployeeFirstName, 'Unknown') AS "Logged by Employee" 
+,MedicalReviewRNL AS "Medical Review"
 ,CAST(MedicalReviewSupportDate AS DATE) "Medical Review Support Date"
-,ReceivedDate as "Received Date"   
-,CompletedDate as "Completed Date"
+,ReceivedDate AS "Received Date"   
+,CompletedDate AS "Completed Date"
 ,PaymentCheckDate AS "Payment Check Date"
-,DIBSClaimantName as "Claimant Name"
-,PriorityName as "Priority Name" 
+,DIBSClaimantName AS "Claimant Name"
+,PriorityName AS "Priority Name" 
 --,Rank() Over (Partition by SourcetransactionID, "DATE"ORDER By TransactionTypeID Desc) as Row Rank  -- Use this to Test EOD Pending Indicator if needed
 ,CASE WHEN RANK() OVER (PARTITION BY SOURCETRANSACTIONID,"DATE"  ORDER BY TRANSACTIONTYPEID DESC) = 1
-    AND TRANSACTIONTYPEID = 2 THEN 1 ELSE 0 END as  "EOD Pending Indicator"
+    AND TRANSACTIONTYPEID = 2 THEN 1 ELSE 0 END AS  "EOD Pending Indicator"
 
 FROM PROD_DMA_VW.ACT_DIC_CURR_INTEGRATED_VW
 WHERE (RestrictedClaimIndicator = 0 OR RestrictedClaimIndicator IS NULL)
-AND EmployeeDepartmentID = 6
+AND (WorkEventDepartmentID = 6 OR EmployeeDepartmentID = 6)
