@@ -48,13 +48,13 @@ T1.RoleID
 ,COALESCE (Sum(AllDayOOO) OVER (Partition by ShortDate,MMID),0) as All_Day_OOO
 ,COALESCE (Sum(ActualOTHours) OVER (Partition by ShortDate,MMID),0) as ACTUAL_OT_HRS
 ,COALESCE (Sum(ActualOOOHours) OVER (Partition by ShortDate,MMID),0) as ACTUAL_OOO_HRS
-,ActualNonProdHours AS ACTUAL_NON_PROD_HRS
+--,ActualNonProdHours AS ACTUAL_NON_PROD_HRS
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS +ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE( ActualNonProdHours,0)
-		    END AS  ACTUAL_NON_PROD_HRS_Test
+		    END AS  "Actual Non-Production Hrs"
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 'A'
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 'B'
@@ -105,8 +105,7 @@ WHERE ShortDate BETWEEN (CASE WHEN T1.StartDate < CURRENT_DATE - INTERVAL '36' M
 AND CURRENT_DATE + INTERVAL '10' DAY
 --And Department_ID = 8
 AND T1.RoleID in (13,15,16,17,19,22) 
-AND (PROD_CREDITS is not null  or Actual_Non_Prod_Hrs is not null or Actual_Prod_Hrs is not null)  --needs testing
---AND T1.Timeoutreportind = 1
+AND (PROD_CREDITS is not null  or /*Actual_Non_Prod_Hrs is not null or */Actual_Prod_Hrs is not null)  --reduces number of records returned. 
 
 
 
