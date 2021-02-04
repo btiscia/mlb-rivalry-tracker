@@ -1,4 +1,16 @@
-----Initial Review for BINGO Dashboard
+/*
+* This routine pulls  initial reviews for ANB BINGO dashboard.
+*  Based on cases.  Cases are distinct policy numbers.
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is  PROD_DMA_VW_ACT_ANO_CURR_INTEGRATED_FCT_VW
+*  Author: Zach Dorval, Lorraine Christian and Bill Trombley
+*  Created: 2/4/2021
+*  Revisions:  
+====================================================================== 
+======================================================================
+                
+======================================================================*/
 
 SELECT DISTINCT
 ApplicationID

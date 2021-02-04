@@ -1,3 +1,18 @@
+/*
+* This routine pulls  SE2 data for ANB BINGO dashboard.
+*  Based on contracts.  Contracts are distinct agrrement IDs.  
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is  PROD_DMA_VW_ACT_ANO_CURR_INTEGRATED_FCT_VW
+*  Author: Zach Dorval, Lorraine Christian and Bill Trombley
+*  Created: 2/4/2021
+*  Revisions:  
+====================================================================== 
+======================================================================
+                
+======================================================================*/
+
+
 --SE2 for BINGO Extract
 SELECT DISTINCT
 DISTRIBUTOR
