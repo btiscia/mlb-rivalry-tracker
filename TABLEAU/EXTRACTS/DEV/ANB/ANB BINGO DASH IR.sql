@@ -21,7 +21,7 @@ ApplicationID
 , Firm
 ---No doc type for IR
 , Product Category
-----NEED NIGO Category
+----NEED NIGO Category  -- will be there after release next week.  Week ending  2/12
 , NIGOReason  
 
 , Product
