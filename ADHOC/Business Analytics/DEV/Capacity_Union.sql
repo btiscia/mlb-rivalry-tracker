@@ -119,12 +119,12 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    END AS "CASE  Test"  
 */
 		    
-, ("Actual Capacity" * T4.Effective)  as "Effective Capacity"
+, ("Actual Capacity" - "Shrinkage Hrs"  )* T4.Effective  as "Effective Capacity"   --- OLD:    ("Actual Capacity" * T4.Effective)  as "Effective Capacity"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high95"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high80"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_low80"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_low95" 
-, ("Actual Capacity" - "Effective Capacity") as "Efficiency Loss"   
+, ("Actual Capacity" - "Effective Capacity")-"Shrinkage Hrs" as "Efficiency Loss"  
 , CASE 
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
