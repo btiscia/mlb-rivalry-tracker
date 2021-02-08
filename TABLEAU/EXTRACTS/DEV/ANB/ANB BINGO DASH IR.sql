@@ -1,3 +1,19 @@
+/*
+* This routine pulls  SE2 data for ANB BINGO dashboard.
+*  Based on contracts.  Contracts are distinct agrrement IDs.  
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is  PROD_DMA_VW.ANB_IR_NIGO_REASON_TOKEN_VW, PROD_DMA_VW.ANB_APPLICATION_RPT_VW
+*  PROD_DMA_VW.FIRM_DIM_VW, PROD_USIG_CMN_VW.PRODUCT_TRANSLATOR_VW
+*  PROD_DMA_VW.ANB_IR_MARKET_TYPES_VW,PROD_DMA_VW.ANB_IR_QUESTIONS_VW
+*  Author: Zach Dorval, Lorraine Christian and Bill Trombley
+*  Created: 2/4/2021
+*  Revisions:  
+====================================================================== 
+======================================================================
+                
+======================================================================*/
+
 SELECT DISTINCT
 ApplicationID
 , CASE WHEN BingoDate IS NULL THEN 0 ELSE 1 END AS BINGOIndicator
