@@ -21,13 +21,13 @@ ApplicationID
 , Channel
 , Firm
 ---No doc type for IR
-<<<<<<< HEAD
+--<<<<<<< HEAD
 , Product Category
 ----NEED NIGO Category  -- will be there after release next week.  Week ending  2/12
-=======
+--=======
 -- Product Category to be added in Release next week
 ----NEED NIGO Category
->>>>>>> 520ff11cc078e7a577c08ac8090cce961503225f
+-->>>>>>> 520ff11cc078e7a577c08ac8090cce961503225f
 , NIGOReason  
 , Product
 , ProductCategory
