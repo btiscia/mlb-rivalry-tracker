@@ -1,5 +1,5 @@
 /*
-* This routine pulls  SE2 data for ANB BINGO dashboard.
+* This routine pulls  IR data for ANB BINGO dashboard.
 *  Based on contracts.  Contracts are distinct agrrement IDs.  
 *  Peer Review & Change Log:
 *  Peer Review Date: 
