@@ -1,5 +1,5 @@
---ANB Modern Policy Details
---Contract Level Extract
+--ANB Policy Details
+--Contract Level
 
 SELECT 
  HoldingKey
@@ -9,7 +9,7 @@ SELECT
 , NewBusinessDocType
 , ContractState
 , ResidenceState
-, RegionName
+, NULL AS "Region"
 , AgentID
 , Advisor
 , AgencyNumber
@@ -17,7 +17,6 @@ SELECT
 , Distributor
 , Channel
 , ChannelType
---, Product
 , CASE
    		WHEN Product LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
    		WHEN Product LIKE ('%Transitions Select%') THEN 'Transition Select'
@@ -38,7 +37,7 @@ SELECT
 , AutoApprovalIndicator
 ,(SELECT IsHoliday FROM PROD_DMA_VW.DATE_DIM_VW WHERE NewBusinessSubmitDate = ShortDate) AS "NBSubmitDateIsHoliday"
 , CASE WHEN IssueDate >= '2018-08-01' THEN 1 ELSE 0 END AS "IssueCountforBINGORate"
-, (SELECT PreviousBusinessDay FROM PROD_DMA_VW.DATE_DIM_VW WHERE ShortDate = CAST(Current_Date AS DATE)) AS PrevBusDayOfToday
+, (SELECT PreviousBusinessDay FROM PROD_DMA_VW.DATE_DIM_VW WHERE ShortDate = CAST(CURRENT_DATE AS DATE)) AS PrevBusDayOfToday
 , ApplicationSubmitDate
 , SuitabilityApprovalDate
 , OriginalOrderSubmitDate
@@ -54,8 +53,8 @@ SELECT
 , IssueDate
 , RejectDate
 , WithdrawnDate
-, CAST(Current_Date AS DATE) - ApplicationSubmitDate AS CalDaysSinceSub
-, CAST(Current_Date AS DATE) - NewBusinessEndDate AS CalDaysSinceNBSub
+, CAST(CURRENT_DATE AS DATE) - ApplicationSubmitDate AS CalDaysSinceSub
+, CAST(CURRENT_DATE AS DATE) - NewBusinessEndDate AS CalDaysSinceNBSub
 , IssueDate - ApplicationSignDate AS CalDaysSignToIssue  --Cycle Time Dashboard
 , ApplicationSignDate - ApplicationSubmitDate AS CalDaysSignToSub
 , OriginalOrderSubmitDate - ApplicationSignDate AS CalDaysAppSignToSuitSub   ---Cycle Time Dash
@@ -80,6 +79,7 @@ SELECT
 	WHEN NewBusinessDocType = 'Annuity Application' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = PAWDate) - T2.BUSINESSDAY
 	END AS DocTypeCycleTime
 , GOALVALUE AS SLA
+, T1.TransDate
 
 FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
 

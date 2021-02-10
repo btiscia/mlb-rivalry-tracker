@@ -12,18 +12,18 @@ SELECT	DISTINCT InventoryID
 	, AgencyNumber
 --	, Product
 	, CASE
-   		WHEN T1.[PlanCode] LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
-   		WHEN T1.[PlanCode] LIKE ('%Transitions Select%') THEN 'Transition Select'
-  		WHEN T1.[PlanCode] LIKE ('%RetireEase Choice%') THEN 'RetireEase Choice'
-   		WHEN T1.[PlanCode] LIKE ('%RetireEase%') THEN 'RetireEase'
-   		WHEN T1.[PlanCode] LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
-   		WHEN T1.[PlanCode] LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
-   		WHEN T1.[PlanCode] LIKE ('%Index Horizons%') THEN 'Index Horizons'
+   		WHEN T1.Product LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
+   		WHEN T1.Product LIKE ('%Transitions Select%') THEN 'Transition Select'
+  		WHEN T1.Product LIKE ('%RetireEase Choice%') THEN 'RetireEase Choice'
+   		WHEN T1.Product LIKE ('%RetireEase%') THEN 'RetireEase'
+   		WHEN T1.Product LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
+   		WHEN T1.Product LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
+   		WHEN T1.Product LIKE ('%Index Horizons%') THEN 'Index Horizons'
    		ELSE 'Unknown'
-	  END AS [Product]
+	  END AS Product
 	, ProductCategory AS "Product Category"
 	, Firm
-	, FirmID
+	, FirmNum AS "FirmID"
 	, FirmName AS "Firm Name"
 	, RegionName
 	, AnticipatedPremium AS "Anticipated Premium"
@@ -58,7 +58,7 @@ FROM	PROD_DMA_VW.ANB_INVENTORY_RPT_VW T1
 
 LEFT JOIN   (SELECT ShortDate, PreviousBusinessDay, IsHoliday, IsWeekday
 							,CASE WHEN IsHoliday =0 AND Isweekday = 1 THEN Shortdate ELSE PreviousBusinessday END AS ReportDate
-							,CASE WHEN shortDate = Current_Date THEN 1 Else 0 END AS "InventoryCurrDayInd"                      
+							,CASE WHEN shortDate = CURRENT_DATE THEN 1 ELSE 0 END AS "InventoryCurrDayInd"                      
 						FROM PROD_DMA_VW.DATE_DIM_VW ) T2 ON "Date" = ShortDate
 
-WHERE Date >= '2020-01-01'
+WHERE DATE >= '2020-01-01'
