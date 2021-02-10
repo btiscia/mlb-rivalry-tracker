@@ -20,9 +20,9 @@ ApplicationID
 , DISTRIBUTOR AS Distributor
 , Channel
 , Firm
----No doc type for IR
---<<<<<<< HEAD
 , Product Category
+---No doc type for IR (from LC)
+--<<<<<<< HEAD  (This from zach)
 ----NEED NIGO Category  -- will be there after release next week.  Week ending  2/12
 --=======
 -- Product Category to be added in Release next week
@@ -31,6 +31,7 @@ ApplicationID
 , NIGOReason  
 , Product
 , ProductCategory
+
 , StateCode
 , IRMarketTypeName
 , SuitabilityIndicator
