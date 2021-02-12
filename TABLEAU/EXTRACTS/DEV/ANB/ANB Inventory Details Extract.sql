@@ -27,7 +27,7 @@ SELECT	DISTINCT InventoryID
 	, FirmName AS "Firm Name"
 	, RegionName
 	, AnticipatedPremium AS "Anticipated Premium"
-	, Distributor
+	, CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
 	, Channel
 	, ChannelType AS "Channel Type"
 	, BINGOStatus AS "Bingo Status"

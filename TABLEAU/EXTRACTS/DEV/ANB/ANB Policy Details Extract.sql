@@ -1,4 +1,4 @@
---ANB Policy Details
+--ANB Modern Policy Details
 --Contract Level
 
 SELECT 
@@ -14,7 +14,7 @@ SELECT
 , Advisor
 , AgencyNumber
 , FirmName
-, Distributor
+, CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
 , Channel
 , ChannelType
 , CASE
