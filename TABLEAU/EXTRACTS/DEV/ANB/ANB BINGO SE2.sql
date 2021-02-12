@@ -41,7 +41,7 @@ SELECT DISTINCT
 	, RejectDate
 	, WithdrawnDate
 	, IssueDate
-	, SE2NIGODate
+	, NIGODate SE2NIGODate
 	, NIGOResolvedDate
 	, BINGOIndicator
 	, (NIGOResolvedDate - NIGODate) SE2NIGOResolution
