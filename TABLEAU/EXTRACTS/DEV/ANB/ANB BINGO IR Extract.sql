@@ -15,7 +15,7 @@
 ======================================================================*/
 SELECT DISTINCT
 Channel
-, Distributor
+, CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
 , T1.InitialReviewID
 , AgreementID
 , PolicyNumber
