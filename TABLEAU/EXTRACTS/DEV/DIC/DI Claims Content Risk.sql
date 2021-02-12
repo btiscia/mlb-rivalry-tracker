@@ -30,7 +30,7 @@ SELECT RiskInventoryID AS "Risk Inventory ID"
     WHEN RISKTYPEID <> 9 AND ROLEGRADEID = 11 THEN 1
     ELSE 0 END AS "Suppression Indicator"
 ,CAST(TransDate AS TIMESTAMP) AS "Trans Date"
-FROM   DEV_DMA_VW.DIC_RISK_INVENTORY_RPT_VW
+FROM   PROD_DMA_VW.DIC_RISK_INVENTORY_RPT_VW
 WHERE RiskTypeGroup ='Content Reports'
 AND (CalendarDaysPastTAT >=-30 OR CalendarDaysPastTAT IS NULL)
 AND (RestrictedClaimIndicator = 0 OR RestrictedClaimIndicator IS NULL)
