@@ -14,46 +14,51 @@
 
 SELECT DISTINCT
 T1.AGREEMENTID
-, BINGOINDICATOR
-, DISTRIBUTOR AS Distributor
-, CHANNEL AS Channel
-, T1.Firm
-, DocumentTypeCode AS "Doc Type"
-, Product Category
-, NIGOCATEGORY AS "NIGO Category"
-, NIGODESCRIPTION AS "NIGO Reason"
-
-, PRODUCT
 , PolicyNumber
-, T1.ORDERENTRYID
-, RESIDENCESTATE
-, T1.AGENTID
-, T1.AGENCYNUMBER
-, T1.FirmNum
+, T1.OrderEntryID
+, Distributor
+, Channel
+, DocumentTypeCode AS "Doc Type"
+, Product
+, ProductCategory
+, ResidenceState
+, AgentID
+, Advisor
+, FirmNum
 , FirmName
 , RegionName
-, T1.ISSUEDATE
-, NIGODATE
-, T1.NEWBUSINESSSUBMITDATE
-, SUITABILITYSUBMITDATE
-, BINGODATE
-, BINGOSTATUS
-, (BINGODATE - NIGODATE) NIGOResolution
-
+, PAWDate
+, TOADate
+, NewBusinessSubmitDate
+, SuitabilityApprovalDate
+, RejectDate
+, WithdrawnDate
+, IssueDate
+, NIGOCategory AS "NIGO Category"
+, ReasonDescription AS "NIGO Reason"
+, NIGODate
+, NIGOResolvedDate
+, BINGOIndicator
+, (NIGOResolvedDate - NIGODate) NIGOResolution
+, CASE WHEN RejectDate IS NOT NULL THEN 'Rejected'
+			WHEN WithdrawnDate IS NOT NULL THEN 'Withdrawn'
+			WHEN IssueDate IS NOT NULL THEN 'Issued'
+  ELSE NULL END AS FinalDisposition
 
 FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
 
 LEFT JOIN (SELECT DISTINCT AGREEMENTID
+							, ORDERENTRYID
 							, CAST(MIN(NIGODate) OVER (PARTITION BY AGREEMENTID) AS DATE) AS NIGODate
 							, MAX(NIGOResolutionDate) OVER (PARTITION  BY AGREEMENTID) AS NIGOResolvedDate
-							, T2.NIGODESCRIPTION
-							, NIGOCategory
+							, T2.NIGOCategory
 							, ReasonDescription
 							, DocumentTypeCode
 						FROM PROD_DMA_VW.ANB_NIGO_FCT_VW T1
 						INNER JOIN PROD_DMA_VW.ANN_NIGO_REASON_LOV_VW T2 ON T2.NIGOUUID = T1.NIGOUUID
 						WHERE T1.SYSTEMID = 34
-						AND GROUPTYPE LIKE 'NEW B%') T10 ON T1.AGREEMENTID = T10.AGREEMENTID 
+						AND GROUPTYPE LIKE 'NEW B%') T2 ON COALESCE(T1.AGREEMENTID, T1.ORDERENTRYID) = COALESCE(T2.AGREEMENTID, T2.ORDERENTRYID)
 		
-WHERE  T1.ORIGINALORDERSUBMITDATE >= CURRENT_DATE - INTERVAL '1' YEAR -- CHANGE THE INTERVAL AS YOU SEE FIT ;
+WHERE  T1.ORIGINALORDERSUBMITDATE >= CURRENT_DATE - INTERVAL '1' MONTH 
+
 
