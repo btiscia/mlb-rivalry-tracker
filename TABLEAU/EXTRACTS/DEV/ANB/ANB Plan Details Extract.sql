@@ -2,12 +2,12 @@
 --Contract  Level
 
 
-SELECT T1.Volumetric as PlanMetric
+SELECT T1.Volumetric AS PlanMetric
 , T1.ShortDate
-, T1.IsHoliday as "IsHoliday"
+, T1.IsHoliday AS "IsHoliday"
 , T1.IsWeekday
-, T1.ChannelType as Channel
-, T1.ProductType as Product
+, T1.ChannelType AS Channel
+, T1.ProductType AS Product
 , Measure
 , DailyKPIPlan
 , DailyMTDPlan
@@ -24,12 +24,12 @@ FROM
 , SUM(DAILYMTDPLAN) AS DailyMTDPlan
 , SUM(DAILYYTDPLAN) AS DailyYTDPlan
 FROM PROD_DMA_VW.PRD_KPI_PLAN_DATA_VW T1
-Inner Join PROD_DMA_VW.Date_DIM_VW T2 ON T1.ShortDate = T2.ShortDate    
+INNER JOIN PROD_DMA_VW.Date_DIM_VW T2 ON T1.ShortDate = T2.ShortDate    
 WHERE CHANNELTYPE <> 'Total'
 AND DEPARTMENTID = 47
 GROUP BY ROLLUP(VOLUMETRIC,CHANNELTYPE,PRODUCTTYPE,IsHoliday ),1,2,3) T1
 
-Left Join
+LEFT JOIN
 (
 	SELECT DISTINCT CASE GROUPING(T1.VOLUMETRIC) WHEN 1 THEN 'Total' ELSE T1.VOLUMETRIC END AS Volumetric
 	, CASE GROUPING(CAST(T1.ShortDate AS VARCHAR(10))) WHEN 1 THEN 'Total' ELSE CAST(T1.ShortDate AS VARCHAR(10)) END AS ShortDate
@@ -72,12 +72,12 @@ Left Join
 		, IssueDate AS ShortDate
 		, ProductCategory AS ProductType
 		, Channel AS ChannelType
-		,Cast (COUNT(IssueDate) as DECIMAL(8,2)) AS Measure
+		,CAST (COUNT(IssueDate) AS DECIMAL(8,2)) AS Measure
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW
 		GROUP BY 1,2,3,4
 ) T1
 
-WHERE T1.SHORTDATE >= Current_Date - INTERVAL '5' YEAR
+WHERE T1.SHORTDATE >= CURRENT_DATE - INTERVAL '5' YEAR
 AND ProductType IS NOT NULL AND ChannelType IS NOT NULL
 
 GROUP BY ROLLUP(T1.VOLUMETRIC,CAST(T1.ShortDate AS VARCHAR(10)),T1.CHANNELTYPE,T1.PRODUCTTYPE)
