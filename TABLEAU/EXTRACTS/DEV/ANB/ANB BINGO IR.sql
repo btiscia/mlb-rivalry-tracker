@@ -14,43 +14,46 @@
                 
 ======================================================================*/
 SELECT DISTINCT
-Channel
-, CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
-, T1.InitialReviewID
-, AgreementID
-, PolicyNumber
-, T1.OrderEntryID
-, Product
-, T1.ProductCategory
-, T3.StateCode AS ResidenceState
-, T3.AgentID
-, Advisor
-, Firm
-, FirmNum
-, FirmName
-, RegionName
-, MarketTypeCode
-, MarketTypeCategory
-, ApplicationSubmitDate
-, SuitabilityApprovalDate
-, NewBusinessSubmitDate
-, PAWDate
-, TOADate
-, T2.RejectDate
-, CancelDate
-, ApprovedDate
-, CASE WHEN T2.REJECTDATE IS NOT NULL THEN 'Rejected'
+	PolicyNumber
+	, T1.InitialReviewID
+	, T1.OrderEntryID
+	, AgreementID
+	,Channel
+	, CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
+	, Product
+	, T1.ProductCategory
+	, RegionName
+	, T3.StateCode AS ResidenceState
+	, FirmNum
+	, FirmName
+	, T3.AgentID
+	, Advisor
+	, MarketTypeCode
+	, MarketTypeCategory
+	, NIGOReason
+	, NIGOCategory
+	, CASE WHEN T2.REJECTDATE IS NOT NULL THEN 'Rejected'
 			WHEN CANCELDATE IS NOT NULL THEN 'Canceled'
 			WHEN APPROVEDDATE IS NOT NULL THEN 'Approved'
-  ELSE NULL END AS FinalDisposition
-, NIGOReason
-, NIGOCategory
-, CAST(CreatedAtDateTimeStamp AS DATE) IRNIGODate
-, CASE WHEN NIGOREASON IS NULL THEN SUITABILITYAPPROVALDATE
+  		ELSE NULL END AS FinalDisposition
+	, ApplicationSubmitDate
+	, NewBusinessSubmitDate
+	, SuitabilityApprovalDate
+	, PAWDate
+	, TOADate
+	, T2.RejectDate
+	, CancelDate
+	, ApprovedDate
+	, CAST(CreatedAtDateTimeStamp AS DATE) IRNIGODate
+	,BINGOIndicator
+
+	, CASE WHEN NIGOREASON IS NULL THEN SUITABILITYAPPROVALDATE
 			WHEN T1.PRODUCTCATEGORY = 'Variable Annuity' THEN CAST(COALESCE( PAWDATE, TOADATE) AS DATE)
-  ELSE CAST(COALESCE(T2.REJECTDATE, CANCELDATE, APPROVEDDATE, PAWDATE, TOADATE, ISSUEDATE) AS DATE) END AS IRBINGODate
-, (IRBINGODate - IRNIGODate) NIGOResolution
+  		ELSE CAST(COALESCE(T2.REJECTDATE, CANCELDATE, APPROVEDDATE, PAWDATE, TOADATE, ISSUEDATE) AS DATE) END AS IRBINGODate
+	, (IRBINGODate - IRNIGODate) IRNIGOResolution
+
 FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
+
 LEFT JOIN PROD_DMA_VW.IPIPELINE_ORDER_FCT_VW T2 ON T2.ORDERENTRYID = T1.ORDERENTRYID
 LEFT JOIN PROD_DMA_VW.ANB_IR_NIGO_REASON_TOKEN_VW T3 ON T3.INITIALREVIEWID = T1.INITIALREVIEWID
 WHERE T1.INITIALREVIEWID IS NOT NULL
