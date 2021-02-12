@@ -17,6 +17,8 @@ SELECT
 , CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
 , Channel
 , ChannelType
+, MarketTypeCode AS "Market Code"
+, MarketTypeCategory AS "Market Category"
 , CASE
    		WHEN Product LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
    		WHEN Product LIKE ('%Transitions Select%') THEN 'Transition Select'
