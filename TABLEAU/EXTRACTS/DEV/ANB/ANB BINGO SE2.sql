@@ -30,7 +30,7 @@ SELECT DISTINCT
 	,COALESCE(T1.AGREEMENTID, T1.POLICYNUMBER, T1.ORDERENTRYID) NIGOID
 	, NIGOCategory AS "NIGO Category"
 	, ReasonDescription AS "NIGO Reason"
-	, CASE WHEN RejectDate IS NOT NULL THEN 'Rejected'
+	, CASE WHEN RejectDate IS NOT NULL THEN 'Rejecte'
 			WHEN WithdrawnDate IS NOT NULL THEN 'Withdrawn'
 			WHEN IssueDate IS NOT NULL THEN 'Issued'
   		ELSE NULL END AS FinalDisposition
