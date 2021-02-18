@@ -82,7 +82,7 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualMakeupHours
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualMakeupHours
 		    ELSE  ActualMakeupHours
-		    END AS  "Actual Makeup Hrs" --New   
+		    END AS  "Actual Makeup Hrs" 
 , ActualMakeupHours 
 
 , CASE 
@@ -94,7 +94,7 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN ActualExcusedHours
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN ActualExcusedHours
 		    ELSE ActualExcusedHours
-		    END AS "Actual Excused Hrs" --New   
+		    END AS "Actual Excused Hrs"
 , ActualExcusedHours 
 , CASE 
 			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
@@ -105,11 +105,11 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
 		    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
-		    END AS "Actual Capacity" 
+		    END AS "Actual Capacity"
 		    
 /*, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN    'A'  ---Needs to move to top row of case.
-			WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 'B'---New 
+			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN    'A' 
+			WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 'B'
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  'C'
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   'D'  
 		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  'E.E'
@@ -119,7 +119,7 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    END AS "CASE  Test"  
 */
 		    
-, ("Actual Capacity" - "Shrinkage Hrs"  )* T4.Effective  as "Effective Capacity"   --- OLD:    ("Actual Capacity" * T4.Effective)  as "Effective Capacity"
+, ("Actual Capacity" - "Shrinkage Hrs"  )* T4.Effective  as "Effective Capacity"   
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high95"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high80"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_low80"
@@ -269,5 +269,4 @@ INNER JOIN
 	(SELECT MAX(ForecastID) as FxID 
 	FROM DMA_GRP_DL.RT20_00002983_LC_Capacity) D2
 	ON F.ForecastID = FxID
-	
 
