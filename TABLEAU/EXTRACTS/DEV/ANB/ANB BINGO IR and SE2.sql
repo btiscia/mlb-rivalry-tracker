@@ -36,7 +36,7 @@ SELECT
 	, IRBINGODate
 	, IRNIGODate
 	, BINGOIndicator
-	, NIGOResolution
+	, CASE WHEN NIGOResolution IS NULL THEN 'Unknown' ELSE NIGOResolution END AS NIGOResolution
 	, FinalDispositionDate
 
 FROM 
@@ -160,4 +160,4 @@ FROM
 	) C1
 	
 WHERE FinalDisposition IS NOT NULL
-AND FinalDispositionDate >= CURRENT_DATE - INTERVAL '2' YEAR
+AND EXTRACT(YEAR FROM FinalDispositionDate) >= EXTRACT(YEAR FROM CURRENT_DATE) - 2
