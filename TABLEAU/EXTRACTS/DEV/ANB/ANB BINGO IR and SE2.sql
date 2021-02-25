@@ -1,25 +1,25 @@
 SELECT 
-	BINGOType
-	, PolicyNumber
-	, AgreementID
-	, OrderEntryID
+	BINGOType AS "Bingo Type"
+	, PolicyNumber AS "Policy Number"
+	, AgreementID AS "Agreement ID"
+	, OrderEntryID AS "Order Entry ID"
 	, InitialReviewID
 	, Channel
 	, Distributor
 	, Product
-	, ProductCategory
+	, ProductCategory AS "Product Category"
 	, RegionName
 	, ResidenceState
 	, FirmNum
-	, FirmName
+	, FirmName AS "Firm"
 	, AgentID
 	, Advisor
-	, DocType
+	, DocType AS "Doc Type"
 	, MarketTypeCode
 	, MarketTypeCategory
 	, NIGOID
-	, NIGOCategory
-	, NIGOReason
+	, NIGOCategory AS "NIGO Category"
+	, NIGOReason AS "NIGO Reason"
 	, FinalDisposition
 	, NewBusinessSubmitDate
 	, ApplicationSubmitDate
@@ -36,8 +36,8 @@ SELECT
 	, IRBINGODate
 	, IRNIGODate
 	, BINGOIndicator
-	, CASE WHEN NIGOResolution IS NULL THEN 'Unknown' ELSE NIGOResolution END AS NIGOResolution
-	, FinalDispositionDate
+	, NIGOResolution
+	, FinalDispositionDate AS "Final Disposition Date"
 
 FROM 
 	(
