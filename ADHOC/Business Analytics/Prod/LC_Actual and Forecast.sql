@@ -1,3 +1,6 @@
+--Combines Demand actuals with Demand forecast
+
+
 SELECT
 TransactionTypeName
 ,Null AS ForecastID
@@ -7,6 +10,7 @@ TransactionTypeName
 WHEN (FunctionName IN('Operations 1st Notice', 'Life Proofs', 'Life Complex', 'Bene Admin BAU', 'Life 2nd Exam', 'Life Other', 'Life Holds') OR (FunctionName = 'Phone Claims' AND WorkEventName IN ('{LC} TC Live Claim Call', '{LC} TC OUTBOUND CLAIM', '{LC} Triage-Outbound Claim')) OR (FunctionName = 'Life Follow Ups' AND SegmentName <> 'Life Follow Ups RM'))  THEN 'Life Claim Examiner'
 WHEN FunctionName LIKE 'Life Pay%' THEN 'Life Pay'
 WHEN FunctionName = 'Operations Setup' AND SegmentName = 'Life Setup' THEN 'Operations Setup'
+WHEN FunctionName LIKE 'Life Calc%' THEN 'Life Calc and Quotes'
 END AS "Workrole"
 ,TRUNC(ReceivedDate,'MON') AS "Date"
 ,EmployeeRoleName

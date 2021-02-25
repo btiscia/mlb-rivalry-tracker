@@ -1,4 +1,3 @@
-
 SELECT  
 D.ForecastID,
 D.ForecastDate,
@@ -67,6 +66,3 @@ INNER JOIN
 (SELECT MAX(ForecastID) as FxID 
 FROM DMA_GRP_DL.RT20_00002983_LC_Forecast_New) D2
 ON D.ForecastID = FxID
-
-
-
