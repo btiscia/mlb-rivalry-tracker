@@ -1,3 +1,6 @@
+--Combines Demand actuals with Demand forecast
+
+
 SELECT
 TransactionTypeName
 ,Null AS ForecastID
