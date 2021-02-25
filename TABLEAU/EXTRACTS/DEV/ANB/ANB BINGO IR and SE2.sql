@@ -36,7 +36,7 @@ SELECT
 	, IRBINGODate
 	, IRNIGODate
 	, BINGOIndicator
-	, NIGOResolution
+	, NIGOResolution AS "NIGO Resolution"
 	, FinalDispositionDate AS "Final Disposition Date"
 
 FROM 
