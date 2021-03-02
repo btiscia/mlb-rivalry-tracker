@@ -38,6 +38,7 @@ SELECT
 	, BINGOIndicator
 	, NIGOResolution AS "NIGO Resolution"
 	, FinalDispositionDate AS "Final Disposition Date"
+	, TransDate
 
 FROM 
 	(
@@ -85,6 +86,7 @@ FROM
 			, CAST(BINGOIndicator AS INTEGER) AS BINGOIndicator
 			, (NIGOResolvedDate - NIGODate)  AS NIGOResolution
 			, COALESCE(RejectDate, WithdrawnDate, IssueDate) AS "FinalDispositionDate" --Final Disposition Date SE2
+			,T1.TransDate
 		
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
 		 
@@ -149,6 +151,7 @@ FROM
 			, CAST(BINGOIndicator AS INTEGER) AS BINGOIndicator
 			, (IRBINGODate - IRNIGODate) AS NIGOResolution
 			, COALESCE(T2.ApprovedDate, T2.RejectDate, T2.CancelDate, PAWDate, T2.TransmitDate) AS "FinalDispositionDate" --Final Disposition Date IR
+			,T1.TransDate
 
 		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
 		
