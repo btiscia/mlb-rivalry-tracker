@@ -1,6 +1,7 @@
 
-----Creats view: DMA_GRP_DL.Waiver_Claim_Jay
+---Create view as  DMA_GRP_DL.Waiver_Claim_Jay
 
+With T AS (
 
 SELECT DISTINCT
 CPV.PolicyNumber,
@@ -130,7 +131,15 @@ From DMA_GRP_DL.Waiver_Claim_Jay
 					Group by 1)B
 					On DMA_GRP_DL.Waiver_Claim_Jay.InsuredGovtid = B.InsuredGovtID
 
-
+*/
+Select
+InsuredgovtID
+,PolicyNumber
+,WorkEventName
+,Face_Amount 
+,Count(*) over (Partition by InsuredgovtID) as Cnt
+From T
+ORder by cnt desc
 
 
 
