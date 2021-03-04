@@ -1,4 +1,6 @@
 
+----Creats view: DMA_GRP_DL.Waiver_Claim_Jay
+
 SELECT DISTINCT
 CPV.PolicyNumber,
 CPV.AdminSystemCode,
@@ -29,7 +31,7 @@ InforceData.LOB_NME,
 InforceData.LOB_CDE,
 InforceData.CTRT_JURISDICTION,
 Comments.CMNT_TYP_CDE, 
-Comments.TXT_DES,
+--Comments.TXT_DES,
 InforceData.InsuredGovtID,
 QUAL.QualifyingPlanIndicator
 --,Sum  (InforceData.Face_Amount) Over (Partition by InforceData.InsuredgovtID) as Tot_Face
@@ -100,3 +102,38 @@ WHERE CPV.WorkEventDepartmentID = '8'
 --AND CPV.WorkEventName LIKE '{LC} CLAIM EXAM%'
 --AND CPV.EmployeeRoleID='22' --Role = Operations Setup 
 --AND CPV.AdminSystemCode IN ('CM2000','MPR','VUL','PE1', 'LIFCOM', 'LVRGVL', 'OPM', 'UNIV', 'VNT', 'VNTAGE', 'VNTG1')
+
+
+) 
+
+----Tableau Extract runs this query on above view:  
+
+Select DMA_GRP_DL.Waiver_Claim_Jay.*
+,Case 
+	When DMA_GRP_DL.Waiver_Claim_Jay.InsuredgovtID is Null then DMA_GRP_DL.Waiver_Claim_Jay.Face_Amount
+	When DMA_GRP_DL.Waiver_Claim_Jay.InsuredgovtID = '' Then DMA_GRP_DL.Waiver_Claim_Jay.Face_Amount
+	Else B.tot_Claim_FaceAmount
+	End as Claims_Face_Corrected
+,B.tot_Claim_FaceAmount
+From DMA_GRP_DL.Waiver_Claim_Jay
+	Left Join(Select 
+					InsuredGovtID
+					,Sum(FACE_AMOUNT) As tot_Claim_FaceAmount
+					From (
+					Select Distinct 
+					InsuredGovtID
+					,AgreementID
+					,PolicyNumber
+					,FACE_AMOUNT
+					From DMA_GRP_DL.Waiver_Claim_Jay)a
+					Group by 1)B
+					On DMA_GRP_DL.Waiver_Claim_Jay.InsuredGovtid = B.InsuredGovtID
+
+
+
+
+
+
+--Select * From T 
+--Where TXT_DES Like ('%No Death Cert%')
+--Only 12 records Identified in all of inventory on 3/3/21
