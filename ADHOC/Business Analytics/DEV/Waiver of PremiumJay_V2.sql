@@ -1,6 +1,7 @@
 
 ----Creats view: DMA_GRP_DL.Waiver_Claim_Jay
 
+
 SELECT DISTINCT
 CPV.PolicyNumber,
 CPV.AdminSystemCode,
@@ -30,7 +31,7 @@ InforceData.PolicyStatus,
 InforceData.LOB_NME,
 InforceData.LOB_CDE,
 InforceData.CTRT_JURISDICTION,
-Comments.CMNT_TYP_CDE, 
+--Comments.CMNT_TYP_CDE, 
 --Comments.TXT_DES,
 InforceData.InsuredGovtID,
 QUAL.QualifyingPlanIndicator
@@ -95,7 +96,7 @@ LEFT JOIN
                         (LAC.AGREEMENTID IS NULL AND TRIM(LEADING '0' FROM InforceData.HLDG_KEY)=TRIM(LEADING '0' FROM CPV.PolicyNumber) AND 
                         InforceData.AGREEMENT_SOURCE_CD=CPV.AdminSystemCode) 
                         
-LEFT JOIN PROD_CATS_VW.CATS_WRK_TXT_CMNT_VW AS Comments ON CPV.SourceTransactionID=Comments.FK_WRK_IDENT      
+--LEFT JOIN PROD_CATS_VW.CATS_WRK_TXT_CMNT_VW AS Comments ON CPV.SourceTransactionID=Comments.FK_WRK_IDENT      
 LEFT JOIN PROD_DMA_VW.DBO_WRK_XTN_VW AS QUAL ON CPV.SourceTransactionID=QUAL.FKWrkIdent --identify pensions 11/11/2020  
               
 WHERE CPV.WorkEventDepartmentID = '8'
