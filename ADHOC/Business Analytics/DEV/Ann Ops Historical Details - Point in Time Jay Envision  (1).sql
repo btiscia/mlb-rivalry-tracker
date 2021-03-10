@@ -15,11 +15,13 @@ Jay copy notes:
 
 Min Date:  1/26/2016 on 3/10/2021
 ====================*/
+
 With T as (
+
 
 SELECT 
 TransactionTypeName AS "Transaction Type"
-,SourceTransactionID AS "Source Transaction ID"
+,T1.SourceTransactionID AS "Source Transaction ID"
 ,HoldingKey AS "Policy Number"
 /*
 ,CASE WHEN BCCIndicator = 0
@@ -28,7 +30,8 @@ TransactionTypeName AS "Transaction Type"
 END AS "Society 1851"
 */
 ,systemDivisionname AS "Line of Business"
-        
+,ReceivedDate
+/*     
 ,CASE 
      WHEN TRANSACTIONTYPEID = 1 THEN ReceivedDate
 --     WHEN TRANSACTIONTYPEID = 2 THEN LoadDate
@@ -39,6 +42,7 @@ END AS "Date"
 ,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
 ,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
 ,TeamName AS "Team Name"
+*/
 ,FunctionName AS "Function Name"
 ,SegmentName AS "Segment Name"
 ,WorkEventName AS "Work Event Name"
@@ -59,27 +63,29 @@ END AS "Date"
 ,WorkEventNumber AS "Work Event Number"
 ,DepartmentCode AS "Department Code"
 ,DivisionCode AS "Division Code"
-,CompletedIndicator AS "Completed Indicator"
-,TAT
+--,CompletedIndicator AS "Completed Indicator"
+--,TAT
 ,NIGODescription
 ,TransDate AS "Transaction Date"
-,LongCompletedDate AS "Completed Time Stamp"
-,CATSexpectedcompleteddate AS "Follow Up Date" 
+--,LongCompletedDate AS "Completed Time Stamp"
+--,CATSexpectedcompleteddate AS "Follow Up Date" 
 ,ShortComment AS "Short Comments"
 ,ItemCount AS "Transaction Count"
 ,DaysPastTAT AS "Total TAT Days"
-,CASE WHEN MetExpectedIndicator = 1 AND DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
-,MetExpectedIndicator AS "Met Expected Ind Count"
+--,CASE WHEN MetExpectedIndicator = 1 AND DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
+--,MetExpectedIndicator AS "Met Expected Ind Count"
 --,CurrentProdCredit AS "Productivity Credits"  Removed 4/29 and added case statement below
+
  , CASE
             WHEN SrcSysID = 24 THEN ProdCredit
             ELSE CurrentProdCredit
             END AS "Productivity Credits"
+
 ,CASE WHEN IGOIndicator = 1 AND NIGOCode = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
 ,CASE WHEN IGOIndicator = 1 AND NIGOCode IN ('090','361') THEN 1 ELSE 0 END AS "IGO Count"  -- REPLACES LINE BELOW '361' is applicable for Annuity Only. 
 --,CASE WHEN IGOIndicator = 1 AND NIGOCode = '090' THEN 1 ELSE 0 END AS "IGO Count"   REMOVED THIS LINE 7/14/2020 
 ,IGOIndicator AS "IGO NIGO Count"
-,GoalValue AS "IGO Goal" --added 4/16
+--,GoalValue AS "IGO Goal" --added 4/16
 ,FlexIndicator AS "Flex Count"
 --,MajorProductName AS "Contract Type" REMOVED 4/6/2020
 , CASE 
@@ -87,27 +93,75 @@ END AS "Date"
  		WHEN T1.MajorProductName IS NULL AND PrimaryLogID NOT IN (6, 10) THEN NULL 
  		ELSE T1.MajorProductName 
  		END AS "Contract Type"
-,CASE WHEN DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
+/*,CASE WHEN DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
 ,CASE WHEN DaysPastTAT = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
 ,CASE WHEN DaysPastTAT = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 ,CASE WHEN DaysPastTAT = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
-,CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
+,CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"*/
+ ,ISSUE_DT
+ ,PolicyStatus
+ ,LOB_NME
+ ,LOB_CDE
+,CTRT_JURISDICTION
 FROM PROD_DMA_VW.ACT_ANO_PIT_INTEGRATED_VW T1
+ Left Join (
+		SELECT
+            SOURCETRANSACTIONID
+            ,AGREEMENTID
+            ,MAX(SEQUENCENUMBER) AS MAXSEQ
+        
+        FROM PROD_DMA_VW.ACT_LAC_CURR_INTEGRATED_VW
+        
+        WHERE WorkEventDepartmentID in (9,11)
+              -- AND WorkEventName LIKE '{LC} CLAIM EXAM%'
+              -- AND RoleID='22' --Role = Operations Setup 
+               -- AND AdminSystem IN ('CM2000','MPR','VUL','PE1', 'LIFCOM', 'LVRGVL', 'OPM', 'UNIV', 'VNT', 'VNTAGE', 'VNTG1')
+        
+        GROUP BY 1,2
+    ) AS LAC ON T1.SOURCETRANSACTIONID=LAC.SOURCETRANSACTIONID
+--LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_DIM_VW WHERE EndDate = '9999-12-31' AND GoalTypeID = 5) T2 --added 4/16/20
+--ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID --added 4/16/20
+LEFT JOIN
+        (
+                SELECT
+                        ACV.AGREEMENT_ID,
+                        ACV.HLDG_KEY,
+                        ACV.AGREEMENT_SOURCE_CD, 
+                        ACV.ISSUE_DT,
+                        ACV.FACE_AMOUNT,
+                      --  ACV.CONV_IND,
+                       -- ACV.REINS_IND,
+                        CASE 
+                            WHEN ACV.HLDG_STUS='TM' THEN 'Terminated'
+                            WHEN ACV.HLDG_STUS='IF' THEN 'Inforce'
+                            WHEN ACV.HLDG_STUS='NB' THEN 'NewBusiness'
+                            WHEN ACV.HLDG_STUS='NR' THEN 'NotRecorded'
+                            ELSE  'Unknown' END AS PolicyStatus,
+                        ACV.LOB_NME,
+                        ACV.LOB_CDE,
+                        ACV.CTRT_JURISDICTION
+                        --MAX(CDV.GOVT_ID_NR) AS InsuredGovtID             
+                FROM PROD_USIG_STND_VW.AGMT_CMN_VW AS ACV
+                where Issue_DT between '2000-01-01' and  '2021-12-31'
+        ) AS InforceData ON 
+     					   InforceData.HLDG_KEY = T1.HoldingKey and InforceData.Agreement_ID = T1.AgreementID
+                     --   (LAC.AGREEMENTID IS NOT NULL AND InforceData.AGREEMENT_ID=LAC.AgreementID) 
+                      --  OR 
+                      --  (LAC.AGREEMENTID IS NULL AND TRIM(LEADING '0' FROM InforceData.HLDG_KEY)=TRIM(LEADING '0' FROM T1.HoldingKey) AND 
+                     --   InforceData.AGREEMENT_SOURCE_CD=T1.AdminSystemCode)
 
-LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_DIM_VW WHERE EndDate = '9999-12-31' AND GoalTypeID = 5) T2 --added 4/16/20
-ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID --added 4/16/20
 
 WHERE (WorkEventDepartmentID in (9,11)
 OR T1. DepartmentID in (9, 11))
 
-AND TransactionTypeId IN (1,3)
-
---Select WorkEventDepartmentID, WorkEventDepartmentName, WorkEventOrganizationName
---FROM PROD_DMA_VW.ACT_ANO_PIT_INTEGRATED_VW
---group by 1,2,3
+AND TransactionTypeId IN (1)--,3)
 
 )
 
-Select MIn("DATE")
-,Max("DATE")
-FROM T
+Select count(*)
+,Min(ReceivedDate)
+,Max(ReceivedDate)
+,Min ( ISSUE_DT)
+,Max( ISSUE_DT)
+From T 
+--Where "Policy Number" is null
