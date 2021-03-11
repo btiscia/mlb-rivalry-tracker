@@ -103,6 +103,12 @@ END AS "Date"
  ,LOB_NME
  ,LOB_CDE
 ,CTRT_JURISDICTION
+,Distribution_Channel
+,SRC_Distribution_Channel
+,Major_Prod_NME
+,Minor_Prod_NME
+,Prod_TYP_NME
+,Admn_SYS_CDE  
 FROM PROD_DMA_VW.ACT_ANO_PIT_INTEGRATED_VW T1
  Left Join (
 		SELECT
@@ -139,10 +145,17 @@ LEFT JOIN
                             ELSE  'Unknown' END AS PolicyStatus,
                         ACV.LOB_NME,
                         ACV.LOB_CDE,
-                        ACV.CTRT_JURISDICTION
-                        --MAX(CDV.GOVT_ID_NR) AS InsuredGovtID             
+                        ACV.CTRT_JURISDICTION,
+                        --MAX(CDV.GOVT_ID_NR) AS InsuredGovtID          
+                        ACV.Distribution_Channel,
+                        ACV.SRC_Distribution_Channel,
+                        ACV.Major_Prod_NME,
+                        ACV.Minor_Prod_NME,
+                        ACV.Prod_TYP_NME,
+                        ACV.Admn_SYS_CDE                       
+                           
                 FROM PROD_USIG_STND_VW.AGMT_CMN_VW AS ACV
-                where Issue_DT between '2000-01-01' and  '2021-12-31'
+                where Issue_DT between '1970-01-01' and  '2021-12-31'
         ) AS InforceData ON 
      					   InforceData.HLDG_KEY = T1.HoldingKey and InforceData.Agreement_ID = T1.AgreementID
                      --   (LAC.AGREEMENTID IS NOT NULL AND InforceData.AGREEMENT_ID=LAC.AgreementID) 
@@ -165,3 +178,7 @@ Select count(*)
 ,Max( ISSUE_DT)
 From T 
 --Where "Policy Number" is null
+
+--Select top 50 * 
+-- FROM PROD_USIG_STND_VW.AGMT_CMN_VW 
+--Where LOB_CDE = 'ANN'
