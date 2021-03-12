@@ -15,6 +15,7 @@ END AS "Society 1851"
 ,SegmentName	as "Segment Name"
 ,WorkEventName	as "Work Event Name"
 ,Priority	
+,LongCompletedDate as "Completed Time Stamp"
 ,AdminSystem as "Admin System"	
 ,ProcessName "Process Name"	
 ,ProcessID as "Process ID"
@@ -54,7 +55,7 @@ WHERE (WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND CompletedIndicator = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31, 32
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31, 32, 33
 
 UNION
 
@@ -75,6 +76,7 @@ END AS "Society 1851"
 ,SegmentName	as "Segment Name"
 ,WorkEventName	as "Work Event Name"
 ,Priority	
+,LongCompletedDate as "Completed Time Stamp"
 ,AdminSystem as "Admin System"	
 ,ProcessName "Process Name"	
 ,ProcessID as "Process ID"
@@ -131,7 +133,7 @@ WHERE(WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND PendingIndicator = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32, 33
 
 UNION
 
@@ -152,6 +154,7 @@ END AS "Society 1851"
 ,SegmentName	as "Segment Name"
 ,WorkEventName	as "Work Event Name"
 ,Priority	
+,LongCompletedDate as "Completed Time Stamp"
 ,AdminSystem as "Admin System"	
 ,ProcessName "Process Name"	
 ,ProcessID as "Process ID"
@@ -191,4 +194,4 @@ WHERE  (WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND SequenceNumber = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32, 33
