@@ -1,4 +1,12 @@
---New Daily Historical Time Updated 12/19 by John Avgosutakis/Vince Bonaddio
+/* * This routine pulls daily time 
+
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is PROD_DMA_VW.SCHEDULE_DIM_VW, PROD_DMA_VW.EMPLOYEE_CURR_DIM_VW ,
+     PROD_DMA_VW.ACT_DMS_INTEGRATED_FCT_VW, PROD_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW 
+*  Author: Lorraine Christian/Kristin Carlile
+*  Created: 3/4/2019
+*  Revised:   1/7/2020  updating % productive and adding net available time */
 
 SELECT
 ShortDate AS "Date"
@@ -91,5 +99,5 @@ END AS "Employee Type"
     
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-WHERE "Date" BETWEEN  Add_Months(Current_Date, -36) AND Current_Date + INTERVAL '10' DAY
-AND T1.DepartmentID = 5
+WHERE "Date" BETWEEN  Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
+AND T1.DepartmentID = 13

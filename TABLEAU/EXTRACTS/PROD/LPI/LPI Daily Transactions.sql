@@ -1,3 +1,4 @@
+
 /*Updated 7/15/20 removed holidays to improve query efficiency -KC */
 
 SELECT 
