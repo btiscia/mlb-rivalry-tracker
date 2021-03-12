@@ -30,8 +30,8 @@ END AS "Society 1851"
 END AS "Date"    
      
 ,EmployeeRoleName AS "Employee Role Name"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
+,COALESCE(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
+,COALESCE(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
 ,TeamName AS "Team Name"
 ,FunctionName AS "Function Name"
 ,SegmentName AS "Segment Name"
@@ -93,7 +93,7 @@ END AS "Date"
 
 -- Added for EOD Pending
 ,CASE WHEN T1.transactiontypeid = 2 --this is a pending record
-                  AND T1.LoggedDate < Current_Date  --that was logged prior to today
+                  AND T1.LoggedDate < CURRENT_DATE  --that was logged prior to today
 				  AND (CompRec.CompDate > T1.LoadDate OR CompRec.CompDate IS NULL) --that was completed after the load date of this pending record or hasn't been completed yet
 				  THEN 1 ELSE 0 END AS "EOD Pending Indicator" 
 -- End of change
@@ -107,15 +107,15 @@ FROM PROD_DMA_VW.ACT_ANO_CURR_INTEGRATED_VW T1  --Removed this mart PSC_MART_CUR
 LEFT 
 JOIN (SELECT DISTINCT
                               a.sourcetransactionid AS SourceTrans,
-                              First_Value( a.CompletedDate) Over (PARTITION BY a.sourcetransactionid
+                              First_Value( a.CompletedDate) OVER (PARTITION BY a.sourcetransactionid
 							  ORDER BY a.SequenceNumber DESC, LoadDate DESC) AS CompDate  
                 FROM PROD_dma_vw.act_ano_integrated_fct_vw AS a
 	         WHERE a.completedindicator = 1 --completed
 				    AND a.transactiontypeid = 3 --completed
-					AND a.completeddate < Current_Date) AS CompRec --exclude completed today bc today isn't over yet
+					AND a.completeddate < CURRENT_DATE) AS CompRec --exclude completed today bc today isn't over yet
    ON CompRec.SourceTrans = T1.SourceTransactionId
 -- end of change 
 
-WHERE (WorkEventDepartmentID in (9,11)
-OR T1. DepartmentID in (9,11))
-AND (TransactionTypeId IN (1,3) OR Cast(loggeddate AS DATE) >=  (Add_Months(Current_Date, -36))) --Added to limit pending records to rolling 3 years
+WHERE (WorkEventDepartmentID IN (9,11)
+OR T1. DepartmentID IN (9,11))
+AND (TransactionTypeId IN (1,3) OR CAST(loggeddate AS DATE) >=  (ADD_MONTHS(CURRENT_DATE, -36))) --Added to limit pending records to rolling 3 years

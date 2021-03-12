@@ -1,3 +1,12 @@
+/* 
+This routine provides Historical Current for DTC
+* Peer Review & Change Log: 
+* Peer Review Date: 
+* Source for this routine is PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW
+*Revision Made: 7/8/2019 
+*Revisions: Pending removed entirely Revision by Kristin Carlile
+*/
+
 SELECT 
 'Completed' AS "Transaction Type"
 ,SourceTransactionID AS "Source Transaction ID"
@@ -28,8 +37,9 @@ SELECT
 ,DepartmentCode	 AS "Department Code"
 ,DivisionCode	AS "Division Code"
 ,TAT
+,LongCompletedDate AS "Completed Time Stamp"
 ,NIGODescription
-,ShortComment
+,ShortComment AS "Short Comments"
 ,MAX(TransDate)	AS "Max Trans Date"
 ,COUNT(DISTINCT ActivityID) AS "Transaction Count"
 ,TAT * "Transaction Count" AS "Total TAT Days"
@@ -46,13 +56,13 @@ SELECT
 ,SUM(CASE WHEN DaysPastTAT = 3 THEN 1 ELSE 0 END) AS "Past TAT 3"
 ,SUM(CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END) AS "Past TAT 4+"
 FROM PROD_DMA_VW.TRANS_CURR_INTEGRATED_VW
-WHERE (WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
+WHERE (WorkEventDepartmentID =20
+OR DepartmentID = 20)
 AND CompletedIndicator = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
 
-UNION
+/* UNION
 
 SELECT 
 'Pending' AS "Transaction Type"
@@ -85,7 +95,7 @@ SELECT
 ,DivisionCode	AS "Division Code"
 ,NULL AS TAT
 ,CAST(NULL AS VARCHAR(5))  AS NIGODescription
-,CAST(NULL AS VARCHAR(100)) AS ShortComment
+,CAST(NULL AS VARCHAR(5))  AS  "Short Comments"
 ,MAX(TransDate)	AS "Max Trans Date"
 ,COUNT(DISTINCT ActivityID) AS "Transaction Count"
 ,NULL AS "Total TAT Days"
@@ -112,18 +122,18 @@ MAX(DaysPastTAT) MaxTAT
 ,CASE WHEN MaxTAT  = 3 THEN 1 ELSE 0 END AS PastTAT3
 ,CASE WHEN MaxTAT  >= 4 THEN 1 ELSE 0 END AS PastTAT4
 FROM PROD_DMA_VW.TRANS_CURR_INTEGRATED_VW
-WHERE  (WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
+WHERE  (WorkEventDepartmentID = 20
+OR DepartmentID = 20)
 AND PendingIndicator = 1
 AND LoadDate >= CURRENT_DATE - INTERVAL '5' YEAR
 GROUP BY 1) MaxSub
 ON LPI.SourceTransactionID = MaxSub.SourceTransactionID
 AND LPI.DaysPastTAT = MaxSub.MaxTAT
-WHERE(WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
+WHERE(WorkEventDepartmentID =20
+OR DepartmentID = 20)
 AND PendingIndicator = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 */
 
 UNION
 
@@ -157,8 +167,9 @@ SELECT
 ,DepartmentCode	 AS "Department Code"
 ,DivisionCode	AS "Division Code"
 ,TAT
+,LongCompletedDate AS "Completed Time Stamp"
 ,CAST(NULL AS VARCHAR(5)) AS NIGODescription
-,ShortComment
+,ShortComment AS "Short Comments"
 ,MAX(TransDate)	AS "Max Trans Date"
 ,COUNT(DISTINCT ActivityID) AS "Transaction Count"
 ,NULL AS "Total TAT Days"
@@ -175,8 +186,8 @@ SELECT
 ,NULL AS "Past TAT 3"
 ,NULL AS "Past TAT 4+"
 FROM PROD_DMA_VW.TRANS_CURR_INTEGRATED_VW
-WHERE  (WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
+WHERE  (WorkEventDepartmentID =20
+OR DepartmentID = 20)
 AND SequenceNumber = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
