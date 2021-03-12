@@ -66,8 +66,8 @@ LEFT JOIN
                         ACV.AGREEMENT_SOURCE_CD, 
                         ACV.ISSUE_DT,
                         ACV.FACE_AMOUNT,
-                        ACV.CONV_IND,
-                        ACV.REINS_IND,
+                      --  ACV.CONV_IND,
+                       -- ACV.REINS_IND,
                         CASE 
                             WHEN ACV.HLDG_STUS='TM' THEN 'Terminated'
                             WHEN ACV.HLDG_STUS='IF' THEN 'Inforce'
@@ -95,7 +95,7 @@ LEFT JOIN
                         (LAC.AGREEMENTID IS NOT NULL AND InforceData.AGREEMENT_ID=LAC.AgreementID) 
                         OR 
                         (LAC.AGREEMENTID IS NULL AND TRIM(LEADING '0' FROM InforceData.HLDG_KEY)=TRIM(LEADING '0' FROM CPV.PolicyNumber) AND 
-                        InforceData.AGREEMENT_SOURCE_CD=CPV.AdminSystemCode) 
+                        InforceData.AGREEMENT_SOURCE_CD=CPV.AdminSystemCode)
                         
 --LEFT JOIN PROD_CATS_VW.CATS_WRK_TXT_CMNT_VW AS Comments ON CPV.SourceTransactionID=Comments.FK_WRK_IDENT      
 LEFT JOIN PROD_DMA_VW.DBO_WRK_XTN_VW AS QUAL ON CPV.SourceTransactionID=QUAL.FKWrkIdent --identify pensions 11/11/2020  
