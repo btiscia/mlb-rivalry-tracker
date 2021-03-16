@@ -31,8 +31,8 @@ END AS "Society 1851"
 END AS "Date"    
      
 ,EmployeeRoleName AS "Employee Role Name"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
+,COALESCE(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
+,COALESCE(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
 ,TeamName AS "Team Name"
 ,FunctionName AS "Function Name"
 ,SegmentName AS "Segment Name"
@@ -92,7 +92,7 @@ FROM PROD_DMA_VW.ACT_ANO_PIT_INTEGRATED_VW T1
 LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_DIM_VW WHERE EndDate = '9999-12-31' AND GoalTypeID = 5) T2 --added 4/16/20
 ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID --added 4/16/20
 
-WHERE (WorkEventDepartmentID in (9,11)
-OR T1. DepartmentID in (9, 11))
+WHERE (WorkEventDepartmentID IN (9,11)
+OR T1. DepartmentID IN (9, 11))
 
 AND TransactionTypeId IN (1,3)

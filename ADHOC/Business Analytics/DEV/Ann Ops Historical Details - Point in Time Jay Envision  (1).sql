@@ -109,6 +109,7 @@ END AS "Date"
 ,Minor_Prod_NME
 ,Prod_TYP_NME
 ,Admn_SYS_CDE  
+,MinIss.Min_Iss_Dt  
 FROM PROD_DMA_VW.ACT_ANO_PIT_INTEGRATED_VW T1
  Left Join (
 		SELECT
@@ -146,14 +147,15 @@ LEFT JOIN
                         ACV.LOB_NME,
                         ACV.LOB_CDE,
                         ACV.CTRT_JURISDICTION,
+                         ACV.TERM_DT,
                         --MAX(CDV.GOVT_ID_NR) AS InsuredGovtID          
                         ACV.Distribution_Channel,
                         ACV.SRC_Distribution_Channel,
                         ACV.Major_Prod_NME,
                         ACV.Minor_Prod_NME,
                         ACV.Prod_TYP_NME,
-                        ACV.Admn_SYS_CDE                       
-                           
+                        ACV.Admn_SYS_CDE                      
+                        
                 FROM PROD_USIG_STND_VW.AGMT_CMN_VW AS ACV
                 where Issue_DT between '1970-01-01' and  '2021-12-31'
         ) AS InforceData ON 
@@ -162,9 +164,15 @@ LEFT JOIN
                       --  OR 
                       --  (LAC.AGREEMENTID IS NULL AND TRIM(LEADING '0' FROM InforceData.HLDG_KEY)=TRIM(LEADING '0' FROM T1.HoldingKey) AND 
                      --   InforceData.AGREEMENT_SOURCE_CD=T1.AdminSystemCode)
+Left Join (
+					select 
+					HLDG_KEY
+					,Min (Issue_DT) as Min_Iss_Dt
+					FROM PROD_USIG_STND_VW.AGMT_CMN_VW 
+					Where LOB_CDE = 'ANN'
+					group by 1 ) as MinIss ON  MinIss.HLDG_KEY = T1.HoldingKey 
 
-
-WHERE (WorkEventDepartmentID in (9,11)
+WHERE (WorkEventDepartmentID in (9,11) 
 OR T1. DepartmentID in (9, 11))
 
 AND TransactionTypeId IN (1)--,3)
@@ -172,10 +180,6 @@ AND TransactionTypeId IN (1)--,3)
 )
 
 Select count(*)
-,Min(ReceivedDate)
-,Max(ReceivedDate)
-,Min ( ISSUE_DT)
-,Max( ISSUE_DT)
 From T 
 --Where "Policy Number" is null
 

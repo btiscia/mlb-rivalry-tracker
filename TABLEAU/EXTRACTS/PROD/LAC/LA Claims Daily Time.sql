@@ -1,5 +1,3 @@
---Daily Time Updated 12/19 by John Avgoustakis/Vince Bonaddio
-
 SELECT
 ShortDate AS "Date"
 ,IsHoliday
@@ -59,13 +57,13 @@ END AS "Employee Type"
 ,PlannedMakeupHours AS "Planned Makeup Hours"
 ,ScheduledHours AS "Working Hours"
 ,AdminTime AS "Admin Time"
-,Coalesce(ProductivityCredits,0) AS "Productivity Credits"
+,COALESCE(ProductivityCredits,0) AS "Productivity Credits"
 ,AllDayOOO AS "All Day OOO"
 
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
+    ELSE COALESCE(CAST("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
     END AS "Productivity Hours"
     
 ,"Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
@@ -92,5 +90,5 @@ END AS "Employee Type"
     
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
- WHERE "Date" BETWEEN  Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
+ WHERE "Date" BETWEEN  ADD_MONTHS(CURRENT_DATE, -3) AND CURRENT_DATE + INTERVAL '10' DAY
  AND T1.DepartmentID IN (7,8)

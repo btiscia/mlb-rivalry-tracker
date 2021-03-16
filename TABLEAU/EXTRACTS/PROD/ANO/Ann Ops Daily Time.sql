@@ -1,3 +1,13 @@
+/*
+* This routine pulls daily time 
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is DEV_DMA_VW.PERFORMANCE_FCT_VW, DEV_DMA_VW.EMPLOYEE_PIT_DIM_VW 
+*  Author: Lorraine Christian 2/19/2020
+*  Revised:   -New Daily Historical Time Updated 12/19 by John Avgosutakis/Vince Bonaddio
+*  Pointing to production since time out will only feed productions*/   
+
+
 SELECT
 ShortDate AS "Date"
 ,IsHoliday
@@ -14,6 +24,7 @@ END AS "Employee Type"
 , ProductionGoal AS "Prod Goal"
 , NonProductionGoal AS "Non Prod Goal"
 , ActualFlexHours AS "Actual Flex Hours"
+--, ActualNonWorkingHours
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
@@ -23,13 +34,12 @@ END AS "Employee Type"
     ELSE ActualOOOHours
     END AS "Actual OOO Hours"
 ,ActualOTHours AS "Actual OT Hours"
-
 ,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
     ELSE ActualWorkingHours
     END AS "Actual Production Hours"
-
+    
 ,ActualExcusedHours AS "Actual Excused Hours"
 ,ActualMakeupHours AS "Actual Makeup Hours"
 ,PlannedFlexHours AS "Planned Flex Hours"
@@ -39,19 +49,19 @@ END AS "Employee Type"
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
     ELSE PlannedNonWorkingHours
     END AS "Planned Non-Production Hours"
-
+    
 ,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
-    ELSE PlannedOOOHourS
+    ELSE PlannedOOOHours
     END AS "Planned OOO Hours"
-
+    
 ,PlannedOTHours AS "Planned OT Hours"
 
 ,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
     WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
     WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
     ELSE PlannedWorkingHours
-    END AS "Planned Prod Hours"
-
+    END AS  "Planned Prod Hours"
+    
 ,PlannedExcusedHours AS "Planned Excused Hours"
 ,PlannedMakeupHours AS "Planned Makeup Hours"
 ,ScheduledHours AS "Working Hours"
@@ -86,8 +96,9 @@ END AS "Employee Type"
     WHEN (ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) >= 6 THEN  (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime)
     ELSE (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime) 
     END AS "Planned Available Time"
+  ,T1.DepartmentID 
     
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
- WHERE "Date" BETWEEN  ADD_MONTHS(CURRENT_DATE, -36) AND CURRENT_DATE + INTERVAL '10' DAY
- AND T1.DepartmentID IN (7,8)
+WHERE "Date" BETWEEN  ADD_MONTHS(CURRENT_DATE, -3) AND CURRENT_DATE + INTERVAL '10' DAY
+AND T1.DepartmentID IN (9,11)
