@@ -23,6 +23,8 @@ SELECT
 TransactionTypeName AS "Transaction Type"
 ,T1.SourceTransactionID AS "Source Transaction ID"
 ,HoldingKey AS "Policy Number"
+,T1.SystemHoldingKey
+,T1.AgreementID
 /*
 ,CASE WHEN BCCIndicator = 0
 	THEN 'N'
@@ -170,19 +172,27 @@ Left Join (
 					,Min (Issue_DT) as Min_Iss_Dt
 					FROM PROD_USIG_STND_VW.AGMT_CMN_VW 
 					Where LOB_CDE = 'ANN'
-					group by 1 ) as MinIss ON  MinIss.HLDG_KEY = T1.HoldingKey 
+					group by 1 ) as MinIss ON  MinIss.HLDG_KEY = Coalesce (T1.HoldingKey , T1.SystemHoldingKey) 
 
 WHERE (WorkEventDepartmentID in (9,11) 
 OR T1. DepartmentID in (9, 11))
-
 AND TransactionTypeId IN (1)--,3)
+And "Line of Business" = 'Annuities'
 
 )
 
-Select count(*)
+Select "Line of Business" 
+,count(*)
+,Count (SystemHoldingKey)
+,count (Distinct SystemHoldingKey)
 From T 
---Where "Policy Number" is null
-
+where  "Policy Number" Is Null 
+Group by 1
+--Where "Policy Number" = '00000000000008362104'
+--Where "Source Transaction ID" = '5,080,943,699'
+--group by 1
 --Select top 50 * 
 -- FROM PROD_USIG_STND_VW.AGMT_CMN_VW 
 --Where LOB_CDE = 'ANN'
+
+
