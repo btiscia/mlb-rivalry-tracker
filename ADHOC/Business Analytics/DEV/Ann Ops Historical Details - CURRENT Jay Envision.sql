@@ -179,6 +179,7 @@ WHERE (WorkEventDepartmentID in (9,11)
 OR T1. DepartmentID in (9, 11))
 AND TransactionTypeId IN (1)--,3)
 And "Line of Business" = 'Annuities'
+And ("Function Name" <> 'Tax/Maturities' and "Segment Name" <> 'Annuity')  --Removes Tax team work
 And ReceivedDate Between '2017-01-01' and '2020-12-31'
 ) 
 
@@ -197,6 +198,7 @@ Select Distinct
 ,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End)AS REAL) as "2019 Total"
 ,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End)AS REAL) as "2020 Total"
 ,CAST (Sum("Transaction Count") AS REAL) as "4Yr Total"
+,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) in ('2018','2019','2020') Then "Transaction Count" End)AS REAL) as  "2018-2020 Total"
 ,"2018 Total" / "2017 Total" as "2018_Growth"
 ,"2019 Total" / "2018 Total" as "2019_Growth"
 ,"2020 Total" / "2019 Total" as "2020_Growth"
