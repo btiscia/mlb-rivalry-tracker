@@ -113,7 +113,7 @@ END AS "Date"
 ,Prod_TYP_NME
 ,Admn_SYS_CDE  
 ,MinIss.Min_Iss_Dt  
-FROM PROD_DMA_VW.ACT_ANO_PIT_INTEGRATED_VW T1
+FROM PROD_DMA_VW.ACT_ANO_CURR_INTEGRATED_VW T1
  Left Join (
 		SELECT
             SOURCETRANSACTIONID
@@ -179,3 +179,38 @@ WHERE (WorkEventDepartmentID in (9,11)
 OR T1. DepartmentID in (9, 11))
 AND TransactionTypeId IN (1)--,3)
 And "Line of Business" = 'Annuities'
+And ReceivedDate Between '2017-01-01' and '2020-12-31'
+) 
+
+--Select * From T
+
+
+
+Select Distinct
+"Function Name"
+,"Segment Name"
+,"Work Event Name"
+,"Contract Type"
+-- ,"Transaction Count"
+,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2017' Then "Transaction Count" End) as "2017 Total"
+,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2018' Then "Transaction Count" End) as "2018 Total"
+,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End) as "2019 Total"
+,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End) as "2020 Total"
+,Sum("Transaction Count") as "4Yr Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '1' Then "Transaction Count" End) as "Jan Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '2' Then "Transaction Count" End) as "Feb Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '3' Then "Transaction Count" End) as "Mar Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '4' Then "Transaction Count" End) as "Apr Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '5' Then "Transaction Count" End) as "May Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '6' Then "Transaction Count" End) as "Jun Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '7' Then "Transaction Count" End) as "Jul Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '8' Then "Transaction Count" End) as "Aug Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '9' Then "Transaction Count" End) as "Sept Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '10' Then "Transaction Count" End) as "Oct Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '11' Then "Transaction Count" End) as "Nov Total"
+,Sum(Case when Extract (MONTH FROM ReceivedDate) = '12' Then "Transaction Count" End) as "Dec Total"
+from T
+group by 1,2,3,4
+Order by 1,2,3,4
+
+			
