@@ -192,23 +192,38 @@ Select Distinct
 ,"Work Event Name"
 ,"Contract Type"
 -- ,"Transaction Count"
-,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2017' Then "Transaction Count" End) as "2017 Total"
-,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2018' Then "Transaction Count" End) as "2018 Total"
-,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End) as "2019 Total"
-,Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End) as "2020 Total"
-,Sum("Transaction Count") as "4Yr Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '1' Then "Transaction Count" End) as "Jan Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '2' Then "Transaction Count" End) as "Feb Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '3' Then "Transaction Count" End) as "Mar Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '4' Then "Transaction Count" End) as "Apr Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '5' Then "Transaction Count" End) as "May Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '6' Then "Transaction Count" End) as "Jun Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '7' Then "Transaction Count" End) as "Jul Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '8' Then "Transaction Count" End) as "Aug Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '9' Then "Transaction Count" End) as "Sept Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '10' Then "Transaction Count" End) as "Oct Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '11' Then "Transaction Count" End) as "Nov Total"
-,Sum(Case when Extract (MONTH FROM ReceivedDate) = '12' Then "Transaction Count" End) as "Dec Total"
+,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2017' Then "Transaction Count" End)AS REAL) as "2017 Total"
+,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2018' Then "Transaction Count" End)AS REAL) as "2018 Total"
+,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End)AS REAL) as "2019 Total"
+,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End)AS REAL) as "2020 Total"
+,CAST (Sum("Transaction Count") AS REAL) as "4Yr Total"
+,"2018 Total" / "2017 Total" as "2018_Growth"
+,"2019 Total" / "2018 Total" as "2019_Growth"
+,"2020 Total" / "2019 Total" as "2020_Growth"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '1' Then "Transaction Count" End) AS REAL) as "Jan Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '2' Then "Transaction Count" End)AS REAL) as "Feb Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '3' Then "Transaction Count" End)AS REAL) as "Mar Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '4' Then "Transaction Count" End)AS REAL) as "Apr Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '5' Then "Transaction Count" End)AS REAL) as "May Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '6' Then "Transaction Count" End) AS REAL)as "Jun Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '7' Then "Transaction Count" End)AS REAL) as "Jul Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '8' Then "Transaction Count" End)AS REAL) as "Aug Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '9' Then "Transaction Count" End) AS REAL)as "Sept Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '10' Then "Transaction Count" End) AS REAL)as "Oct Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '11' Then "Transaction Count" End) AS REAL)as "Nov Total"
+,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '12' Then "Transaction Count" End) AS REAL)as "Dec Total"
+, "Jan Total"/"4Yr Total" as Jan_pct
+,  "Feb Total"/"4Yr Total" as Feb_pct
+, "Mar Total"/"4Yr Total" as Mar_pct
+, "Apr Total"/"4Yr Total" as Apr_pct
+, "May Total"/"4Yr Total" as May_pct
+,  "Jun Total"/"4Yr Total" as Jun_pct
+, "Jul Total"/"4Yr Total" as Jul_pct
+, "Aug Total"/"4Yr Total" as Aug_pct
+,"Sept Total"/"4Yr Total" as Sep_pct
+, "Oct Total"/"4Yr Total" as Oct_pct
+, "Nov Total"/"4Yr Total" as Nov_pct
+, "Dec Total"/"4Yr Total" as Dec_pct
 from T
 group by 1,2,3,4
 Order by 1,2,3,4
