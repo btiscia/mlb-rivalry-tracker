@@ -179,12 +179,11 @@ WHERE (WorkEventDepartmentID in (9,11)
 OR T1. DepartmentID in (9, 11))
 AND TransactionTypeId IN (1)--,3)
 And "Line of Business" = 'Annuities'
-And ("Function Name" <> 'Tax/Maturities' and "Segment Name" <> 'Annuity')  --Removes Tax team work
+--And ("Function Name" <> 'Tax/Maturities' and "Segment Name" <> 'Annuity')  --Removes Tax team work ----this removed too much...trouble shoot
+And "Contract Type" Not In ('Disability Income','Group Non-Traditional Life','Non-Traditional Life','Pay Out','Traditional Long Term Care','Traditional Permanent','Traditional Term')
 And ReceivedDate Between '2017-01-01' and '2020-12-31'
+
 ) 
-
---Select * From T
-
 
 
 Select Distinct
@@ -192,16 +191,31 @@ Select Distinct
 ,"Segment Name"
 ,"Work Event Name"
 ,"Contract Type"
+,Min("Productivity Credits")
+,Max("Productivity Credits")
 -- ,"Transaction Count"
-,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2017' Then "Transaction Count" End)AS REAL) as "2017 Total"
-,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2018' Then "Transaction Count" End)AS REAL) as "2018 Total"
-,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End)AS REAL) as "2019 Total"
-,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End)AS REAL) as "2020 Total"
+,Coalesce (CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2017' Then "Transaction Count" End)AS REAL),0) as "2017 Total"
+,Coalesce (CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2018' Then "Transaction Count" End)AS REAL),0) as "2018 Total"
+,Coalesce(CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End)AS REAL),0) as "2019 Total"
+,Coalesce(CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End)AS REAL),0) as "2020 Total"
 ,CAST (Sum("Transaction Count") AS REAL) as "4Yr Total"
 ,CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) in ('2018','2019','2020') Then "Transaction Count" End)AS REAL) as  "2018-2020 Total"
-,"2018 Total" / "2017 Total" as "2018_Growth"
-,"2019 Total" / "2018 Total" as "2019_Growth"
-,"2020 Total" / "2019 Total" as "2020_Growth"
+--,Coalesce( "2018 Total" / "2017 Total",0) as "2018_Growth"
+--,Coalesce("2019 Total" / "2018 Total",0)  as "2019_Growth"
+--,Coalesce("2020 Total" / "2019 Total",0)  as "2020_Growth"
+--, Coalesce("2018 Total"/"2018-2020 Total",0)  as "2018 Factor"
+--, Coalesce("2019 Total"/"2018-2020 Total",0)  as "2019 Factor"
+--, Coalesce("2020 Total"/"2018-2020 Total",0)  as "2020 Factor"
+--,''as "Weighted_Growth"
+,'' as "4yrCAGR"
+,'' as "3yrCAGR"
+,''as "Fx_2021"
+,''as "Fx_2022"
+--,'' as "CAGR2022"
+,''as "Fx_2023"
+--,''as "CAGR2023"
+,''as "Fx_2024"
+--,''as "CAGR2024"
 ,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '1' Then "Transaction Count" End) AS REAL) as "Jan Total"
 ,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '2' Then "Transaction Count" End)AS REAL) as "Feb Total"
 ,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '3' Then "Transaction Count" End)AS REAL) as "Mar Total"
@@ -229,5 +243,3 @@ Select Distinct
 from T
 group by 1,2,3,4
 Order by 1,2,3,4
-
-			
