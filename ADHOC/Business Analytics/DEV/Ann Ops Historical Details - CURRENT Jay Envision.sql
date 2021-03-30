@@ -113,6 +113,8 @@ END AS "Date"
 ,Prod_TYP_NME
 ,Admn_SYS_CDE  
 ,MinIss.Min_Iss_Dt  
+ ,WorkEventDimStartDate
+,WorkEventDimEndtDate
 FROM PROD_DMA_VW.ACT_ANO_CURR_INTEGRATED_VW T1
  Left Join (
 		SELECT
@@ -158,8 +160,7 @@ LEFT JOIN
                         ACV.Minor_Prod_NME,
                         ACV.Prod_TYP_NME,
                         ACV.Admn_SYS_CDE                      
-                        
-                FROM PROD_USIG_STND_VW.AGMT_CMN_VW AS ACV
+                   FROM PROD_USIG_STND_VW.AGMT_CMN_VW AS ACV
                 where Issue_DT between '1970-01-01' and  '2021-12-31'
         ) AS InforceData ON 
      					   InforceData.HLDG_KEY = T1.HoldingKey and InforceData.Agreement_ID = T1.AgreementID
@@ -241,5 +242,5 @@ Select Distinct
 , "Nov Total"/"4Yr Total" as Nov_pct
 , "Dec Total"/"4Yr Total" as Dec_pct
 from T
-group by 1,2,3,4
-Order by 1,2,3,4
+group by 1,2,3,4,5
+Order by 1,2,3,4,5
