@@ -1,56 +1,15 @@
---Removed Pending/ Completed Unions in this reporting view
 
-With T As (
+With T as (
 
-SELECT
-'Received' AS "Transaction Type"
-,systemDivisionname AS "Line of Business"
-,ReceivedDate
-,WorkEventOranizationName
-,WorkEventDepartmentName
-,WorkEventDepartmentID
-,DepartmentID
-,T1.SourceTransactionID-- AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,ReceivedDate AS "Date"
-,EmployeeRoleName AS "Employee Role Name"
-,COALESCE(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"	
-,COALESCE(ManagerlastName || ', ' || ManagerFirstName, 'Unkonwn') AS "Manager"
-,TeamName	AS "Team Name"
-,FunctionName	AS "Function Name"
-,SegmentName	AS "Segment Name"
-,WorkEventName	AS "Work Event Name"
-,Priority	
-,AdminSystem AS "Admin System"	
-,ProcessName "Process Name"	
-,ProcessID AS "Process ID"
-,ProcessOrder	AS "Process Order"	
-,ServiceChannelName	AS "Service Channel Code"
-,PartyTypeName	AS "Party Type Name"
-,EmployeeOrganizationName AS "Employee Organization Name"
-,EmployeeDepartmentName AS "Employee Department Name"
-,SiteName AS "Site Name"
-,WorkEventOranizationName	AS "Work Event Organization Name"
-,WorkEventDepartmentName	AS "Work Event Department Name"
-,PrimaryRoleName	AS "Primary Role Name"
-,SystemName	AS "System Name"
-,WorkEventNumber	AS "Work Event Number"
-,DepartmentCode	 AS "Department Code"
-,DivisionCode	AS "Division Code"
-,TAT
-,ShortComment
-,CurrentProdCredit
+Select  T1. * 
+,'1' as  "Transaction Count"
  ,LOB_NME
  ,LOB_CDE
  ,Major_Prod_NME
 ,Minor_Prod_NME
 ,Prod_TYP_NME
  ,ISSUE_DT
-/*
-,MAX(TransDate)	AS "Max Trans Date"
-,COUNT(DISTINCT ActivityID) AS "Transaction Count"
-,SUM(CurrentProdCredit) AS "Productivity Credits"*/
-FROM PROD_DMA_VW.TRANS_CURR_INTEGRATED_VW T1
+From PROD_DMA_VW.ACT_LAC_CURR_INTEGRATED_VW T1
 Left Join (
 		SELECT
             SOURCETRANSACTIONID
@@ -59,7 +18,7 @@ Left Join (
         
         FROM PROD_DMA_VW.ACT_LAC_CURR_INTEGRATED_VW
         
-        WHERE WorkEventDepartmentID in (7)
+        WHERE WorkEventDepartmentID in (7,8)
               -- AND WorkEventName LIKE '{LC} CLAIM EXAM%'
               -- AND RoleID='22' --Role = Operations Setup 
                -- AND AdminSystem IN ('CM2000','MPR','VUL','PE1', 'LIFCOM', 'LVRGVL', 'OPM', 'UNIV', 'VNT', 'VNTAGE', 'VNTG1')
@@ -96,32 +55,36 @@ LEFT JOIN
                         ACV.Prod_TYP_NME,
                         ACV.Admn_SYS_CDE                      
                    FROM PROD_USIG_STND_VW.AGMT_CMN_VW AS ACV
-                where Issue_DT between '1990-01-01' and  '2021-12-31'
+                where Issue_DT between '1970-01-01' and  '2021-12-31'
         ) AS InforceData ON 
      					   InforceData.HLDG_KEY = T1.HoldingKey and InforceData.Agreement_ID = T1.AgreementID
-
-WHERE  (WorkEventDepartmentID = 7 -- IN (7,8)
-OR DepartmentID = 7 )--IN (7,8))
+	WHERE  (WorkEventDepartmentID   IN (7,8)
+OR DepartmentID IN (7,8))
 AND SequenceNumber = 1
-And ReceivedDate Between '2017-01-01' and '2020-12-31'
-And LOB_CDE = 'ANN' 
-OR LOB_CDE is null
---And ("Line of Business" = 'Annuities'OR "Department code" <> 'LC' or "Function Name" = 'Income Settlement')
---AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
---GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36
-)
+And T1.ReceivedDate Between '2017-01-01' and '2020-12-31'
+And (WorkEventDepartmentName = 'Annuity Claims' or FunctionName= 'Income Settlement Claims')
+--And (systemDivisionname = 'Annuities' or (LOB_NME = 'Annuity' or LOB_NME is null))
 
+)
 
 Select
 -- LOB_NME
 --,Major_Prod_NME
- "Line of Business"
-,"Function Name"
-,"Segment Name"
-,"Work Event Name"
+ --"Line of Business"
+
+--systemDivisionname as "Line of Business" 
+"FunctionName"
+,"SegmentName"
+,"WorkEventName"
+,WorkEventOranizationName
+,WorkEventDepartmentName
+,LOB_NME
 ,Major_Prod_NME
 --,"Department Code"
-
+,Coalesce (CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2017' Then "Transaction Count" End)AS REAL),0) as "2017 Total"
+,Coalesce (CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2018' Then "Transaction Count" End)AS REAL),0) as "2018 Total"
+,Coalesce(CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End)AS REAL),0) as "2019 Total"
+,Coalesce(CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End)AS REAL),0) as "2020 Total"
 ,Count (*) as "2017-2020 Cnt"
 From T
-group by 1,2,3,4,5
+group by 1,2,3,4,5,6,7
