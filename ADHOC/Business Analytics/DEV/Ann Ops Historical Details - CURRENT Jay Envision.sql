@@ -183,8 +183,8 @@ AND TransactionTypeId IN (1)--,3)
 --And ("Function Name" <> 'Tax/Maturities' and "Segment Name" <> 'Annuity')  --Removes Tax team work ----this removed too much...trouble shoot
 And "Contract Type" In ('Fixed Annuity','Unknown','Variable Annuity')
 And ReceivedDate Between '2017-01-01' and '2020-12-31'
---And "Function Name" in ('Financial', 'Income Settlement','Maturities Transactions', 'Non-Financial','OPM / MPR Transactions', 'Payment Services') 
-And "Function Name" in ('Resolution')
+And "Function Name" in ('Financial', 'Income Settlement','Maturities Transactions', 'Non-Financial','OPM / MPR Transactions', 'Payment Services','Resolution') 
+--And "Function Name" in ('Resolution')
 )
 
 /*Select "Function Name","Line of Business","Contract Type" 
