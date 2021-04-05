@@ -179,12 +179,21 @@ Left Join (
 WHERE (WorkEventDepartmentID in (9,11) 
 OR T1. DepartmentID in (9, 11))
 AND TransactionTypeId IN (1)--,3)
-And "Line of Business" = 'Annuities'
+--And "Line of Business" = 'Annuities'
 --And ("Function Name" <> 'Tax/Maturities' and "Segment Name" <> 'Annuity')  --Removes Tax team work ----this removed too much...trouble shoot
-And "Contract Type" Not In ('Disability Income','Group Non-Traditional Life','Non-Traditional Life','Pay Out','Traditional Long Term Care','Traditional Permanent','Traditional Term')  --Note with this we are excluding Null "?"' Values.  Mainly impacting Pension Risk Transfer function which may not be needed anyway.   If this is a problem, add a condition to include the nulls with an OR 
+And "Contract Type" In ('Fixed Annuity','Unknown','Variable Annuity')
 And ReceivedDate Between '2017-01-01' and '2020-12-31'
+--And "Function Name" in ('Financial', 'Income Settlement','Maturities Transactions', 'Non-Financial','OPM / MPR Transactions', 'Payment Services') 
+And "Function Name" in ('Resolution')
+)
 
-) 
+/*Select "Function Name","Line of Business","Contract Type" 
+,Coalesce (CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2017' Then "Transaction Count" End)AS REAL),0) as "2017 Total"
+,Coalesce (CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2018' Then "Transaction Count" End)AS REAL),0) as "2018 Total"
+,Coalesce(CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2019' Then "Transaction Count" End)AS REAL),0) as "2019 Total"
+,Coalesce(CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End)AS REAL),0) as "2020 Total"From T 
+Group By 1,2,3*/
+
 
 Select Distinct
 "Function Name"
@@ -206,11 +215,6 @@ Select Distinct
 --, Coalesce("2018 Total"/"2018-2020 Total",0)  as "2018 Factor"
 --, Coalesce("2019 Total"/"2018-2020 Total",0)  as "2019 Factor"
 --, Coalesce("2020 Total"/"2018-2020 Total",0)  as "2020 Factor"
-,''as "EWMA20"				
-,''as "EWMA21"
-,''as "EWMA22"
-,''as "EWMA23"
-,''as "EWMA24"
 ,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '1' Then "Transaction Count" End) AS REAL) as "Jan Total"
 ,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '2' Then "Transaction Count" End)AS REAL) as "Feb Total"
 ,CAST(Sum(Case when Extract (MONTH FROM ReceivedDate) = '3' Then "Transaction Count" End)AS REAL) as "Mar Total"
@@ -235,6 +239,13 @@ Select Distinct
 , "Oct Total"/"4Yr Total" as Oct_pct
 , "Nov Total"/"4Yr Total" as Nov_pct
 , "Dec Total"/"4Yr Total" as Dec_pct
+,'' as "Team Alignment"
+,'' as "CI Indicator"
+,''as "EWMA20"				
+,''as "EWMA21"
+,''as "EWMA22"
+,''as "EWMA23"
+,''as "EWMA24"
 from T
 group by 1,2,3,4
 Order by 1,2,3,4
