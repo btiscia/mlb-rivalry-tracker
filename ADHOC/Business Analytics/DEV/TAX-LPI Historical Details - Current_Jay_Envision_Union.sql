@@ -267,7 +267,7 @@ And ReceivedDate Between '2017-01-01' and '2020-12-31'
 And "Function Name" in ('Tax/Maturities','Tax Services (AWF)','Tax Services (CATS)') 
 
 )
-
+/*
 Select 
 "Function Name"
 , "Segment Name"
@@ -280,10 +280,10 @@ Select
 ,Coalesce(CAST(Sum(Case when Extract (YEAR FROM ReceivedDate) = '2020' Then "Transaction Count" End)AS REAL),0) as "2020 Total"
 
 From T 
-Group by 1,2,3,4
+Group by 1,2,3,4*/
 
 
-/*
+
 Select Distinct
 "Function Name"
 ,"Segment Name"
@@ -338,4 +338,4 @@ Select Distinct
 from T
 group by 1,2,3,4
 Order by 1,2,3,4
-*/
+
