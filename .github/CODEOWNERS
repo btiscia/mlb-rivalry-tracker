@@ -1,0 +1,9 @@
+# More information about configuring a CODEOWNERS file can be found here:
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+
+# Order is important; the last matching pattern takes the most
+# precedence.
+
+# Owners for any files in the TABLEAU/EXTRACTS/PROD 
+# directory and any of its subdirectories.
+/TABLEAU/EXTRACTS/PROD/ @wtrombley-mm @javgoustakis-mm
