@@ -13,6 +13,8 @@
 /*
 Jay copy notes:  
 
+In the where clauses use this to identify what is post issue vs. Tax Maturities.  Tax maturties gets combined with "Tax - LPI Historical Details" to account for org changes
+
 Min Date:  1/26/2016 on 3/10/2021
 Switched from Point in time to current view based on Todd B. recomendation
 ====================*/
