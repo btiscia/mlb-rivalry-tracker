@@ -105,11 +105,10 @@ WHERE  (WorkEventDepartmentID in (7,8)
 OR DepartmentID  IN (7,8))
 AND SequenceNumber = 1
 And ReceivedDate Between '2017-01-01' and '2020-12-31'
-And FunctionName in ('Annuity 2nd Exam','Annuity Approval','Annuity Check Audit','Annuity Death Payout','Annuity First Notice','Annuity Hold','Annuity Other','Annuity Phone Calls','Annuity Proofs','Annuity Proofs - Approvals','Income Settlement Claims','Income Settlement')
---And LOB_CDE = 'ANN' 
---OR LOB_CDE is null
---And ("Line of Business" = 'Annuities'OR "Department code" <> 'LC' or "Function Name" = 'Income Settlement')
---AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
+And FunctionName in ('Annuity 2nd Exam','Annuity Approval','Annuity Check Audit','Annuity Death Payout','Annuity First Notice','Annuity Hold','Annuity Other','Annuity Phone Calls','Annuity Proofs','Annuity Proofs - Approvals','Income Settlement Claims','Income Settlement') --core annuity claioms work including multiple managers
+--OR (WorkEventName LIKE any  ('Secondary Authentication%','Bank Account Validation','{AC} Approval - Stretch IRA') -- Brings in missing work events to manualy add to sheet
+--		and "Manager" = 'Franco, Joanna')
+And ("Contract Type" in ('Fixed Annuity','Variable Annuity') or "Contract Type" is null)
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40--,41,42,43
 )
 
