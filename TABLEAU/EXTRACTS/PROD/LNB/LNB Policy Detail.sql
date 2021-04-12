@@ -3,7 +3,7 @@ SELECT
        A.PolicyNumberINT,
        E.TeamName AS UWTeam,
        F.TeamName AS CMTeam,
-       ProductType,
+       C.ProductType,
        PlanCode,
        ProductionDrivenTeam,
        AgencyDisplayName,
