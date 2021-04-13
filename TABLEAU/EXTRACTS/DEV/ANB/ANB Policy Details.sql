@@ -82,6 +82,11 @@ SELECT
 	END AS DocTypeCycleTime
 , GOALVALUE AS SLA
 , T1.TransDate
+, CASE 	WHEN NewBusinessSubmitDate IS NOT NULL AND WithdrawnDate IS NOT NULL THEN 'Withdrawn'
+				WHEN NewBusinessSubmitDate IS NOT NULL AND RejectDate IS NOT NULL THEN 'Rejected'
+				WHEN NewBusinessSubmitDate IS NOT NULL AND IssueDate <> '0001/01/01' AND IssueDate IS NOT NULL THEN 'Issued'
+	END AS PlacementStatus
+, CASE WHEN NewBusinessSubmitDate IS NOT NULL THEN COALESCE(WithdrawnDate, RejectDate, IssueDate) END AS FinalDispositionDate
 
 FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
 
