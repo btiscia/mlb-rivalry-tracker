@@ -5,7 +5,6 @@ Last Updated: 4/15/2021
 Comments: Added Placement Status and Final Disposition Date
 */
 
---ANB Modern Policy Details
 --Contract Level
 
 SELECT 
