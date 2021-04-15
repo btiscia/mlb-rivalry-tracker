@@ -1,3 +1,10 @@
+/*
+Name: ANB Modern Policy Details
+Author/Editor: Vince Bonaddio / Bill Trombley
+Last Updated: 4/15/2021
+Comments: Added Placement Status and Final Disposition Date
+*/
+
 --ANB Modern Policy Details
 --Contract Level
 
