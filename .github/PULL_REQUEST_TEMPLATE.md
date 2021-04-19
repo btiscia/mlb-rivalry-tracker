@@ -1,5 +1,5 @@
 #### Summary of changes
-**Requirements:** [Jira](Jira)
+**Requirements:** OSDT#-####
 
 This PR... [Please include a brief description of what was changed]
 
