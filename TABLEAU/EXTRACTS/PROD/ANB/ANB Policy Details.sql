@@ -93,6 +93,7 @@ SELECT
 				WHEN NewBusinessSubmitDate IS NOT NULL AND IssueDate <> '0001/01/01' AND IssueDate IS NOT NULL THEN 'Issued'
 	END AS PlacementStatus
 , CASE WHEN NewBusinessSubmitDate IS NOT NULL THEN COALESCE(WithdrawnDate, RejectDate, IssueDate) END AS FinalDispositionDate
+,FinalDispositionDate - NewBusinessSubmitDate AS  CalDaysNBSubToFinalDisposition
 
 FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
 
