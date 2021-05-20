@@ -1,6 +1,7 @@
 With T as (
 Select 
 T1.RoleID
+--,COALESCE (Sum(WorkingHours) OVER (Partition by ShortDate,T1.MMID),0) as Working_hrs --only used for testng all day OOO
 ,T1.RoleName 
 ,T1.TimeOutReportInd
 ,T1.TeamName
@@ -12,20 +13,22 @@ T1.RoleID
 ,ShortDate AS "Date"
 ,T5.MeetingTitle
 ,T5.Description
-,T5.Duration
 ,T1.FTE AS FTE
 ,T2.IsHoliday AS IS_HOLIDAY
 ,T2.IsWeekday AS IS_WEEKDAY
 ,T1.TeamPartyID AS TEAM_PARTY_ID
 ,T1.DepartmentID AS DEPARTMENT_ID
 ,T5.TransDt AS TRANS_DT
+,T5.TimeType
 ,WorkingHours AS ScheduledHours
 --,AdminTime AS ADMIN_TIME
 ,ProdCredits AS PROD_CREDITS
 ,Count (*) Over (Partition By ShortDate, T1.MMID) as EE_Day_RowCnt
 ,COALESCE(ProdCredits,0) AS "Productivity Credits_Whole"
 --,COALESCE(ProdCredits/EE_Day_RowCnt ,0)"Productivity Credits_Part_NoCase"
-,COALESCE(ActualMakeupHours ,0) AS ACTUAL_MAKEUP_HRS
+,COALESCE (Sum(AllDayOOO) OVER (Partition by ShortDate,T1.MMID),0) as All_Day_OOO 
+
+
 , CASE 
 			WHEN All_Day_OOO = 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
@@ -39,62 +42,66 @@ T1.RoleID
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE (ActualProdHours ,0)
 		    END AS  "Actual Production Hours"
+,ActualProdHours AS ACTUAL_PROD_HRS
 , "Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
+
+---- Available Capacity time to do work
 , CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  0
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ScheduledHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ScheduledHours
+			WHEN All_Day_OOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  0
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ScheduledHours
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ScheduledHours
 		    ELSE ScheduledHours
 		    END AS "Actual Working Hrs"    
 , CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualOTHours
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualOTHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualOTHours 
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualOTHours  
+			WHEN All_Day_OOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ActualOTHours
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ActualOTHours
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ActualOTHours 
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ActualOTHours  
 		    ELSE ActualOTHours
 		    END AS "Actual OT Hrs"
+,COALESCE (Sum(ActualOTHours) OVER (Partition by ShortDate,T1.MMID),0) as ACTUAL_OT_HRS
 , CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   ActualMakeupHours
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   ActualMakeupHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualMakeupHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualMakeupHours
+			WHEN All_Day_OOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN   ActualMakeupHours
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN   ActualMakeupHours
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ActualMakeupHours
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ActualMakeupHours
 		    ELSE  ActualMakeupHours
 		    END AS  "Actual Makeup Hrs" 
+,COALESCE(Sum(ActualMakeupHours)OVER (Partition by ShortDate,T1.MMID) ,0) AS ACTUAL_MAKEUP_HRS
 , CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualExcusedHours
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualExcusedHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN ActualExcusedHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN ActualExcusedHours
+			WHEN All_Day_OOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ActualExcusedHours
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ActualExcusedHours
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN ActualExcusedHours
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN ActualExcusedHours
 		    ELSE ActualExcusedHours
 		    END AS "Actual Excused Hrs"
-,COALESCE (Sum(AllDayOOO) OVER (Partition by ShortDate,T1.MMID),0) as All_Day_OOO  ---Need to test if its accurate
-,COALESCE (Sum(ActualOTHours) OVER (Partition by ShortDate,T1.MMID),0) as ACTUAL_OT_HRS ---Need to test if its accurate
---Need to test if its accurate
---,ActualNonProdHours AS ACTUAL_NON_PROD_HRS
+--,COALESCE (Sum(ActualExcusedHours) OVER (Partition by ShortDate,T1.MMID),0) as Actual_Excused_Hours
+
+---Actaul Shrinkage time
 , CASE 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (AdminTime)
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   AdminTime
-		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  (AdminTime)
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN   AdminTime
+		    WHEN All_Day_OOO  >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    ELSE  AdminTime
 		    END AS "Admin Time"
 , CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
+			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
 		    ELSE ActualOOOHours
 		    END AS "Actual OOO Hrs"   
 ,COALESCE (Sum(ActualOOOHours) OVER (Partition by ShortDate,T1.MMID),0) as ACTUAL_OOO_HRS
@@ -105,25 +112,29 @@ T1.RoleID
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE( ActualNonProdHours,0)
 		    END AS  "Actual Non-Production Hrs"
+,ActualNonProdHours
+,T5.Duration
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 'A'
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 'B'
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  'C'
 		    ELSE 'D'
-		    END AS  Test
-,T5.TimeType
+		    END AS  Test other
+, CASE 
+			WHEN All_Day_OOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  'a'
+		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 'b'
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  'c'
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  'd'
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  'e'
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  'f' 
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  'g'  
+		    ELSE 'h'
+		    END AS "Test Capacity Values"
 
-,ActualOTHours 
-,ActualProdHours AS ACTUAL_PROD_HRS
-/*,PlannedFlexHours AS PLANNED_FLEX_HRS
-,PlannedNonProdHours AS PLANNED_NON_PROD_HRS
-,PlannedOOOHours AS PLANNED_OOO_HRS
-,PlannedOTHours AS PLANNED_OT_HRS
-,PlannedProdHours AS PLANNED_PROD_HRS
-,PlannedExcusedHours AS PLANNED_EXCUSED_HRS
-,ActualExcusedHours AS ACTUAL_EXCUSED_HRS*/
---,ActualMakeupHours AS ACTUAL_MAKEUP_HRS
---,PlannedMakeupHours AS PLANNED_MAKEUP_HRS
+
+--,PlannedFlexHours AS PLANNED_FLEX_HRS
+--,ActualExcusedHours
+--,ActualMakeupHours 
 ,AllDayOOO
 ,CAST(((ShortDate-RoleStartDate) Month(4)) AS INTEGER) as Experiance
 FROM (SELECT * FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T1 WHERE DepartmentID IN (11,47)) T1
@@ -165,7 +176,10 @@ From T
 --Where ACTUAL_OOO_HRS <> ActualOOOHours 
  --ACTUAL_OT_HRS <> ActualOTHours 
 --Where All_Day_OOO = 1
-
+--Where ACTUAL_MAKEUP_HRS >0
+--where ActualOOOHours >0
+--where ActualNonProdHours <>Duration
+--where AllDayOOO >0 and Working_hrs >=16
 --order by MMID, "DATE"
-where MMID = 'MM34273'
-and "DATE" = '2020-05-05'
+where MMID = 'MM97798'
+and "DATE" = '2020-10-02'
