@@ -20,6 +20,7 @@ T1.RoleID
 ,T1.DepartmentID AS DEPARTMENT_ID
 ,T5.TransDt AS TRANS_DT
 ,T5.TimeType
+,T6.TimeTypeName
 ,WorkingHours AS ScheduledHours
 --,AdminTime AS ADMIN_TIME
 ,ProdCredits AS PROD_CREDITS
@@ -29,14 +30,14 @@ T1.RoleID
 ,COALESCE (Sum(AllDayOOO) OVER (Partition by ShortDate,T1.MMID),0) as All_Day_OOO 
 
 
-, CASE 
+, CASE --Time captured in Cats for production.  
 			WHEN All_Day_OOO = 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    ELSE COALESCE(Cast (ProdCredits/EE_Day_RowCnt as Decimal (12,5)) ,0)/60
 		    END AS  "Productivity Hours"
 
-, CASE 
+, CASE ---Time out data logged for production purposes--not part of shrinkage
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
@@ -137,10 +138,10 @@ T1.RoleID
 --,ActualMakeupHours 
 ,AllDayOOO
 ,CAST(((ShortDate-RoleStartDate) Month(4)) AS INTEGER) as Experiance
-FROM (SELECT * FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T1 WHERE DepartmentID IN (11,47)) T1
+FROM (SELECT * FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T1 WHERE DepartmentID IN (11,47)) T1  --Get all EE's in ANB orginization
 
 INNER JOIN (SELECT ShortDate, T2.DayOfWeek, IsHoliday, IsWeekday, HRID, WorkingHours, AdminTime, StartDate
-						FROM PROD_DMA_VW.SCHEDULE_PIT_DIM_VW T2
+						FROM PROD_DMA_VW.SCHEDULE_PIT_DIM_VW T2  -- Get schedule atributes for EE 
 						INNER JOIN PROD_DMA_VW.DATE_DIM_VW T3 ON T2.DayOfWeek = T3.DayOfWeek
 			 			 WHERE SHORTDATE BETWEEN StartDate AND EndDate) T2 ON T1.HRID = T2.HRID AND T2.ShortDate BETWEEN T1.StartDate AND T1.EndDate
 JOIN ( SELECT Distinct MMID --Get role start date for experiance
@@ -155,17 +156,17 @@ JOIN ( SELECT Distinct MMID --Get role start date for experiance
 				                               Else StartDate
 				                               End) OVER (PARTITION BY MMID,ROLEID) as RoleStartDate  ---New
 							, MAX(EndDate) OVER (PARTITION BY MMID) as EE_EndDate
-				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW ) T3 ON T1.MMID = T3.MMID and T1.RoleID = T3.RoleID
-LEFT JOIN (SELECT PartyEmployeeID   ----Get Cats data for production
+				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW ) T3 ON T1.MMID = T3.MMID and T1.RoleID = T3.RoleID  --get EE role start and end date
+LEFT JOIN (SELECT PartyEmployeeID  
 						, CompletedDate
 						, SUM(ProdCredit) AS ProdCredits
-						FROM PROD_DMA_VW.ACT_LAC_PIT_INTEGRATED_VW
+						FROM PROD_DMA_VW.ACT_LAC_PIT_INTEGRATED_VW ----Get Cats data for production
 						WHERE TransactionTypeID = 3 AND CompletedDate BETWEEN ADD_MONTHS(CURRENT_DATE, -12)
 						AND CURRENT_DATE + INTERVAL '10' DAY
 						GROUP BY 1,2) T4
 						ON T1.PartyEmployeeID = T4.PartyEmployeeID AND T2.ShortDate = T4.CompletedDate
-LEFT JOIN PROD_DMA_VW.ACTIVITY_TO_FCT_VW T5 ON ShortDate = T5.MeetingDate AND T1.PartyEmployeeID = T5.PartyEmployeeID
-
+LEFT JOIN PROD_DMA_VW.ACTIVITY_TO_FCT_VW T5 ON ShortDate = T5.MeetingDate AND T1.PartyEmployeeID = T5.PartyEmployeeID  --get data from time out
+LEFT JOIN (SELECT	TimeTypeID, TimeType as TimeTypeName FROM	Prod_DMA_VW.TIME_TYPE_VW) T6 on T6.TimeTypeID = T5.TimeType ---get time type name
 WHERE ShortDate BETWEEN (CASE WHEN T1.StartDate < CURRENT_DATE - INTERVAL '36' MONTH
 														THEN T2.StartDate ELSE ADD_MONTHS(CURRENT_DATE, -36) END)
 AND CURRENT_DATE + INTERVAL '10' DAY
@@ -181,5 +182,6 @@ From T
 --where ActualNonProdHours <>Duration
 --where AllDayOOO >0 and Working_hrs >=16
 --order by MMID, "DATE"
-where MMID = 'MM97798'
-and "DATE" = '2020-10-02'
+where meetingTitle ='Flex Time'
+--where MMID = 'MM97798'
+--and "DATE" = '2020-10-02'
