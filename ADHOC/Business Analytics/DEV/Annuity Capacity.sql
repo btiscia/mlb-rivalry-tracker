@@ -21,6 +21,7 @@ T1.RoleID
 ,T5.TransDt AS TRANS_DT
 ,T5.TimeType
 ,T6.TimeTypeName
+,ActualFlexHours
 ,WorkingHours AS ScheduledHours
 --,AdminTime AS ADMIN_TIME
 ,ProdCredits AS PROD_CREDITS
