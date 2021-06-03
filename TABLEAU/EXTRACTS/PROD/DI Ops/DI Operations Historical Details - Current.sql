@@ -8,7 +8,7 @@
 *  Revised:  4/22/2019 -- Added Society 1851 and systemDivisionname
 *  Revised: 7/16/2019 - Added completed time stamp, limited pending records to rolling 3 years only, removed join for IGO goal -Kristin Carlile 
 *  Revised: 10/22/2019 - Added in transactiontypeID so we can use to filter and make reports faster - added in transactiontypeID of 16, 17, 18 in date case statement for TREX - Kristin Carlile
-===============================================F=======================
+*  Revised: 6/3/2021 - Added DaysPastTAT - KC
                 
 ======================================================================*/
 
@@ -55,6 +55,7 @@ END AS "Date"
 ,DepartmentCode AS "Department Code"
 ,DivisionCode AS "Division Code"
 ,TAT
+,DaysPastTAT
 ,TransactionTypeId
 ,CompletedIndicator
 ,LongCompletedDate AS "Completed Time Stamp" --Added completed time stamp
