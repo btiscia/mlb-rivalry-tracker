@@ -22,8 +22,8 @@ T1.RoleID
 ,T5.TimeType
 ,T6.TimeTypeName
 ,ActualFlexHours
-,WorkingHours AS ScheduledHours
---,AdminTime AS ADMIN_TIME
+,WorkingHours/ EE_Day_RowCnt AS ScheduledHours
+,AdminTime/EE_Day_RowCnt AS AdminTime
 ,ProdCredits AS PROD_CREDITS
 ,Count (*) Over (Partition By ShortDate, T1.MMID) as EE_Day_RowCnt
 ,COALESCE(ProdCredits,0) AS "Productivity Credits_Whole"
@@ -175,6 +175,9 @@ AND CURRENT_DATE + INTERVAL '10' DAY
 )
 Select * 
 From T
+where "Date" = '2021-01-07'
+--and Employee = 'Carl, Kayla'
+and Employee = 'Scoles, Toni'
 --Where ACTUAL_OOO_HRS <> ActualOOOHours 
  --ACTUAL_OT_HRS <> ActualOTHours 
 --Where All_Day_OOO = 1
@@ -183,6 +186,6 @@ From T
 --where ActualNonProdHours <>Duration
 --where AllDayOOO >0 and Working_hrs >=16
 --order by MMID, "DATE"
-where meetingTitle ='Flex Time'
+--where meetingTitle ='Flex Time'
 --where MMID = 'MM97798'
 --and "DATE" = '2020-10-02'
