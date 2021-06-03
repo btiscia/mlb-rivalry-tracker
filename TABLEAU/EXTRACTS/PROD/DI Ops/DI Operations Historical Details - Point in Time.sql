@@ -5,7 +5,9 @@
 *  Author: Christina Valenti, Lorraine Christian, Kristin Carlile
 *  Created: NA
 *  Revised:  7/8/2019
-*  Revision Made:  7/8/2019 - Pending removed entirely .  GoalValue field removed along with the left join to the goal table, CompletedLongDate added.  */
+*  Revision Made:  7/8/2019 - Pending removed entirely .  GoalValue field removed along with the left join to the goal table, CompletedLongDate added. 
+*  Revision Made: 6/3/2021 - Added DaysPastTAT - KC
+ */
 
 
 SELECT 
@@ -53,6 +55,7 @@ END AS "Date"
 ,DivisionCode AS "Division Code"
 ,CompletedIndicator AS "Completed Indicator"
 ,TAT
+,DaysPastTAT
 ,NIGODescription
 ,TransDate AS "Transaction Date"
 ,LongCompletedDate AS "Completed Time Stamp"
