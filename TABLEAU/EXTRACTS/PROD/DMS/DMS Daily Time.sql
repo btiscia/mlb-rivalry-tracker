@@ -7,15 +7,8 @@
 *  Author: Lorraine Christian/Kristin Carlile
 *  Created: 3/4/2019
 *  Revised:   1/7/2020  updating % productive and adding net available time
- Test
-Test comment
-Forgot to add this comment
-=======
-Adding more here
-=======
-    Test comment
-main
- */
+*  Revised: 6/4/2021 Added dept 51 - KC  */
+
 
 SELECT
 ShortDate AS "Date"
@@ -109,4 +102,4 @@ END AS "Employee Type"
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
 WHERE "Date" BETWEEN  Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
-AND T1.DepartmentID = 13
+AND T1.DepartmentID in (13,51)
