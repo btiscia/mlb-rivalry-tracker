@@ -7,8 +7,8 @@
 *  Author: Lorraine Christian/Kristin Carlile
 *  Created: 3/4/2019
 *  Revised:   1/7/2020  updating % productive and adding net available time
-*  Revised: 6/4/2021 
- */
+*  Revised: 6/4/2021 Added dept 51 - KC  */
+
 
 SELECT
 ShortDate AS "Date"
