@@ -24,7 +24,7 @@ T1.RoleID
 ,ActualFlexHours
 ,WorkingHours as ScheduledHours
 ,WorkingHours/ EE_Day_RowCnt AS WorkingHrs_Rowcnt
-,AdminTime/EE_Day_RowCnt AS AdminTime
+,AdminTime/EE_Day_RowCnt AS Admin_Time
 ,ProdCredits AS PROD_CREDITS
 ,Count (*) Over (Partition By ShortDate, T1.MMID) as EE_Day_RowCnt
 ,COALESCE(ProdCredits,0) AS "Productivity Credits_Whole"
@@ -95,13 +95,14 @@ T1.RoleID
 
 ---Actaul Shrinkage time
 , CASE 
-		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
-		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  (AdminTime)
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN   AdminTime
 		    WHEN All_Day_OOO  >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-		    ELSE  AdminTime
+			WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 0 
+			WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  Admin_Time
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN   Admin_Time
+		    ELSE  Admin_Time
 		    END AS "Admin Time"
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN WorkingHrs_Rowcnt ---If this is ever a problem, check if it needs to go back to ScheduledHours
@@ -176,7 +177,7 @@ AND CURRENT_DATE + INTERVAL '10' DAY
 )
 Select * 
 From T
-where "Date" = '2021-01-07'
+where "Date" = '2021-01-21'
 and Employee = 'Carl, Kayla'
 --and Employee = 'Scoles, Toni'
 --Where ACTUAL_OOO_HRS <> ActualOOOHours 
