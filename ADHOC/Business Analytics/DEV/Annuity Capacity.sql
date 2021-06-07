@@ -22,7 +22,8 @@ T1.RoleID
 ,T5.TimeType
 ,T6.TimeTypeName
 ,ActualFlexHours
-,WorkingHours/ EE_Day_RowCnt AS ScheduledHours
+,WorkingHours as ScheduledHours
+,WorkingHours/ EE_Day_RowCnt AS WorkingHrs_Rowcnt
 ,AdminTime/EE_Day_RowCnt AS AdminTime
 ,ProdCredits AS PROD_CREDITS
 ,Count (*) Over (Partition By ShortDate, T1.MMID) as EE_Day_RowCnt
@@ -49,14 +50,14 @@ T1.RoleID
 
 ---- Available Capacity time to do work
 , CASE 
-			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS  >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
+			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS  >= ScheduledHours AND ScheduledHours <> 0) THEN  WorkingHrs_Rowcnt
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
 		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  0
 		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  0
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ScheduledHours
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ScheduledHours
-		    ELSE ScheduledHours
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  WorkingHrs_Rowcnt
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  WorkingHrs_Rowcnt
+		    ELSE WorkingHrs_Rowcnt
 		    END AS "Actual Working Hrs"    
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS  >= ScheduledHours AND ScheduledHours <> 0) THEN  0
@@ -103,11 +104,11 @@ T1.RoleID
 		    ELSE  AdminTime
 		    END AS "Admin Time"
 , CASE 
-			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
+			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN WorkingHrs_Rowcnt ---If this is ever a problem, check if it needs to go back to ScheduledHours
 		    ELSE ActualOOOHours
 		    END AS "Actual OOO Hrs"   
 ,COALESCE (Sum(ActualOOOHours) OVER (Partition by ShortDate,T1.MMID),0) as ACTUAL_OOO_HRS
-,ActualOOOHours
+
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS +ACTUAL_MAKEUP_HRS) = 0 THEN 0 
