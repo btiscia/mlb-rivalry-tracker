@@ -177,8 +177,8 @@ AND CURRENT_DATE + INTERVAL '10' DAY
 Select * 
 From T
 where "Date" = '2021-01-07'
---and Employee = 'Carl, Kayla'
-and Employee = 'Scoles, Toni'
+and Employee = 'Carl, Kayla'
+--and Employee = 'Scoles, Toni'
 --Where ACTUAL_OOO_HRS <> ActualOOOHours 
  --ACTUAL_OT_HRS <> ActualOTHours 
 --Where All_Day_OOO = 1
