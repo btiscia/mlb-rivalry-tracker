@@ -1,4 +1,6 @@
 With T as (
+
+
 Select 
 T1.RoleID
 --,COALESCE (Sum(WorkingHours) OVER (Partition by ShortDate,T1.MMID),0) as Working_hrs --only used for testng all day OOO
@@ -106,7 +108,7 @@ T1.RoleID
 		    END AS "Admin Time"
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS >= ScheduledHours AND ScheduledHours <> 0) THEN WorkingHrs_Rowcnt ---If this is ever a problem, check if it needs to go back to ScheduledHours
-		    ELSE ActualOOOHours
+		    ELSE  COALESCE( ActualOOOHours,0)
 		    END AS "Actual OOO Hrs"   
 ,COALESCE (Sum(ActualOOOHours) OVER (Partition by ShortDate,T1.MMID),0) as ACTUAL_OOO_HRS
 
