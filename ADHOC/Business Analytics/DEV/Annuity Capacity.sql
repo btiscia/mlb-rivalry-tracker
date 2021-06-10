@@ -76,22 +76,22 @@ T1.RoleID
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS  >= ScheduledHours AND ScheduledHours <> 0) THEN  0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN   ActualMakeupHours
-		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN   ActualMakeupHours
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ActualMakeupHours
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ActualMakeupHours
-		    ELSE  ActualMakeupHours
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN   COALESCE( ActualMakeupHours,0)
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN   COALESCE( ActualMakeupHours,0)
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  COALESCE( ActualMakeupHours,0)
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  COALESCE( ActualMakeupHours,0)
+		    ELSE   COALESCE( ActualMakeupHours,0)
 		    END AS  "Actual Makeup Hrs" 
 ,COALESCE(Sum(ActualMakeupHours)OVER (Partition by ShortDate,T1.MMID) ,0) AS ACTUAL_MAKEUP_HRS
 , CASE 
 			WHEN All_Day_OOO >= 1 OR (ACTUAL_OOO_HRS  >= ScheduledHours AND ScheduledHours <> 0) THEN  0
 		    WHEN (ScheduledHours + ACTUAL_OT_HRS+ ACTUAL_MAKEUP_HRS) = 0 THEN 0 
 		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  ActualExcusedHours
-		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  ActualExcusedHours
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN ActualExcusedHours
-		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN ActualExcusedHours
-		    ELSE ActualExcusedHours
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN  COALESCE( ActualExcusedHours,0)
+		    WHEN (IsHoliday = 1) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN  COALESCE( ActualExcusedHours,0)
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) < 6 THEN COALESCE( ActualExcusedHours,0)
+		    WHEN (ScheduledHours = 0) AND (ACTUAL_OT_HRS + ACTUAL_MAKEUP_HRS) >= 6 THEN COALESCE( ActualExcusedHours,0)
+		    ELSE  COALESCE( ActualExcusedHours,0)
 		    END AS "Actual Excused Hrs"
 --,COALESCE (Sum(ActualExcusedHours) OVER (Partition by ShortDate,T1.MMID),0) as Actual_Excused_Hours
 
@@ -179,9 +179,9 @@ AND CURRENT_DATE + INTERVAL '10' DAY
 )
 Select * 
 From T
-where "Date" = '2021-01-21'
-and Employee = 'Carl, Kayla'
---and Employee = 'Scoles, Toni'
+where "Date" = '2020-08-27'
+--and Employee = 'Carl, Kayla'
+and Employee = 'Scoles, Toni'
 --Where ACTUAL_OOO_HRS <> ActualOOOHours 
  --ACTUAL_OT_HRS <> ActualOTHours 
 --Where All_Day_OOO = 1
