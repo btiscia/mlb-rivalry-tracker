@@ -30,8 +30,7 @@ END AS "Claim Status"
 ,CAST(T1.TransDate AS TIMESTAMP) AS "Trans Date"
 ,LoadDate AS "Load Date" 
 FROM    PROD_DMA_VW.DIC_RISK_INVENTORY_RPT_VW T1
-LEFT JOIN PROD_DMA_VW.EMPLOYEE_CURR_DIM_VW T2 ON T1.EXAMINERPARTYEMPLOYEEID = T2.PARTYEMPLOYEEID
 WHERE RiskTypeGroup ='SUPPORTED THROUGH'
 AND (CalendarDaysPastTAT >=-60 OR CalendarDaysPastTAT IS NULL)
 AND (RestrictedClaimIndicator = 0 OR RestrictedClaimIndicator IS NULL)
-AND T1.RoleGradeID <> 12
+AND Coalesce(T1.RoleGradeID, -99) <> 12
