@@ -6,10 +6,7 @@
      PROD_DMA_VW.ACT_DMS_INTEGRATED_FCT_VW, PROD_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW 
 *  Author: Lorraine Christian/Kristin Carlile
 *  Created: 3/4/2019
-*  Revised:   1/7/2020  updating % productive and adding net available time
-*  Revised: 6/4/2021 
-Test Comment
- */
+*  Revised: 6/4/2021 Added dept 51 - KC  */
 
 SELECT
 ShortDate AS "Date"

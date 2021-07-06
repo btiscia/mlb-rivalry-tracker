@@ -1,0 +1,15 @@
+SELECT	
+"AlertID" AS "Alert ID"
+, "OpenedByMMID" AS "Opened By MMID"
+, "OpenedByName" AS "Opened By"
+,  "DateClosed" AS "Date Closed"
+, "CaseHandleTime" AS "Handle Time"
+, "AlertOrigin" AS "Alert Origin"
+, "AlertOriginCategory" AS "Alert Category"
+, "CaseDisposition" AS "Case Disposition"
+, "FraudCaseIndicator" AS "Fraud Case Indicator"
+, "FollowUpIndicator" AS "Follow Up Indicator"
+, "BusinessArea" AS "Business Area"
+, "TransDate"
+FROM	"PROD_DMA_VW"."ARCHER_TRANSACTION_VW"
+WHERE DateClosed  <= CURRENT_DATE
