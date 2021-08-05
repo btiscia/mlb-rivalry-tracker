@@ -1,3 +1,5 @@
+--comments here
+
 SELECT 
 --ref_wrk_ident_natural_key_hash_uuid
  source_transaction_id AS SourceTransactionID
