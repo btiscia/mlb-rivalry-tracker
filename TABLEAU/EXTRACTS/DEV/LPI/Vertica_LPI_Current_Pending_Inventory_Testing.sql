@@ -1,4 +1,9 @@
---comments here
+
+
+/*
+FILENAME: LPI CURRENT PENDING INVENTORY - VERTICA TESTING
+CREATED BY: John Avgoutakis
+*/
 
 SELECT 
 --ref_wrk_ident_natural_key_hash_uuid
