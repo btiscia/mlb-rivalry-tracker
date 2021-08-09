@@ -1,8 +1,8 @@
-
-
 /*
 FILENAME: LPI CURRENT PENDING INVENTORY - VERTICA TESTING
 CREATED BY: John Avgoutakis
+LAST UPDATED: 08/09/2021
+CHANGES MADE: Added Trans Date (row_process_dtm)
 */
 
 SELECT 
@@ -61,7 +61,7 @@ SELECT
 , group_type_nm AS GroupTypeName
 --, begin_dt
 --, begin_dtm
---, row_process_dtm
+, row_process_dtm AS 'Trans Date'
 --, audit_id
 --, check_sum
 --, current_row_ind
