@@ -1,8 +1,8 @@
 /*
 FILENAME: LPI CURRENT PENDING INVENTORY - VERTICA TESTING
 CREATED BY: John Avgoutakis
-LAST UPDATED: 08/16/2021
-CHANGES MADE: Added bcc_ind to the query.
+LAST UPDATED: 08/23/2021
+CHANGES MADE: Fixed where statement.
 */
 
 SELECT 
@@ -41,5 +41,5 @@ SELECT
 , row_process_dtm AS 'Trans Date'
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id = 5
-OR employee_role_id = 5)
+OR work_event_department_id = 5)
 AND function_nm <> 'Flags/Blockers'
