@@ -43,6 +43,6 @@ select T1.transaction_type_nm
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS past_tat_2
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS past_tat_3
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS past_tat_4_up
-from dma_vw.fact_integrated_psc_curr_vw T1
+from dma_vw.fact_integrated_psc_pit_vw T1
 left join (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
 where (T1.work_event_department_id = 4 OR T1.employee_department_id = 4)
