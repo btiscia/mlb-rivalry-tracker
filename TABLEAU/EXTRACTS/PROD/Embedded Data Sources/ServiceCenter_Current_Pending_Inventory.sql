@@ -2,7 +2,7 @@
 FILENAME: SERVICE CENTER CURRENT PENDING INVENTORY
 CREATED BY: John Avgoutakis
 LAST UPDATED: 08/26/2021
-CHANGES MADE: Created.
+CHANGES MADE: Removed insured's name and policy number.
 */
 
 SELECT 
@@ -21,8 +21,6 @@ SELECT
 , work_event_department_nm AS WorkEventDepartmentName
 , function_nm AS FunctionName --had to add "Name" because of vertica
 , segment_nm AS Segment
-, insured_nm AS "Insured's Name"
-, pol_nr AS 'Policy Number'
 , rcvd_dt AS 'Received Date'
 , expected_completed_dt AS 'Target Complete Date'
 , cats_expected_completed_dt AS 'CATS Expected Completed Date'

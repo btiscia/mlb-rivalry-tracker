@@ -1,12 +1,13 @@
 /*
-FILENAME: LPI CURRENT PENDING INVENTORY - VERTICA TESTING
+FILENAME: DMS CURRENT PENDING INVENTORY
 CREATED BY: John Avgoutakis
 LAST UPDATED: 08/27/2021
-CHANGES MADE: Removed insured full name and added inused last name.
+CHANGES MADE: Created.
 */
 
 SELECT 
  source_transaction_id AS SourceTransactionID
+ ,party_employee_id
 , employee_nm AS Employee
 , organization_nm AS EmployeeOrganizationName  
 , department_nm AS EmployeeDepartmentName
@@ -20,9 +21,8 @@ SELECT
 , work_event_department_nm AS WorkEventDepartmentName
 , function_nm AS FunctionName --had to add "Name" because of vertica
 , segment_nm AS Segment
---, insured_nm AS "Insured's Name"
 , insured_last_nm AS "Insured's Name"
-, pol_nr AS 'Policy Number'
+--, pol_nr AS 'Policy Number'
 , rcvd_dt AS 'Received Date'
 , expected_completed_dt AS 'Target Complete Date'
 , cats_expected_completed_dt AS 'CATS Expected Completed Date'
@@ -40,7 +40,12 @@ SELECT
 , group_nm AS GroupName
 , group_type_nm AS GroupTypeName
 , row_process_dtm AS 'Trans Date'
+,CASE WHEN 
+	pol_nr IS NULL AND group_nm IS NOT NULL 
+	THEN group_nm 
+	ELSE pol_nr
+	END AS "Policy / Group #"
 FROM dma_vw.rpt_cats_curr_pend_vw
-WHERE (employee_department_id = 5
-OR work_event_department_id = 5)
+WHERE (employee_department_id = 13
+OR work_event_department_id = 13)
 AND function_nm <> 'Flags/Blockers'
