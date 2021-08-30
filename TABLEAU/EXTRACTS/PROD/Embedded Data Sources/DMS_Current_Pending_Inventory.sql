@@ -32,9 +32,9 @@ SELECT
 , prod_credit AS 'Productivity Credits'
 , bcc_ind AS 'Society 1851'
 , sht_cmnt_des AS Comments
-, chnl_dspy_nm AS ChannelDisplayName
-, admn_sys_cde AS AdminSystemCode
-, system_division_nm AS SystemDivisionName
+, chnl_dspy_nm AS 'Service Channel'
+, admn_sys_cde AS 'Admin System'
+, system_division_nm AS 'Line of Business'
 , system_department_nm AS SystemDepartmentName
 , log_dt AS LoggedDate
 , group_nm AS GroupName
@@ -48,4 +48,4 @@ SELECT
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id = 13
 OR work_event_department_id = 13)
-AND function_nm <> 'Flags/Blockers'
+AND COALESCE(function_nm,'Unknown') <> 'Flags/Blockers'

@@ -46,4 +46,4 @@ SELECT
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id IN (34,35)
 OR work_event_department_id IN (34,35))
-AND function_nm <> 'Flags/Blockers'
+AND COALESCE(function_nm,'Unknown') <> 'Flags/Blockers'
