@@ -1,8 +1,8 @@
 /*
 FILENAME: Advisor Ops CURRENT PENDING INVENTORY
 CREATED BY: John Avgoutakis
-LAST UPDATED: 09/01/2021
-CHANGES MADE: Created.
+LAST UPDATED: 09/14/2021
+CHANGES MADE: Updated Group Number, Added policy number and group number fields.
 */
 
 SELECT 
@@ -22,10 +22,11 @@ SELECT
 , function_nm AS FunctionName --had to add "Name" because of vertica
 , segment_nm AS Segment
 , insured_last_nm AS "Insured's Name"
---, pol_nr AS 'Policy Number'
+, pol_nr AS 'Policy Number'
+, apm_grp_ident AS 'Group Number'
 ,CASE WHEN 
-	pol_nr IS NULL AND group_nm IS NOT NULL 
-	THEN group_nm 
+	pol_nr IS NULL AND apm_grp_ident IS NOT NULL 
+	THEN apm_grp_ident 
 	ELSE pol_nr
 	END AS "Policy / Group #"
 , rcvd_dt AS 'Received Date'

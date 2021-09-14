@@ -29,6 +29,9 @@ SELECT
 	ELSE T1.pol_nr
 	END AS "Policy / Group #"
 
+--, NULL as Priority
+--, NULL as 'Priority Order'
+
 ,CASE
 	WHEN T1.group_nm = 'Internal Replacement' THEN 'High'
 	WHEN T2.MAJOR_PROD_NME = 'Variable Annuity' AND T1.group_nm = 'Gain/Loss' THEN  'High'
@@ -47,7 +50,7 @@ SELECT
 	WHEN T2.MAJOR_PROD_NME = 'Fixed Annuity' AND T1.group_nm = 'No Gain/Loss' THEN 2
 	WHEN T2.MAJOR_PROD_NME = 'Fixed Annuity' AND T1.group_nm = 'Conditional Gain/Loss' THEN 2
 	ELSE 3 
-	END	AS "Priority Order"
+	END	AS 'Priority Order'
 
 , T1.rcvd_dt AS 'Received Date'
 , T1.expected_completed_dt AS 'Target Complete Date'
