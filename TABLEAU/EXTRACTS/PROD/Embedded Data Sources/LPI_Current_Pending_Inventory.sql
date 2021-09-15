@@ -12,8 +12,8 @@ SELECT
 , department_nm AS EmployeeDepartmentName
 , role_nm AS Role
 , manager_nm AS Manager
-, team_nm AS 'Team Name'
-, work_event_nm as 'Work Event'
+, team_nm AS "Team Name"
+, work_event_nm as "Work Event"
 , employee_department_id AS EmployeeDepartmentID
 , employee_role_id AS EmployeeRoleID
 , work_event_organization_nm AS WorkEventOrganizationName
@@ -22,15 +22,15 @@ SELECT
 , segment_nm AS Segment
 --, insured_nm AS "Insured's Name"
 , insured_last_nm AS "Insured's Name"
-, pol_nr AS 'Policy Number'
-, rcvd_dt AS 'Received Date'
-, expected_completed_dt AS 'Target Complete Date'
-, cats_expected_completed_dt AS 'CATS Expected Completed Date'
-, days_pending AS 'Days Pending'
-, days_past_tat AS 'Days Past TAT'
-, tat_goal AS 'TAT Goal'
-, prod_credit AS 'Productivity Credits'
-, bcc_ind AS 'Society 1851'
+, pol_nr AS "Policy Number"
+, rcvd_dt AS "Received Date"
+, expected_completed_dt AS "Target Complete Date"
+, cats_expected_completed_dt AS "CATS Expected Completed Date"
+, days_pending AS "Days Pending"
+, days_past_tat AS "Days Past TAT"
+, tat_goal AS "TAT Goal"
+, prod_credit AS "Productivity Credits"
+, bcc_ind AS "Society 1851"
 , sht_cmnt_des AS Comments
 , chnl_dspy_nm AS ChannelDisplayName
 , admn_sys_cde AS AdminSystemCode
@@ -39,7 +39,7 @@ SELECT
 , log_dt AS LoggedDate
 , group_nm AS GroupName
 , group_type_nm AS GroupTypeName
-, row_process_dtm AS 'Trans Date'
+, row_process_dtm AS "Trans Date"
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id = 5
 OR work_event_department_id = 5)
