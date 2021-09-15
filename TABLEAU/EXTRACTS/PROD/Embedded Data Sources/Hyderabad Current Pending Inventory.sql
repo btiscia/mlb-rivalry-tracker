@@ -1,7 +1,7 @@
 /*
-FILENAME: DTC CURRENT PENDING INVENTORY
+FILENAME: HYDERABAD CURRENT PENDING INVENTORY
 CREATED BY: John Avgoutakis
-LAST UPDATED: 09/01/2021
+LAST UPDATED: 09/10/2021
 CHANGES MADE: Created.
 */
 
@@ -23,7 +23,12 @@ SELECT
 , segment_nm AS Segment
 , insured_last_nm AS "Insured's Name"
 , pol_nr AS "Policy Number"
-, rcvd_dt AS "Received Date"
+, apm_grp_ident AS "Group Number"
+,CASE WHEN 
+	pol_nr IS NULL AND apm_grp_ident IS NOT NULL 
+	THEN apm_grp_ident 
+	ELSE pol_nr
+	END AS "Policy / Group #"
 , expected_completed_dt AS "Target Complete Date"
 , cats_expected_completed_dt AS "CATS Expected Completed Date"
 , days_pending AS "Days Pending"
@@ -41,6 +46,6 @@ SELECT
 , group_type_nm AS GroupTypeName
 , row_process_dtm AS "Trans Date"
 FROM dma_vw.rpt_cats_curr_pend_vw
-WHERE (employee_department_id = 20
-OR work_event_department_id = 20)
+WHERE (employee_department_id = 51
+OR work_event_department_id = 51)
 AND COALESCE(function_nm,'Unknown') <> 'Flags/Blockers'
