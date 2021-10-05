@@ -1,12 +1,12 @@
 /*
 FILENAME: ANNUITY OPERATIONS CURRENT PENDING INVENTORY
 CREATED BY: John Avgoutakis
-LAST UPDATED: 09/07/2021
+LAST UPDATED: 09/22/2021
 CHANGES MADE: Created.
 */
 
-SELECT 
- T1.source_transaction_id AS SourceTransactionID
+SELECT  
+  T1.source_transaction_id AS SourceTransactionID
 , T1.party_employee_id
 , T1.employee_nm AS Employee
 , T1.organization_nm AS EmployeeOrganizationName  
@@ -24,35 +24,28 @@ SELECT
 , T1.insured_last_nm AS "Insured's Name"
 , pol_nr AS "Policy Number"
 , apm_grp_ident AS "Group Number"
-,CASE WHEN 
-	pol_nr IS NULL AND apm_grp_ident IS NOT NULL 
-	THEN apm_grp_ident 
-	ELSE pol_nr
-	END AS "Policy / Group #"
-
---, NULL as Priority
---, NULL as 'Priority Order'
-
+,CASE WHEN pol_nr IS NULL AND apm_grp_ident IS NOT NULL 
+    THEN apm_grp_ident 
+    ELSE pol_nr END AS "Policy / Group #"
 ,CASE
-	WHEN T1.group_nm = 'Internal Replacement' THEN 'High'
-	WHEN T2.MAJOR_PROD_NME = 'Variable Annuity' AND T1.group_nm = 'Gain/Loss' THEN  'High'
-	WHEN T2.MAJOR_PROD_NME = 'Variable Annuity' AND T1.group_nm = 'Conditional Gain/Loss' THEN  'High'
-	WHEN T2.MAJOR_PROD_NME = 'Variable Annuity' AND T1.group_nm = 'No Gain/Loss' THEN 'Low'
-	WHEN T2.MAJOR_PROD_NME = 'Fixed Annuity' AND T1.group_nm = 'No Gain/Loss' THEN 'Medium'
-	WHEN T2.MAJOR_PROD_NME = 'Fixed Annuity' AND T1.group_nm = 'Conditional Gain/Loss' THEN  'Medium'
-	ELSE 'Low' 
-	END AS Priority	
-	
+    WHEN T1.group_nm = 'Internal Replacement' THEN 'High'
+    WHEN T1.major_prod_nm = 'Ann&&Va' AND T1.group_nm = 'Gain/Loss' THEN  'High'
+    WHEN T1.major_prod_nm = 'Ann&&Va' AND T1.group_nm = 'Conditional Gain/Loss' THEN  'High'
+    WHEN T1.major_prod_nm = 'Ann&&Va' AND T1.group_nm = 'No Gain/Loss' THEN 'Low'
+    WHEN T1.major_prod_nm = 'Ann&&Fa' AND T1.group_nm = 'No Gain/Loss' THEN 'Medium'
+    WHEN T1.major_prod_nm = 'Ann&&Fa' AND T1.group_nm = 'Conditional Gain/Loss' THEN  'Medium'
+    ELSE 'Low' 
+END AS Priority    
+    
 ,CASE
-	WHEN T1.group_nm = 'Internal Replacement' THEN 1
-	WHEN T2.MAJOR_PROD_NME = 'Variable Annuity' AND T1.group_nm = 'Gain/Loss' THEN 1
-	WHEN T2.MAJOR_PROD_NME = 'Variable Annuity' AND T1.group_nm = 'Conditional Gain/Loss' THEN 1
-	WHEN T2.MAJOR_PROD_NME = 'Variable Annuity' AND T1.group_nm = 'No Gain/Loss' THEN 3
-	WHEN T2.MAJOR_PROD_NME = 'Fixed Annuity' AND T1.group_nm = 'No Gain/Loss' THEN 2
-	WHEN T2.MAJOR_PROD_NME = 'Fixed Annuity' AND T1.group_nm = 'Conditional Gain/Loss' THEN 2
-	ELSE 3 
-	END	AS 'Priority Order'
-
+    WHEN T1.group_nm = 'Internal Replacement' THEN 1
+    WHEN T1.major_prod_nm = 'Ann&&Va' AND T1.group_nm = 'Gain/Loss' THEN 1
+    WHEN T1.major_prod_nm = 'Ann&&Va' AND T1.group_nm = 'Conditional Gain/Loss' THEN 1
+    WHEN T1.major_prod_nm = 'Ann&&Va' AND T1.group_nm = 'No Gain/Loss' THEN 3
+    WHEN T1.major_prod_nm = 'Ann&&Fa' AND T1.group_nm = 'No Gain/Loss' THEN 2
+    WHEN T1.major_prod_nm = 'Ann&&Fa' AND T1.group_nm = 'Conditional Gain/Loss' THEN 2
+    ELSE 3 
+END    AS "Priority Order"
 , T1.rcvd_dt AS "Received Date"
 , T1.expected_completed_dt AS "Target Complete Date"
 , T1.cats_expected_completed_dt AS "CATS Expected Completed Date"
@@ -70,10 +63,7 @@ SELECT
 , T1.group_nm AS GroupName
 , T1.group_type_nm AS GroupTypeName
 , T1.row_process_dtm AS "Trans Date"
-T2.MAJOR_PROD_NME
-T2.MINOR_PROD_NMME
+, T1.major_prod_nm AS MajorProductName
 FROM dma_vw.rpt_cats_curr_pend_vw T1
-LEFT JOIN teradata_usig_stnd_vw.AGMT_CMN_VW T2 ON TRIM(LEADING '0' FROM T1.pol_nr) = TRIM(LEADING '0' FROM T2.HLDG_KEY)
-WHERE (T1.employee_department_id = 11
-OR T1.work_event_department_id = 11)
-AND COALESCE(T1.function_nm,'Unknown') <> 'Flags/Blockers'
+WHERE (T1.employee_department_id = 11 OR T1.work_event_department_id = 11)
+AND (COALESCE(T1.function_nm,'Unknown') <> 'Flags/Blockers' or T1.function_nm IS NULL)
