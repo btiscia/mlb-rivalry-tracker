@@ -8,6 +8,7 @@ ActivityID
 , Product
 , Distributor
 , Channel
+, ContractState
 , AgentID
 , Advisor
 , FirmNum
@@ -39,6 +40,7 @@ ActivityID
 , InitialReviewIGOIndicator AS "IGOIndicator"
 , SuitabilityIGOIndicator
 , AutoApprovedIndicator
+, ReplacementIndicator
 , ProductivityCredits
 , ApplicationSignDate
 , SuitabilityApprovalDate
