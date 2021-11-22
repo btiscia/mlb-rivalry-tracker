@@ -9,6 +9,7 @@
 *  Revised: 7/16/2019 - Added completed time stamp, limited pending records to rolling 3 years only, removed join for IGO goal -Kristin Carlile 
 *  Revised: 10/22/2019 - Added in transactiontypeID so we can use to filter and make reports faster - added in transactiontypeID of 16, 17, 18 in date case statement for TREX - Kristin Carlile
 * Revised: 6/7/21 - Added Dept 51 for Hyderabad data - Kristin Carlile
+11/22/21 - Added MMID field for manual vs. bot vs. STP calc - Kristin Carlile
 */
 
 SELECT
@@ -45,6 +46,7 @@ END AS "Date"
 ,PartyTypeName AS "Party Type Name"
 ,EmployeeOrganizationName AS "Employee Organization Name"
 ,EmployeeDepartmentName AS "Employee Department Name"             
+,MMID
 ,SiteName AS "Site Name"
 ,WorkEventOranizationName AS "Work Event Organization Name"
 ,WorkEventDepartmentName AS "Work Event Department Name"
