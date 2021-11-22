@@ -1,8 +1,8 @@
 /*
 FILENAME: LA CLAIMS CAPACITY
-CREATED BY: Bill Trombley
-LAST UPDATED:
-CHANGES MADE:
+CREATED BY: Jay Johnson
+LAST UPDATED: 11/22/2021
+CHANGES MADE: Modifications to the source tables.
 */
 
 SELECT
@@ -112,8 +112,8 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
 		    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
 		    END AS "Actual Capacity" --New    
-		    
-, ("Actual Capacity" - "Shrinkage Hrs"  )* T4.Effective  AS "Effective Capacity"   --- OLD:    ("Actual Capacity" * T4.Effective)  as "Effective Capacity"
+		    		    
+, ("Actual Capacity" - "Shrinkage Hrs"  )* T4.Effective  AS "Effective Capacity"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high95"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_high80"
 , CAST(NULL AS INTEGER) AS "ForecastCapacity_low80"
@@ -128,20 +128,17 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    ELSE  AdminTime
 		    END AS "Admin Time"
-		    
 , CASE 
 			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE ActualNonWorkingHours
 		    END AS "Actual Non-Production Hrs"
-		    
 , ActualOOOHours
 , CASE 
 			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
 		    ELSE ActualOOOHours
-		    END AS "Actual OOO Hrs"  
-		     
+		    END AS "Actual OOO Hrs"   
 , CASE 
 		WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hrs" )
 	    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
@@ -164,7 +161,6 @@ CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
 		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
 		    ELSE COALESCE(CAST("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
 		    END AS "Productivity Hours"  
-		    
 , CASE 
 			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
 		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
@@ -185,10 +181,13 @@ JOIN ( SELECT DISTINCT MMID
 							, MIN(CASE 
 				                               WHEN EXTRACT(YEAR FROM StartDate) = '1900' THEN HireDate
 				                               ELSE StartDate
-				                               END) OVER (PARTITION BY MMID,ROLEID) AS RoleStartDate  ---New
+				                               END) OVER (PARTITION BY MMID,ROLEID) AS RoleStartDate
 							, MAX(EndDate) OVER (PARTITION BY MMID) AS EE_EndDate
 				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW ) T3 ON T2.MMID = T3.MMID AND T2.RoleID = T3.RoleID
-JOIN DMA_GRP_DL.RT20_LC_Capacity_ExperianceLOV T4 ON 
+
+JOIN DMA_GRP_DL.Analytics_Capacity_Expc_LOV T4 ON 
+
+
 																				CASE 
 	                																	WHEN T2.RoleName LIKE ('%Consultant') THEN CAST(11 AS INTEGER)
 	               																		WHEN (ShortDate-RoleStartDate) MONTH(4) >9 THEN CAST(10 AS INTEGER)
@@ -202,7 +201,7 @@ UNION ALL
 
 SELECT
 CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
-, F.ForecastID
+, T1.ForecastID
 , CAST(NULL AS VARCHAR(50)) AS "MMID"
 , CAST(NULL AS VARCHAR(100)) AS "Employee"
 , CAST(NULL AS VARCHAR(100)) AS "Active Schedule Ident"
@@ -210,21 +209,21 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS VARCHAR(100)) AS "Team Name"
 , CAST(NULL AS INTEGER) AS "RoleID"
 , CAST(NULL AS VARCHAR(100)) AS "Role Name"
-, F.WorkRole 
+, T1.WorkRole 
 , CAST(NULL AS DATE) AS "EE_Startdate"
 , CAST(NULL AS DATE) AS "RoleStartDate"
 , CAST(NULL AS DATE) AS "EE_EndDate"
-,F.ForecastDate AS "Date" 
+,T1.ForecastDate AS "Date" 
 , CAST(NULL AS INTEGER) AS "IsHoliday"
 , CAST(NULL AS INTEGER) AS "IsWeekday"
 , CAST(NULL AS INTEGER) AS "Experience"
 , CAST(NULL AS VARCHAR(100)) AS "EE_TYPE"
 ,CAST(NULL AS INTEGER) AS "%Effective"
-, F.ForecastEffectiveFTE "EffectiveFTE"
-, F.ForecastEffectiveFTE_high95
-, F.ForecastEffectiveFTE_high80
-, F.ForecastEffectiveFTE_low80
-, F.ForecastEffectiveFTE_low95
+, T1.ForecastEffectiveFTE "EffectiveFTE"
+, T1.ForecastEffectiveFTE_high95
+, T1.ForecastEffectiveFTE_high80
+, T1.ForecastEffectiveFTE_low80
+, T1.ForecastEffectiveFTE_low95
 , CAST(NULL AS INTEGER) AS "Actual Flex Hours"
 , CAST(NULL AS INTEGER) AS "Planned OOO Hours"
 , CAST(NULL AS INTEGER) AS "Planned OT Hours"
@@ -241,28 +240,29 @@ CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
 , CAST(NULL AS INTEGER) AS "Actual Excused Hrs"
 , CAST(NULL AS INTEGER) AS ActualExcusedHours 
 , CAST(NULL AS INTEGER) AS "Actual Capacity"
-, F.ForecastCapacity AS "Effective Capacity"
-, F.ForecastCapacity_high95
-, F.ForecastCapacity_high80
-, F.ForecastCapacity_low80
-, F.ForecastCapacity_low95
+, T1.ForecastCapacity AS "Effective Capacity"
+, T1.ForecastCapacity_high95
+, T1.ForecastCapacity_high80
+, T1.ForecastCapacity_low80
+, T1.ForecastCapacity_low95
 , CAST(NULL AS INTEGER) AS "Efficiency Loss"   
 , CAST(NULL AS INTEGER) AS "Admin Time"
 , CAST(NULL AS INTEGER) AS "Actual Non-Production Hrs"
 , CAST(NULL AS INTEGER) AS "ActualOOOHours"
 , CAST(NULL AS INTEGER) AS "Actual OOO Hrs"   
 , CAST(NULL AS INTEGER) AS "Shrinkage Hrs" 
-, F.ForecastShrinkage AS "%Shrinkage"
-, F.ForecastShrinkage_high95
-, F.ForecastShrinkage_high80
-, F.ForecastShrinkage_low80
-, F.ForecastShrinkage_low95
+, T1.ForecastShrinkage AS "%Shrinkage"
+, T1.ForecastShrinkage_high95
+, T1.ForecastShrinkage_high80
+, T1.ForecastShrinkage_low80
+, T1.ForecastShrinkage_low95
 , CAST(NULL AS INTEGER) AS "Productivity Hours"  
 , CAST(NULL AS INTEGER) AS "Actual Production Hours"
 , CAST(NULL AS INTEGER) AS "Hours Productive"
-FROM DMA_GRP_DL.RT20_00002983_LC_Capacity F
-
+FROM DMA_GRP_DL.Analytics_CapacityFX AS T1
 INNER JOIN
-	(SELECT MAX(ForecastID) AS FxID 
-	FROM DMA_GRP_DL.RT20_00002983_LC_Capacity) D2
-	ON F.ForecastID = FxID
+(SELECT DISTINCT Department, ForecastDate ,MAX(ForecastID) OVER (PARTITION BY Department,ForecastDate) AS FxID 
+FROM DMA_GRP_DL.Analytics_CapacityFX
+WHERE   EXTRACT(YEAR FROM ForecastDate) = EXTRACT (YEAR FROM CURRENT_DATE- INTERVAL '0' YEAR)
+AND Department = 'Life Claims') AS T2
+ON (ForecastID = FxID AND T1.ForecastDate = T2.ForecastDate AND T1.Department=T2.Department)
