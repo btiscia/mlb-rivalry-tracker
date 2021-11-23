@@ -6,6 +6,7 @@
 *Created: NA
 *Revision Made: 7/8/2019
 *Revisions: Pending removed entirely 
+*Revision made 11/23/21 Removed Sanderling work event causing slowness in query - Kristin Carlile
 */
 
 SELECT 
@@ -65,6 +66,7 @@ WHERE (WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND CompletedIndicator = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
+AND WorkEventNumber <> 4763
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31, 32, 33
 
 /* UNION
@@ -204,4 +206,5 @@ WHERE (WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND SequenceNumber = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
+AND WorkEventNumber <> 4763
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31, 32, 33

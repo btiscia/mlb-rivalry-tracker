@@ -1,5 +1,6 @@
 
-/*Updated 7/15/20 removed holidays to improve query efficiency -KC */
+/*Updated 7/15/20 removed holidays to improve query efficiency -KC *
+Updated 11/23/21 - Removing Sanderling work event that is slowing extract -Kristin Carlile*/
 
 SELECT 
 CASE 
@@ -65,6 +66,8 @@ ON "Date" = DateDimDate.ShortDate
 WHERE (WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND "Date" >= ADD_MONTHS(CURRENT_DATE, -3)
+AND WorkEventNumber <> 4763
+
 
 UNION ALL
 
@@ -126,3 +129,4 @@ OR DepartmentID = 5)
 AND CompletedIndicator = 1
 AND SequenceNumber = 1
 AND "Date" >= ADD_MONTHS(CURRENT_DATE, -3)
+AND WorkEventNumber <> 4763
