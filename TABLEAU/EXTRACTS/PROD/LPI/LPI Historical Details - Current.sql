@@ -1,3 +1,9 @@
+/*  This routine provides Historical Current for LPI
+* Peer Review & Change Log: 
+* Peer Review Date: 
+* Source for this routine is PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW
+Updated 11/23/21 to remove unnecessary Sanderling work event causing slowness - Kristin Carlile */
+
 SELECT 
 'Completed' as "Transaction Type"
 ,SourceTransactionID as "Source Transaction ID"
@@ -55,6 +61,7 @@ WHERE (WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND CompletedIndicator = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
+AND WorkEventNumber <> 4763
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31, 32, 33
 
 UNION
@@ -133,6 +140,7 @@ WHERE(WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND PendingIndicator = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
+AND WorkEventNumber <> 4763
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32, 33
 
 UNION
@@ -194,4 +202,5 @@ WHERE  (WorkEventDepartmentID = 5
 OR DepartmentID = 5)
 AND SequenceNumber = 1
 AND "Date" >= CURRENT_DATE - INTERVAL '5' YEAR
+AND WorkEventNumber <> 4763
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32, 33
