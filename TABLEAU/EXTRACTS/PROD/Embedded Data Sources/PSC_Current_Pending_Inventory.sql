@@ -39,9 +39,10 @@ SELECT
 , group_nm AS GroupName
 , group_type_nm AS GroupTypeName
 , row_process_dtm AS "Trans Date"
+, apm_grp_ident AS "Group Number"
 ,CASE WHEN 
-	pol_nr IS NULL AND group_nm IS NOT NULL 
-	THEN group_nm 
+	pol_nr IS NULL AND apm_grp_ident IS NOT NULL 
+	THEN apm_grp_ident 
 	ELSE pol_nr
 	END AS "Policy / Group #"
 FROM dma_vw.rpt_cats_curr_pend_vw
