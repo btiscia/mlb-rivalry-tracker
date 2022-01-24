@@ -5,7 +5,8 @@
 *  Source for this routine is  PROD_DMA_VW.ACT_DIGITAL_ADOPT_MART_PIT_VW
 *  Author: Kristin Carlile
 *  Created: 4/12/2021
-* Revised: */
+* Revised: 1/24/2022 added processing type field - Kristin Carlile
+*/
 
 SELECT 
 IntegratedActivityID AS "Integrated Activity ID"
@@ -103,7 +104,7 @@ IntegratedActivityID AS "Integrated Activity ID"
 --, WorkEventDimStartDate
 --, WorkEventDimEndtDate
 --, WorkEventDimTransDate
-
+,ProcessingType as "Processing Type"
 --, SiteID as "Site ID"
 , EmployeeOrganizationID as "Employee Organization ID"
 , EmployeeDepartmentID as "Employee Department ID"
