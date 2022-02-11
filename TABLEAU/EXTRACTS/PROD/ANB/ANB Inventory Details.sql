@@ -19,6 +19,7 @@ SELECT	DISTINCT InventoryID
    		WHEN T1.Product LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
    		WHEN T1.Product LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
    		WHEN T1.Product LIKE ('%Index Horizons%') THEN 'Index Horizons'
+   		WHEN T1.Product LIKE ('%Envision%') THEN 'Envision'
    		ELSE 'Unknown'
 	  END AS Product
 	, ProductCategory AS "Product Category"
@@ -31,10 +32,11 @@ SELECT	DISTINCT InventoryID
 	, Channel
 	, ChannelType AS "Channel Type"
 	, BINGOStatus AS "Bingo Status"
-	, CASE WHEN CompletedDate IS NOT NULL THEN
+/*	, CASE WHEN CompletedDate IS NOT NULL THEN
 		CASE WHEN NewBusinessStatus <> 'Withdrawn' THEN 'Issued' ELSE NewBusinessStatus END 
 		END AS NewBusinessStatus
-	, ReceivedDate
+*/	
+, ReceivedDate
 	, LoadDate
 	, CompletedDate
 	, TAT
