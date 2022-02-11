@@ -37,7 +37,7 @@ SELECT  MAJOR_PROD_NME AS ReviewTypeCode
     , T10.EmployeeLastName
     , T10.MMID
     , CreatedAtDateTimestamp AS CreatedAt
-    ,Cast(CreatedAtDateTimestamp as Date) as "Created Date"
+    ,CAST(CreatedAtDateTimestamp AS DATE) AS "Created Date"
     , CASE WHEN IGOIndicator = 0 THEN 'NIGO'
             WHEN IGOIndicator=1 THEN 'IGO'
         END AS InitialReviewIndicator
@@ -46,7 +46,9 @@ SELECT  MAJOR_PROD_NME AS ReviewTypeCode
     , CAST(T12.IssueDate AS DATE) AS IssueDate 
     , (SELECT IsHoliday FROM PROD_DMA_VW.DATE_DIM_VW WHERE T12.IssueDate = ShortDate) AS "IssueDateIsHoliday"  
     , BINGOStatus
-FROM    PROD_DMA_VW.ANB_IR_FORMS_VW T1
+    , T12.Channel
+    , NigoReason
+FROM PROD_DMA_VW.ANB_IR_FORMS_VW T1
 LEFT JOIN PROD_DMA_VW.ANB_IR_SUBMIT_TYPES_VW T2 ON T1.IRSubmissionTypeID = T2.IRSubmissionTypeID
 LEFT JOIN PROD_DMA_VW.ANB_IR_REPL_TYPES_VW T3 ON T1.IRReplacementTypeID = T3.IRReplacementTypeID
 LEFT JOIN PROD_DMA_VW.ANB_IR_FUND_TYPES_VW T4 ON T1.IRFundingTypeID = T4.IRFundingTypeID
