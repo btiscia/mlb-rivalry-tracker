@@ -45,11 +45,11 @@ SELECT T1.Volumetric AS PlanMetric
 		, CHANNELTYPE
 		, ProductName
 		
-		FROM DMA_GRP_DL.PRD_KPI_PLAN_DATA_VW
+		FROM PROD_DMA_VW.PRD_KPI_PLAN_DATA_VW
 		WHERE CHANNELTYPE <> 'Total' AND DEPARTMENTID = 47) TCAT ON 1=1
 		----------------------------------End TCAT------------------------------------
 		
-		LEFT JOIN DMA_GRP_DL.PRD_KPI_PLAN_DATA_VW T1 ON T2.ShortDate = T1.ShortDate 
+		LEFT JOIN PROD_DMA_VW.PRD_KPI_PLAN_DATA_VW T1 ON T2.ShortDate = T1.ShortDate 
 			AND  T1.CHANNELTYPE <> 'Total' 
 			AND T1.DEPARTMENTID = 47
 			AND T1.VOLUMETRIC = TCAT.VOLUMETRIC 
