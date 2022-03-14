@@ -6,6 +6,7 @@
 *  Author: Kristin Carlile
 *  Created: 4/12/2021
 * Revised: 1/24/2022 added processing type field - Kristin Carlile
+*Revised: 3/14/2022 added i nsome fields that were previously commented out for customer download based on feedback -Kristin Carlile
 */
 
 SELECT 
