@@ -6,6 +6,7 @@
 *  Author: Kristin Carlile
 *  Created: 4/12/2021
 * Revised: 1/24/2022 added processing type field - Kristin Carlile
+*Revised: 3/14/2022 added i nsome fields that were previously commented out for customer download based on feedback -Kristin Carlile
 */
 
 SELECT 
@@ -19,7 +20,7 @@ IntegratedActivityID AS "Integrated Activity ID"
 , ServiceChannelCode AS "Service Channel Code"
 , ServiceChannelName AS "Service Channel Name"
 , TeamPartyID AS "Team Party ID" 
---, PartyEmployeeID
+, PartyEmployeeID
 , MMID
 --, SourceAgreementID
 --, SourceHoldingKey
@@ -28,11 +29,11 @@ IntegratedActivityID AS "Integrated Activity ID"
 --, RecIdent
 --, PrimaryLogID
 --, PrimaryLogValueDescription
---, RequestorTypeCode
+, RequestorTypeCode
 , RequestorTypeName AS "Requestor Type Name" 
---, LoggedByTeamPartyID as "Logged by Team party ID"
---, LoggedByPartyEmployeeID as "Logged by Party Employee ID"
---, LoggedByMMID as "Logged by MMID"
+, LoggedByTeamPartyID as "Logged by Team party ID"
+, LoggedByPartyEmployeeID as "Logged by Party Employee ID"
+, LoggedByMMID as "Logged by MMID"
 , LoadDate as "Load Date" 
 , LoggedDate as "Logged Date"
 , ReceivedDate as "Received Date"
@@ -41,14 +42,11 @@ IntegratedActivityID AS "Integrated Activity ID"
 , BCCIndicator as "BCC Indicator" 
 , ShortComment as "Short Comment" 
 , DirectLinkType as "Direct Link Type" 
---, CustomerAgreementDimensionID
---, CustomerAgreementUUID
---, CustomerAgreementChecksum
 , AgreementID as "Agreement ID"
 , HoldingKey as "Holding Key"
 , HoldingKeyPrefix as "Holding Key Prefix" 
 , HoldingKeySuffix as "Holding Key Suffix"
---, AgreementSourceCode as "Agreement Source Code"
+, AgreementSourceCode as "Agreement Source Code"
 , LOBCode as "LOB Code"
 , LOBName as "LOB Name"
 , MajorProductName as "Major Product Name"
@@ -57,15 +55,15 @@ IntegratedActivityID AS "Integrated Activity ID"
 , PolicyEffectiveDate as "Policy Effective Date"
 , PolicyAge as "Policy Age"
 , MemberID
---, PartyID
+, PartyID
 --, PartyAgreementStartDate
 --, PartyAgreementEndDate
---, PartyAgreementRoleCode
---, PartyAgreementRoleName
---, PartyAgreementRoleSubtypeCode
+, PartyAgreementRoleCode
+, PartyAgreementRoleName
+, PartyAgreementRoleSubtypeCode
 , CustomerEffectiveDate as "Customer Effective Date"
 , CustomerTenure as "Customer Tenure"
---, CustomerPartyTypeCode
+, CustomerPartyTypeCode
 --, BirthDate as "Birth Date"
 , CustomerAge as "Customer Age"
 , ResidenceState as "Residence State"
@@ -92,7 +90,7 @@ IntegratedActivityID AS "Integrated Activity ID"
 , WorkEventOrganizationName as "Work Event Organization Name"
 , SystemDivisionName as "System Division Name" 
 , WorkEventDepartmentName as "Work Event Department Name"
---, SystemDepartmentName
+, SystemDepartmentName
 , FunctionName as "Function"
 , SegmentName as "Segment"
 , GroupName as "Group Name"
@@ -106,6 +104,7 @@ IntegratedActivityID AS "Integrated Activity ID"
 --, WorkEventDimTransDate
 ,ProcessingType as "Processing Type"
 --, SiteID as "Site ID"
+,SiteName as "Site Name"
 , EmployeeOrganizationID as "Employee Organization ID"
 , EmployeeDepartmentID as "Employee Department ID"
 --, TeamID
@@ -117,7 +116,8 @@ IntegratedActivityID AS "Integrated Activity ID"
 , ManagerEmail as "Manager Email" 
 , TeamLeadLastName || ', ' || TeamLeadFirstName as "Team Lead Name"
 , EmployeeRoleName as "Employee Role Name" 
---, EmployeePartyTypeName
+, EmployeeRoleGradeID as "Employee Role Grade ID"
+, EmployeePartyTypeName
 , EmployeeLastName || ', ' || EmployeeFirstName as "Employee Name"
 , EmployeeEmail as "Employee Email"
 , InternalIndicator as "Internal Indicator"
