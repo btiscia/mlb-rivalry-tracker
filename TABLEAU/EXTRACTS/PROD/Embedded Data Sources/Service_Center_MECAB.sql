@@ -1,3 +1,10 @@
+/*
+FILENAME: MECAB Embedded
+CREATED BY: Bill Trombley
+LAST UPDATED: 04/14/2022
+CHANGES MADE: Vertica Migration.
+*/
+
 SELECT DISTINCT
 	W1.source_transaction_id
 	, trim(LEADING '0' FROM W1.agreement_nr) AS "Policy Number"
