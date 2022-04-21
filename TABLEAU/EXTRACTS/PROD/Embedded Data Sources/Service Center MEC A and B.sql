@@ -1,3 +1,10 @@
+/*
+FILENAME: Service Center MEC A and B
+CREATED BY: Bill Trombley
+LAST UPDATED: 4/21/2022
+CHANGES MADE: Added WRK.division_cd SE
+*/
+
 SELECT DISTINCT
 	W1.source_transaction_id
 	, trim(LEADING '0' FROM W1.agreement_nr) AS "Policy Number"
