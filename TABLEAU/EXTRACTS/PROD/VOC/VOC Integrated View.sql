@@ -1,0 +1,51 @@
+/*  
+FILENAME: VOC INTEGRATED VIEW
+CREATED BY: Kristin Carlile
+LAST UPDATED: 5/2/2022
+CHANGES MADE: Vertica SQL Creation
+ */
+
+SELECT survey_id
+, survey_number as "Survey Number"
+, survey_alias as "Survey Alias"
+, survey_nm as "Survey Name"
+, survey_response_id as "Survey Response ID"
+, survey_question_id as "Survey Question ID"
+, survey_question_name as "Survey Question Name"
+, survey_question_description as "Survey Question Description"
+, survey_question_target as "Survey Question Target"
+, survey_question_target_met as "Survey Question Target Met"
+, survey_question_weight as "Survey Question Weight"
+, survey_question_response as "Survey Question Response"
+, survey_question_response_text as "Survey Question Response Text"
+, metric_id as "Metric ID"
+, metric_name as "Metric Name"
+, response_date as "Response Date"
+, lob_id as "LOB ID" 
+, lob_name as "LOB Name"
+, work_department_id as "Work Department ID"
+, work_organization_nm as "Work Organization Name"
+, department_nm as "Department Name"
+, function_nm as "Function Name"
+, segment_nm as "Segment Name"
+, work_event_nm as "Work Event Name"
+, primary_role_nm as "Primary Role Name"
+, system_nm as "System Name"
+, work_event_num as "Work Event Number"
+, department_cd as "Department Code"
+, division_cd as "Division Code"
+, prod_credit as "Prod Credit"
+, employee_organization_id as "Employee Organization ID"
+, employee_team_id as "Employee Team ID"
+, employee_department_id as "Employee Department ID"
+, employee_organization_nm as "Employee Organization Name"
+, employee_department_nm as "Employee Department Name"
+, team_nm as "Team Name"
+, role_nm as "Role Name"
+, mmid as "MMID"
+, employee_last_nm ||', ' || employee_first_nm as "Employee Name"
+, manager_mmid as "Manager MMID"
+, manager_last_nm || ', ' || manager_first_nm  as "Manager Name"
+, agent_id as "Agent ID"
+, agency_id as "Agency ID"
+FROM dma_vw.fact_VOC_integrated_vw
