@@ -2,7 +2,7 @@
 FILENAME: DI OPERATIONS HISTORICAL DETAILS POINT IN TIME
 CREATED BY: John Avgoutakis
 LAST UPDATED: 05/13/2022
-CHANGES MADE: Vertica Migration, EOD Indicator is now in the view.
+CHANGES MADE: Vertica Migration
 */
 
 
@@ -48,7 +48,10 @@ SELECT
 	, CASE WHEN igo_ind = 1 AND nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
 	, CASE WHEN igo_ind = 1 AND nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
 	, T1.igo_ind AS "IGO NIGO Count"
+	, T2.goal_val AS "IGO Goal"
 	, T1.sht_cmnt_des AS "Short Comments"
+	, T1.rqstr_des AS "Requestor Type Name"
+	, T1.ProductTypeName AS "Product Type Name"
 	, CASE WHEN T1.met_expected_ind = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 	, T1.met_expected_ind AS "Met Expected Ind Count"
 	, T1.row_process_dtm AS "Transaction Date"
@@ -64,6 +67,7 @@ SELECT
 	--, T1.eod_pend_ind AS "EOD Pending Indicator"
 	
 FROM dma_vw.fact_integrated_dio_pit_vw T1
+LEFT JOIN (SELECT goal_val, department_id, function_id FROM dma_vw.dma_dim_goal_pit_vw WHERE end_dt ='9999-12-31' AND goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
 WHERE T1.trans_type_id IN (1,3)
 AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52

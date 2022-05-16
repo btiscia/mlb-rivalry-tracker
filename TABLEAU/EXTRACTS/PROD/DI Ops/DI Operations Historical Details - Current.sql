@@ -49,6 +49,8 @@ SELECT
 	, CASE WHEN igo_ind = 1 AND nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
 	, T1.igo_ind AS "IGO NIGO Count"
 	, T1.sht_cmnt_des AS "Short Comments"
+	, T1.rqstr_des AS "Requestor Type Name"
+	, T1.ProductTypeName AS "Product Type Name"
 	, CASE WHEN T1.met_expected_ind = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 	, T1.met_expected_ind AS "Met Expected Ind Count"
 	, T1.row_process_dtm AS "Transaction Date"
