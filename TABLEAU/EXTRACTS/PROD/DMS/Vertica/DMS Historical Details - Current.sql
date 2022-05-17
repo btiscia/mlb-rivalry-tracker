@@ -65,5 +65,3 @@ FROM dma_vw.fact_integrated_dms_curr_vw T1
 WHERE (T1.work_event_department_id = 13
 OR T1.employee_department_id in (13,51))
 AND (T1.trans_type_id IN (1,3) OR CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36)))
-AND eod_pend_ind = 1
-AND report_dt = '2021-04-27'
