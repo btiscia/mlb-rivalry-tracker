@@ -1,16 +1,3 @@
-/*
-* This routine pulls pindrop_passport_calls_vw data from 7/1/2020 to current
-*  with either (a) an lob of Ins Ops or (b) a corresponding Ins Ops transmit record 
-*  The result is a complete list of Passport insurance Ops calls
-*  for use in data source Fraud Ops All Passport Ins Ops Calls
-*  Peer Review & Change Log: 
-*  Peer Review Date: 5/10/2022
-*  Sources for this routine are dma_vw.pindrop_passport_calls_vw 
-*  & dma_vw.enhanced_auth_tier3_call_base_vw
-*  Author: Christina Valenti
-*  Created: 5/18/2022
-*  Revised:
-*/
 SELECT
 	ppcv.pindrop_passport_call_natural_key_hash_uuid,
 	ppcv.pindrop_call_id AS "Passport Pindrop Call Id",
@@ -50,17 +37,17 @@ SELECT
          WHEN ppcv.auth_policy IS null
          THEN 'No Auth Policy'
          ELSE 'Subsequent Caller'     
-    END AS caller_status,
+    END AS "Passport Caller Status",
     CASE WHEN ppcv.auth_result = true
          THEN 'Authenticated' 
          WHEN ppcv.auth_result = false
          THEN 'Not Authenticated' 
          ELSE cast(ppcv.auth_result AS varchar(20))
-    END AS auth_status,
+    END AS "Passport Auth Status",
     CASE WHEN ppcv.enrollment_pol = 'Profile Creation'
          THEN 'Enrolled' 
          ELSE 'Not Enrolled'
-    END AS new_enrollment,	
+    END AS "Passport New Enrollment",	
 	eat.transmit_caller_role AS "Transmit Caller Role"
 FROM
 	dma_vw.pindrop_passport_calls_vw AS ppcv

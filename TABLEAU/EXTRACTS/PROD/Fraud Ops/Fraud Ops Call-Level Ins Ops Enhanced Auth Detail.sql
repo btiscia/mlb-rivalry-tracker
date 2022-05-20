@@ -188,9 +188,9 @@ SELECT
 	passport_device_risk,
 	passport_behavior_risk,
 	passport_voice_risk,
-	passport_caller_status,
-	passport_auth_status,
-	passport_new_enrollment,
+	passport_caller_status AS "Passport Caller Status", 
+	passport_auth_status AS "Passport Auth Status",
+	passport_new_enrollment AS "Passport New Enrollment",
 	row_process_dtm
 FROM
 	dma_vw.enhanced_auth_tier3_call_base_vw
