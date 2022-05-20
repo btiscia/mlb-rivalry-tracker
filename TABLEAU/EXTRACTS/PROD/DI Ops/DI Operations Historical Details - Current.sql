@@ -63,8 +63,7 @@ SELECT
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
 	, COUNT(DISTINCT T1.fact_integrated_natural_key_hash_uuid) AS "Transaction Count"
-	--, T1.eod_pend_ind AS "EOD Pending Indicator"
-	
+	--, T1.eod_pend_ind AS "EOD Pending Indicator"	
 FROM dma_vw.fact_integrated_dio_curr_vw T1
 WHERE T1.trans_type_id IN (1,3)
 AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))

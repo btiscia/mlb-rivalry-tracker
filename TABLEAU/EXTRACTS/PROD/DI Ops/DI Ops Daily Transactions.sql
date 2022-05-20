@@ -44,6 +44,5 @@ SELECT
 	, CASE WHEN T1.source_transaction_id IS NULL THEN 0 ELSE 1 END AS "Completed Flag"	
 	, T1.sht_cmnt_des AS "Comments"
 	, T1.row_process_dtm AS "Transaction Date"
-	
 FROM dma_vw.fact_integrated_dio_pit_vw T1
 WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)

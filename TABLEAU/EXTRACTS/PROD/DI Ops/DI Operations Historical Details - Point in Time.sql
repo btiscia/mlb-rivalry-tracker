@@ -65,7 +65,6 @@ SELECT
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
 	, COUNT(DISTINCT T1.fact_integrated_natural_key_hash_uuid) AS "Transaction Count"
 	--, T1.eod_pend_ind AS "EOD Pending Indicator"
-	
 FROM dma_vw.fact_integrated_dio_pit_vw T1
 LEFT JOIN (SELECT goal_val, department_id, function_id FROM dma_vw.dma_dim_goal_pit_vw WHERE end_dt ='9999-12-31' AND goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
 WHERE T1.trans_type_id IN (1,3)
