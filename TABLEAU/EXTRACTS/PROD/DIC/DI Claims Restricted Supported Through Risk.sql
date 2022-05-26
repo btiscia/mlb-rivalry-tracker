@@ -11,10 +11,10 @@ SELECT
 , T1.short_claim_num AS "Short Claim Number"
 , T1.claim_num AS "Claim Number"
 , CASE 
-    WHEN T1.last_item_type  = 'NO/Uncertain' THEN 'Uncertain'
-    WHEN T1.last_item_type  LIKE '%YES%'  AND supported_through_dt IN( '2008-08-08','2010-10-10','2011-11-11') THEN 'Extended Duration' 
-    WHEN T1.last_item_type  LIKE '%YES%'  AND T1.cal_days_past_tat <= 0  THEN 'Active Supported'
-    WHEN T1.last_item_type  LIKE '%YES%' AND  T1.cal_days_past_tat > 0   THEN 'Past Supported'
+    WHEN LOWER(T1.last_item_type)  = ('no/uncertain') THEN 'Uncertain'
+    WHEN LOWER(T1.last_item_type)  LIKE '%yes%'  AND supported_through_dt IN( '2008-08-08','2010-10-10','2011-11-11') THEN 'Extended Duration' 
+    WHEN LOWER(T1.last_item_type)  LIKE '%yes%'  AND T1.cal_days_past_tat <= 0  THEN 'Active Supported'
+    WHEN LOWER(T1.last_item_type)  LIKE '%yes%' AND  T1.cal_days_past_tat > 0   THEN 'Past Supported'
     ELSE 'No Review'  
   END AS "Supported Risk Type"
 ,CASE 
