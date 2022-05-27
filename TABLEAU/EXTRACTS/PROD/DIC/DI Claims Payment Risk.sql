@@ -17,10 +17,8 @@ SELECT DISTINCT T1.short_claim_num AS "Short Claim Number"
 , T1.load_dt AS "Load Date"
 , T1.supported_through_dt AS "Supported Through Date"
 , T1.last_item_type AS "Last Item Type"
--- , MAX(T2.last_item_dt) OVER (PARTITION BY T1.claim_num) AS "Past Due Check Date"
--- , MAX(T3.last_item_dt) OVER (PARTITION BY T1.claim_num) AS "Past Due Through Date"
-, T2.last_item_dt
-, T3.last_item_dt
+, T2.last_item_dt AS "Past Due Check Date"
+, T3.last_item_dt AS "Past Due Through Date"
 , COALESCE(NoPaymentIndicator, 0) AS "No Payment Indicator"
 , COALESCE(NoThroughIndicator, 0) AS "No Through Indicator"
 , CAST(T1.row_process_dtm AS DATE) AS "Trans Date"
