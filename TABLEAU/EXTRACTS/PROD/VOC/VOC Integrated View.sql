@@ -1,8 +1,9 @@
 /*  
 FILENAME: VOC INTEGRATED VIEW
 CREATED BY: Kristin Carlile
-LAST UPDATED: 5/2/2022
+LAST UPDATED: 5/27/2022
 CHANGES MADE: Vertica SQL Creation
+CHANGES MADE: Added surveys to exclude in where clause -KC
  */
 
 SELECT survey_id
@@ -49,3 +50,20 @@ SELECT survey_id
 , agent_id as "Agent ID"
 , agency_id as "Agency ID"
 FROM dma_vw.fact_VOC_integrated_vw
+WHERE survey_response_id not in
+('67f0641f-953d-a9f8-b02c-bd1b3cfe2849',
+'add8c099-4545-2682-ca64-9d79ad56fb58',
+'bfeaa0a6-1ee7-673b-5a19-93511ff24ab0',
+'060946e2-a028-ef37-4604-6372bdf347fd',
+'59bd4ff9-f184-b37c-ff05-8dd41e66a5f0',
+'4979ab46-c02e-313e-bdf8-df543ab2ea65',
+'572a0ce9-54d0-f63f-a3d9-d3b60075d514',
+'b174e320-60b6-f751-684e-7b038c4f382c',
+'d13231ac-6a92-5d2c-5776-b512333cf364',
+'a9475a5e-b193-6953-47bf-7916a4c0c55d',
+'3f65e7d8-d5a2-3571-96f1-77266cedcd46',
+'01227761-f01e-9230-7a5e-5af7145bb65b',
+'a29a4448-3086-9e07-e5c4-c087e53edc1d',
+'c3e78d04-75e8-18bb-2654-a3938c8ad62b',
+'42632554-9395-4010-8700-20b042e2c153'
+,'5a94c295-c6f5-7b4c-6ff9-30279a978a70')
