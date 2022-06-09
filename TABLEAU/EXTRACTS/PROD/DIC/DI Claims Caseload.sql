@@ -93,3 +93,4 @@ LEFT JOIN dma.dic_dim_medical_review T4 ON T1.short_claim_num = T4.claim_num AND
 LEFT JOIN dma.dma_dim_employee_pit T6 ON T1.examiner_party_employee_id = T6.party_employee_id AND T5.short_dt BETWEEN t6.begin_dt AND T6.end_dt
 WHERE lower(T1.claim_status_category) NOT IN ('closed','unknown')
 	AND T5.short_dt = coalesce(:date, CAST(CURRENT_DATE AS Date))
+	AND "Days Aging" >= 0
