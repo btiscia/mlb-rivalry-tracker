@@ -1,35 +1,42 @@
+/*
+FILENAME: DI CLAIMS CYCLE TIME
+CREATED BY: John Avgoutakis
+LAST UPDATED: 5/24/2022
+CHANGES MADE: Vertica SQL Creation.
+*/
+
 SELECT
-ReportingDate AS "Date"
-,CycleTimeType AS "Cycle Time Type"
-,ShortClaimNumber AS"Short Claim Number" 
-,NoFormsIndicator AS "No Forms Indicator"
-,CycleTime AS "Cycle Time"
-,MetExpected
---,GoalID AS "Goal ID"
-,GoalValue AS "Goal Value"
---,SourceSystemID
---,RunID
---,UpdateRunID
-,TransDate
-,ClaimCategory AS "Claim Category"
-,DIBSCustomerName AS "Claimant"
---,OccupationDescription
---,ICD1GroupID
---,ICD1GroupName
---,ICD1Code
---,ICD1Description
-,DisabilityDate AS "Date of Disability"
-,DateOfNotice
-,DateOfForms
-,DateOfDecision
-,PreclaimEndDate
-,EstimatedBenefitDuration
-,BirthDate AS "Birth Date"
-,ResidenceState AS "Residence State"
-,ExaminerID
-,ExaminerName AS "Examiner"
-,ExaminerPartyEmployeeID
-,ExaminerManagerName AS "Manager"
-,ExaminerTeamName AS "Team"
-FROM PROD_DMA_VW.DIC_CYCLE_TIME_RPT_VW
-WHERE (RestrictedClaimIndicator = 0 OR RestrictedClaimIndicator IS NULL)
+  report_dt AS "Date"
+, cycle_time_type AS "Cycle Time Type"
+, short_claim_num AS"Short Claim Number" 
+, no_forms_ind AS "No Forms Indicator"
+, cycle_time AS "Cycle Time"
+, met_expected AS "MetExpected"
+, goal_val AS "Goal Value"
+, row_process_dtm AS "TransDate"
+, claim_category AS "Claim Category"
+, dibs_customer_nm AS "Claimant"
+, occ_desc AS "Occ Description"
+, icd_1_group_nm AS "ICD Group Name"
+, icd_1_code AS "ICD Code"
+, icd_1_desc AS "ICD Description"
+, contestable_ind AS "Contestable Indicator"
+, appeal_ind AS "Appeal Indicator"
+, erisa_ind AS "ERISA Indicator"
+, late_notice_ind AS "Late Notice Indicator"
+, quick_decision_ind AS "Quick Claim Indicator"
+, disability_dt AS "Date of Disability"
+, dt_of_notice AS "DateOfNotice"
+, dt_of_forms AS "DateOfForms"
+, dt_of_decision AS "DateOfDecision"
+, preclaim_end_dt "PreclaimEndDate"
+, est_ben_duration As "EstimatedBenefitDuration"
+, birth_dt AS "Birth Date"
+, residence_state AS "Residence State"
+, examiner_id AS "ExaminerID"
+, examiner_nm AS "Examiner"
+, examiner_party_employee_id "ExaminerPartyEmployeeID"
+, manager_nm AS "Manager"
+, team_nm AS "Team"
+FROM dma_vw.sem_fact_dic_cycle_time_vw
+WHERE (restricted_claim_ind = 0 OR restricted_claim_ind IS NULL)
