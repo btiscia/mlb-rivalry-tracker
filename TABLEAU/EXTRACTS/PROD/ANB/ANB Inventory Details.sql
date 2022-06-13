@@ -35,16 +35,7 @@ SELECT	DISTINCT InventoryID
 /*	, CASE WHEN CompletedDate IS NOT NULL THEN
 		CASE WHEN NewBusinessStatus <> 'Withdrawn' THEN 'Issued' ELSE NewBusinessStatus END 
 		END AS NewBusinessStatus
-*/	
-	,CASE WHEN T3.NBPurchaseWAppIndicator = 1 THEN 'NB Purchase w App'
-		WHEN T3.INCOMINGTRANSFERINDICATOR = 1 THEN 'Incoming Transfer'
-		WHEN T3.ANNUITYAPPINDICATOR = 1 THEN 'Annuity Application'
-		WHEN T3.SDElectIndicator = 1 THEN 'SD Elect App'
-		WHEN T3.NBREG60INDICATOR = 1 THEN 'NB Reg 60'
-		WHEN T3.EXCLUDEDINDICATOR = 1 THEN 'Excluded'
-		WHEN T3.OVERLAPINDICATOR = 1 THEN 'Overlap'
-		ELSE 'N/A' END AS NewBusinessDocType
-	,ReceivedDate
+*/
 	, LoadDate
 	, CompletedDate
 	, TAT

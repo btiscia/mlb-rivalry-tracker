@@ -1,3 +1,14 @@
+/*
+* This routine pulls daily time 
+
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is DEV_DMA_VW.PERFORMANCE_FCT_VW, DEV_DMA_VW.EMPLOYEE_PIT_DIM_VW 
+*  Author: Lorraine Christian 2/19/2020
+*  Revised:   -New Daily Historical Time Updated 12/19 by John Avgosutakis/Vince Bonaddio
+*  Pointing to production since time out will only feed productions*/   
+
+
 SELECT
 ShortDate AS "Date"
 ,IsHoliday
@@ -9,7 +20,7 @@ ShortDate AS "Date"
 END AS "Employee Type"
 , ManagerLastName || ', ' || ManagerFirstName AS Manager
 , TeamName AS "Team Name"
-, RoleName AS "Employee Role Name"
+, RoleName AS "Role Name"
 , RoleGradeName AS "Role Grade Name"
 , ProductionGoal AS "Prod Goal"
 , NonProductionGoal AS "Non Prod Goal"
@@ -86,8 +97,9 @@ END AS "Employee Type"
     WHEN (ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) >= 6 THEN  (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime)
     ELSE (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime) 
     END AS "Planned Available Time"
+  ,T1.DepartmentID 
     
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-WHERE "Date" BETWEEN  Add_Months(Current_Date, -36) AND Current_Date + INTERVAL '10' DAY
-AND T1.DepartmentID = 4
+WHERE "Date" BETWEEN  Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
+AND T1.DepartmentID = 48

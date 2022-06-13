@@ -1,3 +1,13 @@
+/* * This routine pulls daily time 
+
+*  Peer Review & Change Log:
+*  Peer Review Date: 
+*  Source for this routine is PROD_DMA_VW.SCHEDULE_DIM_VW, PROD_DMA_VW.EMPLOYEE_CURR_DIM_VW ,
+     PROD_DMA_VW.ACT_DMS_INTEGRATED_FCT_VW, PROD_DMA_VW.TIMEOUT_ACTIVITY_CURR_IVW 
+*  Author: Lorraine Christian/Kristin Carlile
+*  Created: 3/4/2019
+*  Revised: 6/4/2021 Added dept 51 - KC  */
+
 SELECT
 ShortDate AS "Date"
 ,IsHoliday
@@ -9,7 +19,7 @@ ShortDate AS "Date"
 END AS "Employee Type"
 , ManagerLastName || ', ' || ManagerFirstName AS Manager
 , TeamName AS "Team Name"
-, RoleName AS "Employee Role Name"
+, RoleName AS "Role Name"
 , RoleGradeName AS "Role Grade Name"
 , ProductionGoal AS "Prod Goal"
 , NonProductionGoal AS "Non Prod Goal"
@@ -89,5 +99,5 @@ END AS "Employee Type"
     
 FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
 LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-WHERE "Date" BETWEEN  Add_Months(Current_Date, -36) AND Current_Date + INTERVAL '10' DAY
-AND T1.DepartmentID = 4
+WHERE "Date" BETWEEN  Add_Months(Current_Date, -3) AND Current_Date + INTERVAL '10' DAY
+AND T1.DepartmentID in (13,51)
