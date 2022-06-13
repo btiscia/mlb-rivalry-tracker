@@ -1,7 +1,7 @@
 SELECT	DISTINCT InventoryID
 	, ApplicationNaturalKeyUUID
 	, OrderEntryID
-	, AgreementID
+	, T1.AgreementID
 	, ContractNumber
 	, T1.ReportDate AS "Date"
 	,"InventoryCurrDayInd"
@@ -35,8 +35,7 @@ SELECT	DISTINCT InventoryID
 /*	, CASE WHEN CompletedDate IS NOT NULL THEN
 		CASE WHEN NewBusinessStatus <> 'Withdrawn' THEN 'Issued' ELSE NewBusinessStatus END 
 		END AS NewBusinessStatus
-*/	
-, ReceivedDate
+*/
 	, LoadDate
 	, CompletedDate
 	, TAT
@@ -62,5 +61,7 @@ LEFT JOIN   (SELECT ShortDate, PreviousBusinessDay, IsHoliday, IsWeekday
 							,CASE WHEN IsHoliday =0 AND Isweekday = 1 THEN Shortdate ELSE PreviousBusinessday END AS ReportDate
 							,CASE WHEN shortDate = CURRENT_DATE THEN 1 ELSE 0 END AS "InventoryCurrDayInd"                      
 						FROM PROD_DMA_VW.DATE_DIM_VW ) T2 ON "Date" = ShortDate
+
+LEFT JOIN PROD_DMA_VW.ANB_DOC_TYPE_CMN_VW T3 on T3.HoldingKey = T1.ContractNumber
 
 WHERE DATE >= '2020-01-01'
