@@ -66,6 +66,6 @@ LEFT JOIN dma_vw.sem_dim_anb_application_curr_vw T2 ON T2.initial_review_id = T1
 LEFT JOIN dma.dma_dim_firm_curr T3 ON TRIM(LEADING '0' FROM T1.agency_num) = TRIM(LEADING '0' FROM T3.agency_id)
 LEFT JOIN edw_vw.product_translator_current_vw T4 ON CAST(T4.prod_id AS INTEGER)= T1.ir_product_id
 LEFT JOIN dma.bibt_ref_ir_market_types T5 ON T5.market_type_id = T1.ir_market_type_id
-LEFT JOIN dma.bibt_rel_ir_questions T6 ON lower(T6.name) = lower(T1.nigo_reason)
+-- LEFT JOIN dma.bibt_rel_ir_questions T6 ON lower(T6.name) = lower(T1.nigo_reason)
 WHERE T2.initial_review_id IS NOT NULL
 
