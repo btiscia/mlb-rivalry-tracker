@@ -1,6 +1,6 @@
 /*
 FILENAME: ANN OPS HISTORICAL TIME
-CREATED BY: John Avgoutakis
+CREATED BY: John Avgoustakis
 LAST UPDATED: 6/14/2022
 CHANGES MADE: Vertica SQL Creation.
 */
