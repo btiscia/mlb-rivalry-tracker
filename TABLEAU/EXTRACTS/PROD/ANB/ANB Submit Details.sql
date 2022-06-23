@@ -1,28 +1,20 @@
-/*
-FILENAME: ANB Submit Details
-CREATED BY: Bill Trombley
-LAST UPDATED:
-CHANGES MADE:
-*/
-
-SELECT T1.SUBMITDATE
-,T3.IsHoliday
-,T3.IsWeekday
-    , TOTAL
+SELECT T1.submit_dt
+    , T3.is_holiday
+    , T3.is_weekday
+    , total
     , MMFA
-    , TOTAL - MMFA AS MMSD
-FROM
-(
-SELECT COUNT(T1.HOLDINGKEY) AS TOTAL
-    , T2.APP_COUNT AS MMFA
-    , CAST(NEWBUSINESSSUBMITDATE AS DATE) AS SUBMITDATE
-FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
-INNER JOIN (SELECT COUNT(OREPLACE(T1.ORDERENTRYID,'-','')) AS APP_COUNT
-                            , CAST(T1.SUITCOMPLETEDATETRANSMITTED AS DATE) AS SUBMITDATE
-                        FROM PROD_DMA_VW.IPIPELINE_ORDERS_VW T1
-                        WHERE PRODUCTNAME LIKE 'MassMutual%'
-                        GROUP BY 2) T2 ON CAST(T1.NEWBUSINESSSUBMITDATE AS DATE) = T2.SUBMITDATE
-GROUP BY 2,3) T1
+    , total - MMFA AS MMSD
+FROM (
+    SELECT COUNT(T1.agreement_nr) AS total
+        , T2.app_count AS MMFA
+        , CAST(nb_submit_dt AS DATE) AS submit_dt
+    FROM dma_vw.sem_dim_anb_application_curr_vw T1
+    INNER JOIN (SELECT COUNT(REPLACE(T1.order_entry_id,'-','')) AS app_count
+                    , CAST(T1.suit_comp_dt_transmit AS DATE) AS submit_dt
+                FROM dma_vw.dim_ipipeline_orders_curr_vw T1
+                WHERE product_nm LIKE 'MassMutual%'
+                GROUP BY 2) T2 ON CAST(T1.nb_submit_dt AS DATE) = T2.submit_dt
+    GROUP BY 2,3) T1
 
-LEFT JOIN 
-	PROD_DMA_VW.Date_DIM_VW T3 ON T3.SHORTDATE = T1.SUBMITDATE
+LEFT JOIN dma_vw.dma_dim_date_vw T3 ON T3.short_dt = T1.submit_dt
+ORDER BY T3.short_dt DESC
