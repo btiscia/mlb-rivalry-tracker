@@ -76,4 +76,4 @@ ON T1.function_id = T2.function_id AND T1.employee_department_id = T2.department
 
 WHERE (work_event_department_id IN (9,11) OR employee_department_id IN (9,11))
 AND T1.trans_type_id IN (1,3)
-AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
+--AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))

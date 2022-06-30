@@ -1,64 +1,67 @@
-SELECT T1.fact_activity_natural_key_hash_uuid,
-       T1.source_transaction_id,
-       T4.agreement_nr,
-       T5.dim_agreement_natural_key_hash_uuid,
-       T4.product_category,
-       T4.product,
-       T4.distributor,
-       T4.channel,
-       T4.contract_jurisdiction_state_cde,
-       coalesce(T4.agent_id, T6.agent_id)                                  AS agent_id,
-       T4.advisor_nm,
-       coalesce(T4.firm_num, T6.agency_num)                                AS agency_num,
-       T4.firm_nm,
-       T1.work_event_id,
-       T3.work_event_nm,
-       T3.division_cd,
-       T3.department_cd,
-       T3.function_nm,
-       T3.segment_nm,
-       T1.team_party_id,
-       T1.party_employee_id,
-       T2.employee_first_nm,
-       T2.employee_last_nm,
-       ((T2.employee_last_nm || ', '::varchar(2)) || T2.employee_first_nm) AS employee_full_nm,
-       T2.manager_last_nm,
-       T2.manager_first_nm,
-       ((T2.manager_last_nm || ', '::varchar(2)) || T2.manager_first_nm)   AS manager_full_nm,
-       T2.organization_nm,
-       T2.department_nm,
-       T2.team_nm,
-       T1.trans_type_id,
-       T1.received_dt,
-       T1.load_dt,
-       T1.completed_dt,
-       T1.tat,
-       T1.tat_goal,
-       T1.days_pending,
-       T1.days_past_tat,
-       T1.ir_igo_ind,
-       T1.suit_igo_ind,
-       T1.auto_approved_ind,
-       T6.replacement_ind,
-       T1.prod_credit,
-       T4.application_signed_dt,
-       T4.suitability_approved_dt,
-       T4.original_order_submit_dt,
-       T5.parent_cancel_dt,
-       T4.suitability_submit_dt,
-       CASE WHEN (lower(T5.app_status) = 'cancel/reject'::varchar(13)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS reject_dt,
-       CASE WHEN (lower(T5.app_status) = 'cancelled'::varchar(9)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS cancel_dt,
-       CASE WHEN (lower(T5.app_status) = 'cancel/rework'::varchar(13)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS cancel_rework_dt,
-       T1.row_process_dtm
-FROM dma_vw.fact_anb_suit_activity_vw T1
-LEFT JOIN dma_vw.dma_dim_employee_pit_vw T2 ON T1.party_employee_id = T2.party_employee_id AND T1.completed_dt BETWEEN T2.begin_dt AND T2.end_dt
-LEFT JOIN dma_vw.dma_dim_work_pit_vw T3 ON T1.work_event_id = T3.work_event_id AND T1.completed_dt BETWEEN T3.begin_dt AND T3.end_dt
-LEFT JOIN (SELECT * FROM dma_vw.sem_dim_anb_application_curr_vw
-            LIMIT 1 OVER ( PARTITION BY initial_review_id ORDER BY application_signed_dt DESC)) T4 ON T1.initial_review_id = T4.initial_review_id
-LEFT JOIN dma_vw.dim_ipipeline_orders_curr_vw T5 ON T1.source_transaction_id = T5.order_entry_id
-LEFT JOIN dma_vw.bibt_rel_initial_reviews_vw T6 ON T1.initial_review_id = T6.initial_review_id
-LIMIT 1 OVER (PARTITION BY T1.source_transaction_id, T1.work_event_id, T1.trans_type_id ORDER BY T1.load_dt);
+/*
+FILENAME: ANNUITY NEW BUSINESS IR WORKFLOW DETAILS
+UPDATED BY: John Avgoustakis, Vince Banaddio 
+LAST UPDATED: 06/29/2022
+CHANGES MADE: Vertica Migration
+*/
 
+SELECT 
+
+	T1.fact_activity_natural_key_hash_uuid AS "Natural Key"
+    , T1.source_transaction_id AS "OrderEntryID"
+    --, T4.agreement_nr "Agreement ID"
+    --, T5.dim_agreement_natural_key_hash_uuid
+    , T1.product_category AS "Product Category"
+    , T1.product AS "Product" --no more case statement?
+    , T1.distributor AS "Distributor"
+    , T1.channel AS "Channel"
+    , T1.contract_jurisdiction_state_cde AS "Contract State"
+    , coalesce(T1.agent_id, T1.agent_id) AS "AgentID"
+    , T1.advisor_nm AS "Advisor"
+    , T1.agency_num AS "FirmNum"
+    , T1.firm_nm AS "Firm Name"
+    , T1.work_event_id AS "WorkEventID"
+    , T1.work_event_nm AS "WorkEventName"
+    , T1.division_cd AS "DivisionCode"
+    , T1.department_cd AS "DepartmentCode"
+    , T1.function_nm AS "FunctionName"
+    , T1.segment_nm AS "SegmentName"
+    , T1.team_party_id AS "TeamPartyID"
+    , T1.party_employee_id AS "PartyEmployeeID"
+    --, T2.employee_first_nm
+    --, T2.employee_last_nm
+    , ((T1.employee_last_nm || ', '::varchar(2)) || T1.employee_first_nm) AS "Employee"
+    --, T2.manager_last_nm
+    --, T2.manager_first_nm
+    , ((T1.manager_last_nm || ', '::varchar(2)) || T1.manager_first_nm)   AS "Manager"
+    , T1.organization_nm AS "OrganizationName"
+    , T1.department_nm AS "DepartmentName"
+    , T1.team_nm AS "TeamName"
+    , T1.trans_type_id AS "TransactionTypeID"
+    , T1.received_dt AS "ReceivedDate"
+    , T1.load_dt AS "LoadDate"
+    , T1.completed_dt AS "CompletedDate"
+    , T1.tat AS "TAT"
+    , T1.tat_goal AS "TATGoal"
+    , T1.days_pending AS "DaysPending"
+    , T1.days_past_tat AS "Days Past TAT"
+    , CAST(T1.ir_igo_ind AS INTEGER) AS "IGOIndicator"
+    , T1.suit_igo_ind AS "SuitabilityIGOIndicator"
+    , CAST(T1.auto_approved_ind AS INTEGER) AS "AutoApprovedIndicator"
+    , T1.replacement_ind AS "ReplacementIndicator"
+    , T1.prod_credit AS "ProductivityCredits"
+    , T1.application_signed_dt AS "ApplicationSignDate"
+    , T1.suitability_approved_dt AS "SuitabilityApprovalDate"
+    , T1.original_order_submit_dt AS "OriginalOrderSubmitDate"
+    , T5.parent_cancel_dt AS "ParentCancelDate"
+    , T1.suitability_submit_dt AS "SuitabilitySubmitDate"
+    , CASE WHEN (lower(T5.app_status) = 'cancel/reject'::varchar(13)) THEN T5.app_status_change_dt
+           ELSE NULL::timestamp END                                        AS "RejectDate"
+    , CASE WHEN (lower(T5.app_status) = 'cancelled'::varchar(9)) THEN T5.app_status_change_dt
+           ELSE NULL::timestamp END                                        AS "CancelDate"
+    , CASE WHEN (lower(T5.app_status) = 'cancel/rework'::varchar(13)) THEN T5.app_status_change_dt
+           ELSE NULL::timestamp END                                        AS "CancelReworkDate"
+    , T1.row_process_dtm as "TransDate"
+FROM dma_vw.sem_fact_anb_suit_activity_vw T1
+LEFT JOIN dma_vw.dim_ipipeline_orders_curr_vw T5 ON T1.source_transaction_id = T5.order_entry_id
+LIMIT 1 OVER (PARTITION BY T1.source_transaction_id, T1.work_event_id, T1.trans_type_id ORDER BY T1.load_dt)

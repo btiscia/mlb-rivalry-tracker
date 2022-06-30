@@ -15,7 +15,7 @@ SELECT
 , COALESCE(T2.manager_last_nm || ', ' || T2.manager_first_nm , 'Unknown') AS 'Manager'
 , CASE WHEN T1.fte < 1 THEN 'Non_Production' ELSE 'Production' END AS "Employee Type"
 , T2.team_nm AS "Team Name"
-, T2.role_nm AS "Role Name"
+, T2.role_nm AS "Employee Role Name"
 , T2.role_grade_nm AS "Role Grade Name"
 , T1.prod_goal AS "Prod Goal"
 , T1.non_prod_goal AS "Non Prod Goal"
