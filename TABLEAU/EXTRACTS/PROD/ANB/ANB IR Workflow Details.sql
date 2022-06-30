@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
 FILENAME: ANNUITY NEW BUSINESS IR WORKFLOW DETAILS
 UPDATED BY: John Avgoustakis, Vince Banaddio 
@@ -8,7 +7,7 @@ CHANGES MADE: Vertica Migration
 
 SELECT 
 
-	T1.fact_activity_natural_key_hash_uuid AS "Natural Key"
+      T1.fact_activity_natural_key_hash_uuid AS "Natural Key"
     , T1.source_transaction_id AS "OrderEntryID"
     --, T4.agreement_nr "Agreement ID"
     --, T5.dim_agreement_natural_key_hash_uuid
@@ -66,63 +65,3 @@ SELECT
 FROM dma_vw.sem_fact_anb_suit_activity_vw T1
 LEFT JOIN dma_vw.dim_ipipeline_orders_curr_vw T5 ON T1.source_transaction_id = T5.order_entry_id
 LIMIT 1 OVER (PARTITION BY T1.source_transaction_id, T1.work_event_id, T1.trans_type_id ORDER BY T1.load_dt)
-=======
-SELECT T1.fact_activity_natural_key_hash_uuid,
-       T1.source_transaction_id,
-       T1.agreement_nr,
-       T5.dim_agreement_natural_key_hash_uuid,
-       T1.product_category,
-       T1.product,
-       T1.distributor,
-       T1.channel,
-       T1.contract_jurisdiction_state_cde,
-       T1.agent_id,
-       T1.advisor_nm,
-       T1.agency_num,
-       T1.firm_nm,
-       T1.work_event_id,
-       T1.work_event_nm,
-       T1.division_cd,
-       T1.department_cd,
-       T1.function_nm,
-       T1.segment_nm,
-       T1.team_party_id,
-       T1.party_employee_id,
-       T1.employee_first_nm,
-       T1.employee_last_nm,
-       ((T1.employee_last_nm || ', '::varchar(2)) || T1.employee_first_nm) AS employee_full_nm,
-       T1.manager_last_nm,
-       T1.manager_first_nm,
-       ((T1.manager_last_nm || ', '::varchar(2)) || T1.manager_first_nm)   AS manager_full_nm,
-       T1.organization_nm,
-       T1.department_nm,
-       T1.team_nm,
-       T1.trans_type_id,
-       T1.received_dt,
-       T1.load_dt,
-       T1.completed_dt,
-       T1.tat,
-       T1.tat_goal,
-       T1.days_pending,
-       T1.days_past_tat,
-       T1.ir_igo_ind,
-       T1.suit_igo_ind,
-       T1.auto_approved_ind,
-       T1.replacement_ind,
-       T1.prod_credit,
-       T1.application_signed_dt,
-       T1.suitability_approved_dt,
-       T1.original_order_submit_dt,
-       T5.parent_cancel_dt,
-       T1.suitability_submit_dt,
-       CASE WHEN (lower(T5.app_status) = 'cancel/reject'::varchar(13)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS reject_dt,
-       CASE WHEN (lower(T5.app_status) = 'cancelled'::varchar(9)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS cancel_dt,
-       CASE WHEN (lower(T5.app_status) = 'cancel/rework'::varchar(13)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS cancel_rework_dt,
-       T1.row_process_dtm
-FROM dma_vw.sem_fact_anb_suit_activity_vw T1
-LEFT JOIN dma_vw.dim_ipipeline_orders_curr_vw T5 ON T1.source_transaction_id = T5.order_entry_id
-LIMIT 1 OVER (PARTITION BY T1.source_transaction_id, T1.work_event_id, T1.trans_type_id ORDER BY T1.load_dt);
->>>>>>> 40be3526da6181fd4a795782b0525a7f31773635
