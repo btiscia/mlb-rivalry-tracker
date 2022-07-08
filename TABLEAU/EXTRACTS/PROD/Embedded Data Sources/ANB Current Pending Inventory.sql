@@ -39,7 +39,7 @@ SELECT
 	, T1.contractstate AS "Contract State"
 FROM dma_vw.anb_trex_work_object_vw T1
 LEFT JOIN dma_vw.dma_dim_employee_pit_vw T2 ON UPPER(T1.assignedto) = T2.mmid AND T1.r_createdate BETWEEN T2.begin_dt AND T2.end_dt
-LEFT JOIN dma_vw.dma_dim_work_curr_vw T3 ON T3.work_event_nm = T1.worktype
+LEFT JOIN dma_vw.dma_dim_work_curr_vw T3 ON trim(lower(T3.work_event_nm)) = trim(lower(T1.worktype))
 
 WHERE UPPER(T1.t_stepname) IN ('ACTIVE','PEND','NEW')
 	AND T1.worktype <> ''
