@@ -1,3 +1,10 @@
+/*
+FILENAME: ANB Inventory Details
+CREATED BY: Bill Trombley
+LAST UPDATED: 7/8/2022
+CHANGES MADE: Added NewBusinessDocType
+*/
+
 SELECT	DISTINCT InventoryID
 	, ApplicationNaturalKeyUUID
 	, OrderEntryID
@@ -10,7 +17,6 @@ SELECT	DISTINCT InventoryID
 	, AgentID
 	, Advisor
 	, AgencyNumber
---	, Product
 	, CASE
    		WHEN T1.Product LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
    		WHEN T1.Product LIKE ('%Transitions Select%') THEN 'Transition Select'
@@ -32,10 +38,15 @@ SELECT	DISTINCT InventoryID
 	, Channel
 	, ChannelType AS "Channel Type"
 	, BINGOStatus AS "Bingo Status"
-/*	, CASE WHEN CompletedDate IS NOT NULL THEN
-		CASE WHEN NewBusinessStatus <> 'Withdrawn' THEN 'Issued' ELSE NewBusinessStatus END 
-		END AS NewBusinessStatus
-*/
+	,CASE WHEN T3.NBPurchaseWAppIndicator = 1 THEN 'NB Purchase w App'
+		WHEN T3.INCOMINGTRANSFERINDICATOR = 1 THEN 'Incoming Transfer'
+		WHEN T3.ANNUITYAPPINDICATOR = 1 THEN 'Annuity Application'
+		WHEN T3.SDElectIndicator = 1 THEN 'SD Elect App'
+		WHEN T3.NBREG60INDICATOR = 1 THEN 'NB Reg 60'
+		WHEN T3.EXCLUDEDINDICATOR = 1 THEN 'Excluded'
+		WHEN T3.OVERLAPINDICATOR = 1 THEN 'Overlap'
+		ELSE 'N/A' END AS NewBusinessDocType
+	,ReceivedDate
 	, LoadDate
 	, CompletedDate
 	, TAT
@@ -54,14 +65,16 @@ SELECT	DISTINCT InventoryID
     		ELSE 0 END AS "Count Input"
 	, CASE WHEN INVENTORYSTATUSID = 5 AND TRANSACTIONTYPEID = 3 THEN 1 
     		ELSE 0 END AS "Count Throughput"
-    , T2.ReportDate   
+    ,T2.ReportDate
+    ,T2.IsHoliday
+    ,T2.IsWeekday
 FROM	PROD_DMA_VW.ANB_INVENTORY_RPT_VW T1
 
 LEFT JOIN   (SELECT ShortDate, PreviousBusinessDay, IsHoliday, IsWeekday
 							,CASE WHEN IsHoliday =0 AND Isweekday = 1 THEN Shortdate ELSE PreviousBusinessday END AS ReportDate
-							,CASE WHEN shortDate = CURRENT_DATE THEN 1 ELSE 0 END AS "InventoryCurrDayInd"                      
+							,CASE WHEN shortDate = CURRENT_DATE THEN 1 ELSE 0 END AS "InventoryCurrDayInd"
 						FROM PROD_DMA_VW.DATE_DIM_VW ) T2 ON "Date" = ShortDate
 
-LEFT JOIN PROD_DMA_VW.ANB_DOC_TYPE_CMN_VW T3 on T3.HoldingKey = T1.ContractNumber
+LEFT JOIN PROD_DMA_VW.ANB_DOC_TYPE_CMN_VW T3 ON T3.HoldingKey = T1.ContractNumber
 
 WHERE DATE >= '2020-01-01'
