@@ -1,42 +1,45 @@
 /*
 FILENAME: ANB CURRENT PENDING INVENTORY
 CREATED BY: Jess Madru
-LAST UPDATED: 10/15/2021
-CHANGES MADE: 
+UPDATED BY: John Avgoustakis
+LAST UPDATED: 7/6/2022
+CHANGES MADE: Repoint to Vertica.
 */
 
-SELECT T1.RWOBNUM  AS SourceTransactionID
-	, T1.CONTRACTNUMBER AS "Contract"
-	, T1.PESSPOLICYPREFFIX AS "Contract Prefix"
-	, T1.CONTROLID AS OrderEntryID
-	, CAST(T1.RCREATEDATE AS DATE) AS "Received Date"
-	, CAST(T1.RSTATUSTIME AS DATE) AS "Trans Date"
-	, CAST(T1.TPENDTIME AS DATE) AS "Pend Date"
-	, T1.WORKTYPE AS "Work Type"
-	, T1.TRANSACTIONTYPE AS "Transaction Type"
-	, T1.DOCUMENTTYPE AS "Document Type"
-	, T3.FUNCTIONNAME AS "Function"
-	, T3.SEGMENTNAME AS "Segment"
-	, T3.WORKEVENTID AS WorkEventID
-	, T3.TATGOAL AS "TAT Goal"
-	, T1.TSTEPNAME AS "Work Status"
-	, CAST(CURRENT_DATE AS DATE) - CAST(T1.RSTATUSTIME AS DATE) AS "Trans Days Pending"
-	, CAST(CURRENT_DATE AS DATE) - CAST(T1.RCREATEDATE AS DATE) AS "Days Pending"
-	, CAST(CURRENT_DATE AS DATE) - CAST(T1.TPENDTIME AS DATE) AS "Pend Days Pending"
-        , UPPER(T1.ASSIGNEDTO) AS AssignedToMMID
-	, T2.ORGANIZATIONNAME AS "Organization"
-	, T2.DEPARTMENTNAME AS "Department"
-	, TeamName AS "Team"
-	, EmployeeLastName||', '||EmployeeFirstName AS "Employee"
-	, RoleName AS "Role"
-	, ManagerLastName||', '||ManagerFirstName AS "Manager"
-	, T1.PRODUCEID AS AgentID
-	, T1.AGENCY AS Firm
-	, T1.PRODUCT AS "Product Name"
-	, T1.CONTRACTSTATE AS "Contract State"
-FROM PROD_DMA_VW.ANB_WORK_OBJECT_VW T1
-LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON UPPER(T1.ASSIGNEDTO) = T2.MMID AND T1.RCREATEDATE BETWEEN T2.STARTDATE AND T2.ENDDATE
-LEFT JOIN PROD_DMA_VW.WORK_EVENT_CURR_DIM_VW T3 ON T3.WORKEVENTNAME = T1.WORKTYPE
+SELECT 
+	  T1.r_wobnum  AS "SourceTransactionID"
+	, T1.contractnumber AS "Contract"
+	, T1.pe_sspolicyprefix AS "Contract Prefix"
+	, T1.controlid AS OrderEntryID
+	, CAST(T1.r_createdate AS DATE) AS "Received Date"
+	, CAST(T1.r_statustime AS DATE) AS "Trans Date"
+	, T1.r_statustime AS "Report Date"
+	, CAST(T1.t_pendtime AS DATE) AS "Pend Date"
+	, T1.worktype AS "Work Type"
+	, T1.trantype AS "Transaction Type"
+	, T1.document_type AS "Document Type"
+	, T3.function_nm AS "Function"
+	, T3.segment_nm AS "Segment"
+	, T3.work_event_id AS "WorkEventID"
+	, T3.tat_goal AS "TAT Goal"
+	, T1.t_stepname AS "Work Status"
+	, CAST(CURRENT_DATE AS DATE) - CAST(T1.r_statustime AS DATE) AS "Trans Days Pending"
+	, CAST(CURRENT_DATE AS DATE) - CAST(T1.r_createdate AS DATE) AS "Days Pending"
+	, CAST(CURRENT_DATE AS DATE) - CAST(T1.t_pendtime AS DATE) AS "Pend Days Pending"
+    , UPPER(T1.assignedto) AS "AssignedToMMID"
+	, T2.organization_nm AS "Organization"
+	, T2.department_nm AS "Department"
+	, T2.team_nm AS "Team"
+	, T2.employee_last_nm||', '||T2.employee_first_nm AS "Employee"
+	, T2.role_nm AS "Role"
+	, T2.manager_last_nm||', '||T2.manager_first_nm AS "Manager"
+	, T1.producerid AS "AgentID"
+	, T1.agency AS "Firm"
+	, T1.product AS "Product Name"
+	, T1.contractstate AS "Contract State"
+FROM dma_vw.anb_trex_work_object_vw T1
+LEFT JOIN dma_vw.dma_dim_employee_pit_vw T2 ON UPPER(T1.assignedto) = T2.mmid AND T1.r_createdate BETWEEN T2.begin_dt AND T2.end_dt
+LEFT JOIN dma_vw.dma_dim_work_curr_vw T3 ON T3.work_event_nm = T1.worktype
 
-WHERE T1.TSTEPNAME IN ('ACTIVE','PEND','NEW')
-	AND T1.WORKTYPE <> ''
+WHERE UPPER(T1.t_stepname) IN ('ACTIVE','PEND','NEW')
+	AND T1.worktype <> ''
