@@ -3,7 +3,7 @@
 *  Peer Review & Change Log:
 *  Peer Review Date:
 *  Source for this routine is
-*  Author: Zach Dorvay/Lorraine Christian
+*  Author: Zach Dorval/Lorraine Christian
 *  Created: 11/3/2020
 *  Updated By: John Avgoustakis
 *  Updated: 7/5/2022
@@ -17,7 +17,7 @@
 
 SELECT  
 	  T6.major_prod_nme AS "ReviewTypeCode"
-    , T1.application_id AS "OrderEntryID"
+    , T1.application_id AS "Application ID"
     , T1.initial_review_id AS "InitialReviewID"
     , T1.agency_num AS "AgencyID"
     , T1.agent_id AS "AgentID"
@@ -58,4 +58,4 @@ LEFT JOIN dma_vw.bibt_ref_ir_funding_types_vw T4 ON T1.ir_funding_type_id = T4.f
 LEFT JOIN dma_vw.bibt_ref_ir_market_types_vw T5 ON T1.ir_market_type_id = T5.market_type_id
 LEFT JOIN dma_vw.dma_dim_employee_pit_vw T10 ON T1.created_by = T10.hr_id AND CAST(T1.created_at AS DATE) BETWEEN T10.begin_dt AND T10.end_dt
 LEFT JOIN dma_vw.sem_dim_anb_application_curr_vw T12 ON T12.initial_review_id = T1.initial_review_id
-WHERE T12.Channel IS NOT NULL
+WHERE T1.hold_ind = FALSE

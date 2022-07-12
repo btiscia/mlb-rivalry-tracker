@@ -1,6 +1,6 @@
 /*
 FILENAME: ANNUITY NEW BUSINESS IR WORKFLOW DETAILS
-UPDATED BY: John Avgoustakis, Vince Banaddio 
+UPDATED BY: John Avgoustakis, Vince Bonaddio 
 LAST UPDATED: 06/29/2022
 CHANGES MADE: Vertica Migration
 */
