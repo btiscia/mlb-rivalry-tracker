@@ -1,166 +1,62 @@
-SELECT 
-	BINGOType AS "Bingo Type"
-	, PolicyNumber AS "Policy Number"
-	, AgreementID AS "Agreement ID"
-	, OrderEntryID AS "Order Entry ID"
-	, InitialReviewID
-	, Channel
-	, Distributor
-	, Product
-	, ProductCategory AS "Product Category"
-	, RegionName
-	, ResidenceState
-	, FirmNum
-	, FirmName AS "Firm"
-	, AgentID
-	, Advisor
-	, DocType AS "Doc Type"
-	, MarketTypeCode
-	, MarketTypeCategory
-	, NIGOID
-	, NIGOCategory AS "NIGO Category"
-	, NIGOReason AS "NIGO Reason"
-	, FinalDisposition
-	, NewBusinessSubmitDate
-	, ApplicationSubmitDate
-	, SuitabilityApprovalDate
-	, PAWDate
-	, TOADate
-	, RejectDate
-	, WithdrawnDate
-	, IssueDate
-	, NIGODate
-	, CancelDate
-	, ApprovedDate
-	, NIGOResolvedDate
-	, IRBINGODate
-	, IRNIGODate
-	, BINGOIndicator
-	, NIGOResolution AS "NIGO Resolution"
-	, FinalDispositionDate AS "Final Disposition Date"
-	, TransDate
+/*
+FILENAME: ANNUITY NEW BUSINESS IR AND SE2
+UPDATED BY: John Avgoustakis, Vince Bonaddio 
+LAST UPDATED: 07/5/2022
+CHANGES MADE: Vertica Migration
+*/
 
-FROM 
-	(
-		--SE2
-		SELECT DISTINCT
-			'SE2' AS BINGOType
-			,PolicyNumber
-			, T1.AGREEMENTID AS AgreementID
-			, T1.OrderEntryID
-			, CAST(NULL AS VARCHAR(100)) AS InitialReviewID
-			, Channel
-			, CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
-			, Product
-			, ProductCategory
-			, RegionName
-			, CAST(ResidenceState AS VARCHAR(2)) AS ResidenceState
-			, FirmNum
-			, FirmName
-		    , AgentID
-			, Advisor
-			, DocumentTypeCode AS "DocType"
-			, CAST(NULL AS VARCHAR(20)) AS MarketTypeCode
-			, CAST(NULL AS VARCHAR(23)) AS MarketTypeCategory
-			, COALESCE(T1.AGREEMENTID, T1.POLICYNUMBER, T1.ORDERENTRYID) NIGOID --Use to sum distinct cases
-			, NIGOCategory
-			, ReasonDescription AS "NIGOReason"
-			, CASE WHEN RejectDate IS NOT NULL THEN 'Rejected'
-					WHEN WithdrawnDate IS NOT NULL THEN 'Withdrawn'
-					WHEN IssueDate IS NOT NULL THEN 'Issued'
-		  		ELSE NULL END AS FinalDisposition
-		  	, NewBusinessSubmitDate
-			, CAST(NULL AS DATE) AS ApplicationSubmitDate
-			, SuitabilityApprovalDate
-			, PAWDate
-			, TOADate
-			, RejectDate
-			, WithdrawnDate
-			, IssueDate
-			, NIGODate
-			, CAST(NULL AS TIMESTAMP(6)) AS CancelDate
-			, CAST(NULL AS TIMESTAMP(6)) AS ApprovedDate
-			, NIGOResolvedDate
-			, CAST(NULL AS DATE) AS IRBINGODate
-			, CAST(NULL AS DATE) AS IRNIGODate
-			, CAST(BINGOIndicator AS INTEGER) AS BINGOIndicator
-			, (NIGOResolvedDate - NIGODate)  AS NIGOResolution
-			, COALESCE(RejectDate, WithdrawnDate, IssueDate) AS "FinalDispositionDate" --Final Disposition Date SE2
-			,T1.TransDate
-		
-		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
-		 
-		LEFT JOIN (SELECT DISTINCT AGREEMENTID
-		                            , ORDERENTRYID
-		                            , CAST(MIN(NIGODate) OVER (PARTITION BY AGREEMENTID) AS DATE) AS NIGODate
-		                            , MAX(NIGOResolutionDate) OVER (PARTITION  BY AGREEMENTID) AS NIGOResolvedDate
-		                            , T2.NIGOCategory
-		                            , ReasonDescription
-		                            , DocumentTypeCode
-		                        FROM PROD_DMA_VW.ANB_NIGO_FCT_VW T1
-		                        INNER JOIN PROD_DMA_VW.ANN_NIGO_REASON_LOV_VW T2 ON T2.NIGOUUID = T1.NIGOUUID
-		                        WHERE T1.SYSTEMID = 34
-		                        AND GROUPTYPE LIKE 'NEW B%'
-		                        AND NIGODATE >= '2019-01-01') T2 ON COALESCE(T1.AGREEMENTID, T1.ORDERENTRYID) = COALESCE(T2.AGREEMENTID, T2.ORDERENTRYID)
-		                        
-		UNION
-		
-		--IR
-		SELECT DISTINCT
-			'IR' AS BINGOType
-			,PolicyNumber
-			, AgreementID
-			, T1.OrderEntryID
-			, T1.InitialReviewID
-			, Channel
-			, CASE WHEN Distributor = 'SDP' THEN 'MMSD' ELSE Distributor END AS Distributor
-			, Product
-			, T1.ProductCategory
-			, RegionName
-			, T3.StateCode AS ResidenceState
-			, FirmNum
-			, FirmName
-			, CAST(T3.AgentID AS VARCHAR(10)) AS AgentID
-			, Advisor
-			,CAST(NULL AS VARCHAR(255)) AS DocType
-			, MarketTypeCode
-			, MarketTypeCategory
-			, CAST(NULL AS VARCHAR(255)) AS NIGOID
-			, NIGOCategory
-			, NIGOReason
-			, CASE WHEN T2.REJECTDATE IS NOT NULL THEN 'Rejected'
-					WHEN CANCELDATE IS NOT NULL THEN 'Canceled'
-					WHEN APPROVEDDATE IS NOT NULL THEN 'Approved'
-		  		ELSE NULL END AS FinalDisposition
-		  	, NewBusinessSubmitDate
-			, ApplicationSubmitDate
-			, SuitabilityApprovalDate
-			, PAWDate
-			, TOADate
-			, T2.RejectDate
-			, CAST (NULL AS DATE) AS WithdrawnDate
-			, CAST (NULL AS DATE) AS IssueDate
-			, CAST(CreatedAtDateTimeStamp AS DATE) AS NIGODate
-			, CancelDate
-			, ApprovedDate
-			, CAST(NULL AS DATE) AS NIGOResolvedDate
-			, CASE WHEN NIGOREASON IS NULL THEN SUITABILITYAPPROVALDATE
-					WHEN T1.PRODUCTCATEGORY = 'Variable Annuity' THEN CAST(COALESCE( PAWDATE, TOADATE) AS DATE)
-		  		ELSE CAST(COALESCE(T2.REJECTDATE, CANCELDATE, APPROVEDDATE, PAWDATE, TOADATE, ISSUEDATE) AS DATE) END AS IRBINGODate
-		  	, CAST(CreatedAtDateTimeStamp AS DATE) AS IRNIGODate
-			, CAST(BINGOIndicator AS INTEGER) AS BINGOIndicator
-			, (IRBINGODate - IRNIGODate) AS NIGOResolution
-			, COALESCE(T2.ApprovedDate, T2.RejectDate, T2.CancelDate, PAWDate, T2.TransmitDate) AS "FinalDispositionDate" --Final Disposition Date IR
-			,T1.TransDate
+		SELECT
+			 'IR' AS BINGOType
+			, T1.policy_num AS "PolicyNumber"
+			, dim_agreement_natural_key_hash_uuid AS "AgreementID" --aggreement number? or aggreement natural key hash id?
+			, T1.order_entry_id AS "OrderEntryID"
+			, T1.initial_review_id AS "InitialReviewID"
+			, T1.channel AS "Channel"
+			, CASE WHEN T1.distributor = 'SDP' THEN 'MMSD' ELSE T1.distributor END AS Distributor
+			, T1.product AS "Product"
+			, T1.product_category AS "ProductCategory"
+			, T1.resident_state_cde AS ResidenceState --no longer T3
+			, T1.firm_num AS "FirmNum"
+			, T1.firm_nm AS "FirmName"
+			, CAST(T1.agent_id AS VARCHAR(10)) AS "AgentID" --no longer T3
+			, T1.advisor_nm AS "Advisor"
+			, T1.doc_type_nm AS "DocType"     --CAST(NULL AS VARCHAR(255)) AS DocType
+			, T1.market_category_type_cde AS "MarketTypeCode"
+			, T1.market_type_category AS "MarketTypeCategory"
+			--, CAST(NULL AS VARCHAR(255)) AS "NIGOID"
+			, T3.category AS "NIGOCategory"
+			, T3.nigo_reason AS "NIGOReason"
+			, CASE WHEN T2.reject_dt IS NOT NULL THEN 'Rejected'
+					WHEN T2.cancel_dt IS NOT NULL THEN 'Canceled'
+					WHEN T2.approved_dt IS NOT NULL THEN 'Approved'
+		  		ELSE NULL END AS "FinalDisposition"
+		  	, T1.nb_submit_dt AS "NewBusinessSubmitDate"
+			, T1.application_submit_dt AS "ApplicationSubmitDate"
+			, T1.suitability_approved_dt AS "SuitabilityApprovalDate"
+			, T1.paw_dt AS "PAWDate"
+			, T1.toa_dt AS "TOADate"
+			, T2.reject_dt AS "RejectDate"
+			--, CAST (NULL AS DATE) AS "WithdrawnDate"
+			--, CAST (NULL AS DATE) AS "IssueDate"
+			, T3.updated_at AS "NIGODate"
+			, T2.cancel_dt AS "CancelDate"
+			, T2.approved_dt AS "ApprovedDate"
+			--, CAST(NULL AS DATE) AS "NIGOResolvedDate"
+			, CASE WHEN T3.nigo_reason IS NULL THEN T1.suitability_approved_dt
+					WHEN lower(T1.product_category) = 'variable annuity' THEN CAST(COALESCE( T1.paw_dt, T1.toa_dt) AS DATE)
+		  		ELSE CAST(COALESCE(T2.reject_dt, T2.cancel_dt, T2.approved_dt, T1.paw_dt, T1.toa_dt, issue_dt) AS DATE) END AS "IRBINGODate"
+		  	, CAST(T3.updated_at AS DATE) AS "IRNIGODate"
+			, T1.bingo_ind AS "BINGOIndicator"
+			, ("IRBINGODate" - "IRNIGODate") AS "NIGOResolution"
+		    , COALESCE(T2.approved_dt,T2.reject_dt,T2.cancel_dt,T1.paw_dt,T2.transmit_dt) AS "FinalDispositionDate"
+			,T1.row_process_dtm AS "TransDate"
 
-		FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
+		FROM dma_vw.sem_dim_anb_application_curr_vw T1
 		
-		LEFT JOIN PROD_DMA_VW.IPIPELINE_ORDER_FCT_VW T2 ON OREPLACE(T2.OrderEntryID, '-','') = T1.ORDERENTRYID --Look in here for the fields
-		LEFT JOIN PROD_DMA_VW.ANB_IR_NIGO_REASON_TOKEN_VW T3 ON T3.INITIALREVIEWID = T1.INITIALREVIEWID
-		WHERE T1.INITIALREVIEWID IS NOT NULL --AND NIGOResolution >= 0
+		LEFT JOIN dma_vw.sem_anb_ipipeline_vw T2 ON T2.order_entry_id = T1.order_entry_id --Look in here for the fields
+		LEFT JOIN dma_vw.bibt_ir_initial_reviews_token_vw T3 ON T3.initial_review_id = T1.initial_review_id
+		WHERE T1.initial_review_id IS NOT NULL --AND NIGOResolution >= 0
+		AND T1.final_disposition_dt IS NOT NULL
+		AND EXTRACT(YEAR FROM T1.final_disposition_dt) >= EXTRACT(YEAR FROM CURRENT_DATE) - 2
 		
-		QUALIFY ROW_NUMBER() OVER(PARTITION BY T1.INITIALREVIEWID, NIGOREASON ORDER BY CREATEDATDATETIMESTAMP) = 1 
-	) C1
-	
-WHERE FinalDisposition IS NOT NULL
-AND EXTRACT(YEAR FROM FinalDispositionDate) >= EXTRACT(YEAR FROM CURRENT_DATE) - 2
+		LIMIT 1 OVER(PARTITION BY T1.initial_review_id, T3.nigo_reason ORDER BY T3.updated_at)
