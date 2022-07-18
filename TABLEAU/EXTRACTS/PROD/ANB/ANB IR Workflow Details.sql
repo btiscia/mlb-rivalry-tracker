@@ -1,18 +1,17 @@
 /*
 FILENAME: ANNUITY NEW BUSINESS IR WORKFLOW DETAILS
 UPDATED BY: John Avgoustakis, Vince Bonaddio 
-LAST UPDATED: 06/29/2022
+LAST UPDATED: 07/18/2022
 CHANGES MADE: Vertica Migration
 */
 
 SELECT 
 
-      T1.fact_activity_natural_key_hash_uuid AS "Natural Key"
+	T1.fact_activity_natural_key_hash_uuid AS "Natural Key"
     , T1.source_transaction_id AS "OrderEntryID"
-    --, T4.agreement_nr "Agreement ID"
-    --, T5.dim_agreement_natural_key_hash_uuid
     , T1.product_category AS "Product Category"
-    , T1.product AS "Product" --no more case statement?
+    , T1.product AS "Product"
+    --, CASE WHEN UPPER(T1.product) like 'MASSMUTUAL%' then substring(T1.product, 12) ELSE T1.product END AS "Product"	
     , T1.distributor AS "Distributor"
     , T1.channel AS "Channel"
     , T1.contract_jurisdiction_state_cde AS "Contract State"
@@ -28,11 +27,7 @@ SELECT
     , T1.segment_nm AS "SegmentName"
     , T1.team_party_id AS "TeamPartyID"
     , T1.party_employee_id AS "PartyEmployeeID"
-    --, T2.employee_first_nm
-    --, T2.employee_last_nm
     , ((T1.employee_last_nm || ', '::varchar(2)) || T1.employee_first_nm) AS "Employee"
-    --, T2.manager_last_nm
-    --, T2.manager_first_nm
     , ((T1.manager_last_nm || ', '::varchar(2)) || T1.manager_first_nm)   AS "Manager"
     , T1.organization_nm AS "OrganizationName"
     , T1.department_nm AS "DepartmentName"

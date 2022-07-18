@@ -8,7 +8,7 @@ CHANGES MADE: Vertica Migration
 		SELECT
 			 'IR' AS BINGOType
 			, T1.policy_num AS "PolicyNumber"
-			, dim_agreement_natural_key_hash_uuid AS "AgreementID"
+			, T1.dim_agreement_natural_key_hash_uuid AS "AgreementID"
 			, T1.order_entry_id AS "OrderEntryID"
 			, T1.initial_review_id AS "InitialReviewID"
 			, T1.channel AS "Channel"
