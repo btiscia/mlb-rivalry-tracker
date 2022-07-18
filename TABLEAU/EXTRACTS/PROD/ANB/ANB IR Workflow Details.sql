@@ -59,4 +59,6 @@ SELECT
     , T1.row_process_dtm as "TransDate"
 FROM dma_vw.sem_fact_anb_suit_activity_vw T1
 LEFT JOIN dma_vw.dim_ipipeline_orders_curr_vw T5 ON T1.source_transaction_id = T5.order_entry_id
+WHERE T1.work_event_id IN (27834,27836,27837)
 LIMIT 1 OVER (PARTITION BY T1.source_transaction_id, T1.work_event_id, T1.trans_type_id ORDER BY T1.load_dt)
+
