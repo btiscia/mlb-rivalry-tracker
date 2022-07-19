@@ -35,7 +35,7 @@ SELECT
     , T1.copied_from_trans_id AS "CopiedFromTransIdentifier"
     , T1.auto_approved_ind AS "AutoApprovedIndicator"
     , T1.row_process_dtm AS "TRANS_DT"
-FROM dma_vw.dim_ipipeline_orders_pit_vw T1
+FROM dma_vw.dim_ipipeline_orders_curr_vw T1
 LEFT JOIN dma_vw.dma_dim_date_vw T2 ON T2.short_dt = CAST(T1.suit_comp_dt_transmit AS DATE)
 LEFT JOIN dma_vw.dma_dim_date_vw T3 ON T3.short_dt = CAST(T1.electronic_submit_dt AS DATE)
 WHERE T1.electronic_submit_dt IS NOT NULL   --Count for Katie's Team Work Received
