@@ -47,7 +47,7 @@ SELECT
 	, T1.reject_dt AS "RejectDate"
 	, T1.withdraw_dt AS "WithdrawnDate"
 	, CAST(CURRENT_DATE() AS DATE) - T1.application_submit_dt AS "CALDaysSinceSub"
-	, CAST(CURRENT_DATE() AS DATE) - final_disposition_dt AS "CalDaysSinceNBSub"	
+	, CAST(CURRENT_DATE() AS DATE) - T1.final_disposition_dt AS "CalDaysSinceNBSub"	
 	, T1.issue_dt - T1.application_signed_dt AS "CalDaysSignToIssue"
 	, T1.application_signed_dt - T1.application_submit_dt AS "CalDaysSignToSub"
 	, T1.original_order_submit_dt - T1.application_signed_dt AS "CalDaysAppSignToSuitSub"
@@ -117,6 +117,4 @@ SELECT
 FROM dma_vw.sem_dim_anb_application_curr_vw T1
 LEFT JOIN dma_vw.dma_dim_date_vw T2 ON T1.bingo_dt = T2.short_dt 
 LEFT JOIN dma_vw.dma_dim_goal_curr_vw T3 ON lower(T1.doc_type_nm) = lower(T3.trans_type_nm)
-LIMIT 1 OVER(PARTITION BY T1.agreement_nr, T1.doc_type_nm, COALESCE("SE2DocTypeCycleTime", "HODocTypeCycleTime") ORDER BY T1.row_process_dtm) --coelesce is causing issues
-
---COALESCE("SE2DocTypeCycleTime", "HODocTypeCycleTime")
+LIMIT 1 OVER(PARTITION BY T1.agreement_nr, T1.doc_type_nm, COALESCE("SE2DocTypeCycleTime", "HODocTypeCycleTime") ORDER BY T1.row_process_dtm)  --coelesce is causing issues with aliased fields
