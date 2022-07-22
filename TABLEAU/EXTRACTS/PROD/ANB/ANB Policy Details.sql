@@ -1,133 +1,122 @@
 /*
 Name: ANB Modern Policy Details
 Author/Editor: Vince Bonaddio / Bill Trombley
-Last Updated: 4/15/2021
-Comments: Added Placement Status and Final Disposition Date
+Updated By: John Avgoustakis
+Last Updated: 7/14/2022
+Comments: Repoint to vertica.
 */
 
---Contract Level
-
 SELECT
-T1.HoldingKey
-,T1.OrderEntryID
-,T1.AgreementID
-,T1.PolicyNumber
-,T1.NewBusinessDocType
-,T1.ContractState
-,T1.ResidenceState
-,NULL AS Region
-,T1.AgentID
-,T1.Advisor
-,T1.AgencyNumber
-,T1.FirmName
-,CASE WHEN T1.Distributor = 'SDP' THEN 'MMSD' ELSE T1.Distributor END AS Distributor
-,T1.Channel
-,T1.ChannelType
-,T1.MarketTypeCode AS "Market Code"
-,T1.MarketTypeCategory AS "Market Category"
-,CASE
-WHEN T1.Product LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
-WHEN T1.Product LIKE ('%Transitions Select%') THEN 'Transition Select'
-WHEN T1.Product LIKE ('%RetireEase Choice%') THEN 'RetireEase Choice'
-WHEN T1.Product LIKE ('%RetireEase%') THEN 'RetireEase'
-WHEN T1.Product LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
-WHEN T1.Product LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
-WHEN T1.Product LIKE ('%Index Horizons%') THEN 'Index Horizons'
-WHEN T1.Product LIKE ('%Envision%') THEN 'Envision'
-ELSE 'Unknown'
-END AS Product
-,T1.ProductCategory
-,T1.AnticipatedPremium
-,T1.DepositAmount
-,T1.BINGOStatus,
-(
-SELECT PROD_DMA_VW.DATE_DIM_VW.IsHoliday
-FROM PROD_DMA_VW.DATE_DIM_VW
-WHERE T1.IssueDate = PROD_DMA_VW.DATE_DIM_VW.ShortDate
-) AS IssueDateIsHoliday,
-(
-SELECT PROD_DMA_VW.DATE_DIM_VW.IsHoliday
-FROM PROD_DMA_VW.DATE_DIM_VW
-WHERE T1.ApplicationSubmitDate = PROD_DMA_VW.DATE_DIM_VW.ShortDate
-) AS AppSubDateIsHoliday,
-T1.BINGOIndicator,
-T1.AutoApprovalIndicator,
-(
-SELECT PROD_DMA_VW.DATE_DIM_VW.IsHoliday
-FROM PROD_DMA_VW.DATE_DIM_VW
-WHERE T1.NewBusinessSubmitDate = PROD_DMA_VW.DATE_DIM_VW.ShortDate
-) AS NBSubmitDateIsHoliday,
-CASE
-WHEN T1.IssueDate >= '2018-08-01' THEN 1
-ELSE 0
-END AS IssueCountforBINGORate,
-(
-SELECT PROD_DMA_VW.DATE_DIM_VW.PreviousBusinessDay
-FROM PROD_DMA_VW.DATE_DIM_VW
-WHERE PROD_DMA_VW.DATE_DIM_VW.ShortDate = CAST(CURRENT_DATE AS DATE)
-) AS PrevBusDayOfToday
-,T1.ApplicationSubmitDate
-,T1.SuitabilityApprovalDate
-,T1.OriginalOrderSubmitDate
-,T1.SuitabilitySubmitDate
-,T1.ApplicationSignDate
-,T1.OrderChangeDate
-,T1.NewBusinessSubmitDate
-,T1.PAWDate
-,T1.TOADate
-,T1.BINGODate
-,T1.FirstNIGODate
-,T1.NewBusinessEndDate
-,T1.IssueDate
-,T1.RejectDate
-,T1.WithdrawnDate
-,CAST(CURRENT_DATE AS DATE) - T1.ApplicationSubmitDate AS CalDaysSinceSub
-,CAST(CURRENT_DATE AS DATE) - T1.NewBusinessEndDate AS CalDaysSinceNBSub
-,T1.IssueDate - T1.ApplicationSignDate AS CalDaysSignToIssue
-,T1.ApplicationSignDate - T1.ApplicationSubmitDate AS CalDaysSignToSub
-,T1.OriginalOrderSubmitDate - T1.ApplicationSignDate AS CalDaysAppSignToSuitSub
-,T1.NewBusinessSubmitDate - T1.ApplicationSignDate AS CalDaysSignToNBSub
-,T1.IssueDate - T1.ApplicationSubmitDate AS SubtoIssueCycleTime
-,T1.NewBusinessSubmitDate - T1.ApplicationSubmitDate AS CalDaysSubToNBSub
-,T1.IssueDate - T1.NewBusinessSubmitDate AS CalDaysNBRcvdToIssued
-,T1.BINGODate - T1.NewBusinessSubmitDate AS NBSubToBINGO
-,T1.PAWDate - T1.NewBusinessSubmitDate AS CalDaysNBSubToPAW
-,T2.BUSINESSDAY
-,T1.SuitabilityApprovalDate - T1.SuitabilitySubmitDate AS CalDaysSuitSubToSuitApvd
-,T1.NewBusinessSubmitDate - T1.SuitabilityApprovalDate AS CalDaysSuitApvdToNBSub
-,CAST(T1.OrderChangeDate AS DATE) - T1.SuitabilityApprovalDate AS CalDaysSuitApvdToSuitTrans
-,CAST(T1.OrderChangeDate AS DATE) - T1.SuitabilitySubmitDate AS CalDaysSuitSubToSuitTrans
-,T1.IssueDate - T1.SuitabilitySubmitDate AS CalDaysSuitSubToIssue
-,T1.NewBusinessSubmitDate - CAST(T1.OrderChangeDate AS DATE) AS CalDayssuitCmpltToNBRcvd
-,T1.PAWDate - T1.BINGODate AS CalDaysBINGOToPAW
-,T1.TOADate - T1.BINGODate AS CalDaysBINGOToTOA
-,T1.IssueDate - T1.TOADate AS CalDaysTOAToIssue
-, CASE WHEN NewBusinessDocType = 'NB Purchase w App' AND T3.FUNCTIONNAME = 'SE2' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = IssueDate) - T2.BUSINESSDAY
-WHEN NewBusinessDocType = 'Incoming Transfer' AND T3.FUNCTIONNAME = 'SE2' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = TOADate) - T2.BUSINESSDAY
-WHEN NewBusinessDocType = 'Annuity Application' AND T3.FUNCTIONNAME = 'SE2' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = PAWDate) - T2.BUSINESSDAY
-ELSE NULL
-END AS SE2DocTypeCycleTime
-, CASE WHEN NewBusinessDocType = 'NB Purchase w App' AND T3.FUNCTIONNAME = 'Home Office' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = IssueDate) - T2.BUSINESSDAY
-WHEN NewBusinessDocType = 'Incoming Transfer' AND T3.FUNCTIONNAME = 'Home Office' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = TOADate) - T2.BUSINESSDAY
-WHEN NewBusinessDocType = 'Annuity Application' AND T3.FUNCTIONNAME = 'Home Office' THEN (SELECT BUSINESSDAY FROM PROD_DMA_VW.DATE_DIM_VW WHERE SHORTDATE = PAWDate) - T2.BUSINESSDAY
-ELSE NULL
-END AS HODocTypeCycleTime
-, FUNCTIONNAME
-, GOALVALUE AS SLA
-/*
-, CASE WHEN T3.FUNCTIONNAME IS NULL THEN T3.GOALVALUE END AS SE2SLA
-, CASE WHEN T3.FUNCTIONNAME = 'Home Office' THEN T3.GOALVALUE END AS HOSLA*/
-,T1.TransDate
-,CASE
-WHEN T1.NewBusinessSubmitDate IS NOT NULL AND T1.WithdrawnDate IS NOT NULL THEN 'Withdrawn'
-WHEN T1.NewBusinessSubmitDate IS NOT NULL AND T1.RejectDate IS NOT NULL THEN 'Rejected'
-WHEN T1.NewBusinessSubmitDate IS NOT NULL AND T1.IssueDate IS NOT NULL AND T1.IssueDate <> '0001/01/01' THEN 'Issued'
-END AS PlacementStatus
-,CASE
-WHEN T1.NewBusinessSubmitDate IS NOT NULL THEN COALESCE(T1.WithdrawnDate, T1.RejectDate, T1.IssueDate)
-END AS FinalDispositionDate
-,FinalDispositionDate - T1.NewBusinessSubmitDate AS CalDaysNBSubToFinalDisposition
-FROM PROD_DMA_VW.ANB_APPLICATION_RPT_VW T1
-LEFT JOIN PROD_DMA_VW.DATE_DIM_VW T2 ON T1.BINGODate = T2.ShortDate
-LEFT JOIN PROD_DMA_VW.GOAL_CURR_DIM_VW T3 ON T1.NEWBUSINESSDOCTYPE = T3.TransactionTypeName
-QUALIFY ROW_NUMBER() OVER(PARTITION BY HOLDINGKEY, NEWBUSINESSDOCTYPE, COALESCE(SE2DocTypeCycleTime, HODocTypeCycleTime) ORDER BY T1.TRANSDATE) = 1
+
+	  T1.agreement_nr AS "HoldingKey"
+	, T1.order_entry_id AS "OrderEntryID"
+	, T1.dim_agreement_natural_key_hash_uuid AS "AgreementID"
+	, T1.policy_num AS "PolicyNumber"
+	, T1.doc_type_nm AS "NewBusinessDocType"
+	, T1.contract_jurisdiction_state_cde AS "ContractState"
+	, T1.resident_state_cde AS "ResidentState"
+	, T1.agent_id AS "AgentID"
+	, T1.advisor_nm AS "Advisor"
+	, T1.agency_num AS "AgencyNumber"
+	, T1.firm_nm AS "FirmName"
+	, CASE WHEN UPPER(T1.distributor) = 'SDP' THEN 'MMSD' ELSE T1.distributor END AS "Distributor"
+	, T1.channel AS "Channel"
+	, T1.market_category_type_cde AS "Market Code"
+	, T1.market_type_category AS "Market Category"
+	, T1.product AS "Product"
+	, T1.product_category AS "Product Category"
+	, T1.anticipated_premium AS "AnticipatedPremium"
+	, T1.deposit_amt AS "Deposit Amount"
+	, T1.bingo_status AS "BINGOStatus"
+	, T1.bingo_ind AS "BINGOIndicator"
+	, T1.auto_approved_ind AS "AutoApprovalIndicator"
+	, CASE WHEN T1.issue_dt >= '2018-08-01' THEN 1 ELSE 0 END AS "IssueCountforBINGORate"
+	, T1.application_submit_dt AS "ApplicationSubmitDate"
+	, T1.suitability_approved_dt AS "SuitabilityApprovalDate"
+	, T1.original_order_submit_dt AS "OriginalOrderSubmitDate"
+	, T1.suitability_submit_dt AS "SuitabilitySubmitDate"
+	, T1.application_signed_dt AS "ApplicationSignDate"
+	, T1.order_change_dt AS "OrderChangeDate"
+	, T1.nb_submit_dt AS "NewBusinessSubmitDate"
+	, T1.paw_dt AS "PawDate"
+	, T1.toa_dt AS "TOADate"
+	, T1.bingo_dt AS "BINGODate"
+	 --first nigo date [PLEASE CHECK IF NEEDED IN THE REPORTS]
+	, T1.final_disposition_dt AS "FinalDispositionDate" --Vince Zach noted final disposition date is new business end date.
+	, T1.issue_dt AS "IssueDate"
+	, T1.reject_dt AS "RejectDate"
+	, T1.withdraw_dt AS "WithdrawnDate"
+	, CAST(CURRENT_DATE() AS DATE) - T1.application_submit_dt AS "CALDaysSinceSub"
+	, CAST(CURRENT_DATE() AS DATE) - final_disposition_dt AS "CalDaysSinceNBSub"	
+	, T1.issue_dt - T1.application_signed_dt AS "CalDaysSignToIssue"
+	, T1.application_signed_dt - T1.application_submit_dt AS "CalDaysSignToSub"
+	, T1.original_order_submit_dt - T1.application_signed_dt AS "CalDaysAppSignToSuitSub"
+	, T1.nb_submit_dt - T1.application_signed_dt AS "CalDaysSignToNBSub"
+	, T1.issue_dt - T1.application_submit_dt AS "SubtoIssueCycleTime"
+	, T1.nb_submit_dt - T1.application_submit_dt AS "CalDaysSubToNBSub"
+	, T1.issue_dt - T1.nb_submit_dt AS "CalDaysNBRcvdToIssued"
+	, T1.bingo_dt - T1.nb_submit_dt AS "NBSubToBINGO"
+	, T1.paw_dt - T1.nb_submit_dt AS "CalDaysNBSubToPAW"
+	, T2.business_day AS "BUSINESSDAY"
+	, T1.suitability_approved_dt - T1.suitability_submit_dt AS "CalDaysSuitSubToSuitApvd"
+	, T1.nb_submit_dt - T1.suitability_approved_dt AS "CalDaysSuitApvdToNBSub"
+	, CAST(T1.order_change_dt AS DATE) - T1.suitability_approved_dt AS "CalDaysSuitApvdToSuitTrans"
+	, CAST(T1.order_change_dt AS DATE) - T1.suitability_submit_dt AS "CalDaysSuitSubToSuitTrans"
+	, T1.issue_dt - T1.suitability_submit_dt AS "CalDaysSuitSubToIssue"
+	, T1.nb_submit_dt - CAST(T1.order_change_dt AS DATE) AS "CalDayssuitCmpltToNBRcvd"
+	, T1.paw_dt - T1.bingo_dt AS "CalDaysBINGOToPAW"
+	, T1.toa_dt - T1.bingo_dt AS "CalDaysBINGOToTOA"
+	, T1.issue_dt - T1.toa_dt AS "CalDaysTOAToIssue"
+	, T3.function_nm AS "FUNCTIONNAME"
+	, T3.goal_val AS "SLA"
+	, T1.row_process_dtm AS "TransDate"
+	, T1.final_disposition_dt - T1.nb_submit_dt AS "CalDaysNBSubToFinalDisposition"
+	
+	, CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
+		   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
+		   WHEN LOWER(T1.doc_type_nm) = 'annuity application' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
+	  	   ELSE NULL
+	  END AS "SE2DocTypeCycleTime"
+	  
+	, CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
+		   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
+		   WHEN LOWER(T1.doc_type_nm) = 'annuity application' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
+	  	   ELSE NULL
+	  END AS "HODocTypeCycleTime"
+
+	, CASE
+		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.withdraw_dt IS NOT NULL THEN 'Withdrawn'
+		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.reject_dt IS NOT NULL THEN 'Rejected'
+		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.issue_dt IS NOT NULL AND T1.issue_dt <> '0001/01/01' THEN 'Issued'
+	  END AS "PlacementStatus"	  
+	
+	, (
+	SELECT dma_vw.dma_dim_date_vw.is_holiday 
+	FROM dma_vw.dma_dim_date_vw
+	WHERE T1.issue_dt = dma_vw.dma_dim_date_vw.short_dt 
+	) AS "IssueDateIsHoliday" --need to cast as integer
+	
+	, (
+	SELECT dma_vw.dma_dim_date_vw.is_holiday 
+	FROM dma_vw.dma_dim_date_vw
+	WHERE T1.application_submit_dt = dma_vw.dma_dim_date_vw.short_dt 
+	) AS "AppSubDateIsHoliday" --need to cast as integer
+	
+	, (
+	SELECT dma_vw.dma_dim_date_vw.is_holiday 
+	FROM dma_vw.dma_dim_date_vw
+	WHERE T1.nb_submit_dt = dma_vw.dma_dim_date_vw.short_dt 
+	) AS "NBSubmitDateIsHoliday" --need to cast as integer
+	
+	, (
+	SELECT dma_vw.dma_dim_date_vw.prev_bd
+	FROM dma_vw.dma_dim_date_vw
+	WHERE dma_vw.dma_dim_date_vw.short_dt = CAST(CURRENT_DATE() AS DATE)
+	) AS "PrevBusDayOfToday" --need to cast as integer
+	
+FROM dma_vw.sem_dim_anb_application_curr_vw T1
+LEFT JOIN dma_vw.dma_dim_date_vw T2 ON T1.bingo_dt = T2.short_dt 
+LEFT JOIN dma_vw.dma_dim_goal_curr_vw T3 ON lower(T1.doc_type_nm) = lower(T3.trans_type_nm)
+LIMIT 1 OVER(PARTITION BY T1.agreement_nr, T1.doc_type_nm, COALESCE("SE2DocTypeCycleTime", "HODocTypeCycleTime") ORDER BY T1.row_process_dtm) --coelesce is causing issues
+
+--COALESCE("SE2DocTypeCycleTime", "HODocTypeCycleTime")
