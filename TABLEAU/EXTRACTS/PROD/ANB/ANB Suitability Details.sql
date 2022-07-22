@@ -37,7 +37,7 @@ SELECT T1.original_order_id AS 'Original Order ID'
     , CAST(T1.electronic_submit_dt AS DATE) - CAST(T1.parent_cancel_dt AS DATE) AS 'Resubmit Lag Time'
     , T5.doc_type_nm AS 'NB Doc Type'
     , CAST(T1.suit_comp_dt_transmit AS DATE) - CAST(T1.electronic_submit_dt AS DATE) AS 'Initial Review Cycle Time'
-    , CAST(T6.suitability_ind AS INTEGER) AS 'IGO Indicator'
+    , COALESCE(CASE WHEN T1.auto_approved_ind = 1 THEN 1 ELSE CAST(T6.suitability_ind AS INTEGER) END, 1) AS 'IGO Indicator'
     , T1.row_process_dtm AS 'TransDate'
 FROM dma_vw.sem_anb_ipipeline_vw T1
 LEFT JOIN edw_semantic_vw.sem_producer_demographics_current_vw T2 ON TRIM(LEADING '0' FROM T1.agent_id) = TRIM(LEADING '0' FROM T2.business_partner_id)
