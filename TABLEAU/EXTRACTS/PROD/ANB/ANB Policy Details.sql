@@ -72,17 +72,23 @@ SELECT
 	, T1.row_process_dtm AS "TransDate"
 	, T1.final_disposition_dt - T1.nb_submit_dt AS "CalDaysNBSubToFinalDisposition"
 	
-	, CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
-		   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
-		   WHEN LOWER(T1.doc_type_nm) = 'annuity application' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
-	  	   ELSE NULL
-	  END AS "SE2DocTypeCycleTime"
+	-- , CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
+	-- 	   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
+	-- 	   WHEN LOWER(T1.doc_type_nm) = 'annuity application' AND UPPER(T3.function_nm) = 'SE2' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
+	--   	   ELSE NULL
+	--   END AS "SE2DocTypeCycleTime"
 	  
-	, CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
-		   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
-		   WHEN LOWER(T1.doc_type_nm) = 'annuity application' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
+	-- , CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
+	-- 	   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
+	-- 	   WHEN LOWER(T1.doc_type_nm) = 'annuity application' AND UPPER(T3.function_nm) = 'HOME OFFICE' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
+	--   	   ELSE NULL
+	--   END AS "HODocTypeCycleTime"
+	
+	, CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
+		   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
+		   WHEN LOWER(T1.doc_type_nm) = 'annuity application' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
 	  	   ELSE NULL
-	  END AS "HODocTypeCycleTime"
+	  END AS "DocTypeCycleTime"
 
 	, CASE
 		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.withdraw_dt IS NOT NULL THEN 'Withdrawn'
@@ -117,4 +123,5 @@ SELECT
 FROM dma_vw.sem_dim_anb_application_curr_vw T1
 LEFT JOIN dma_vw.dma_dim_date_vw T2 ON T1.bingo_dt = T2.short_dt 
 LEFT JOIN dma_vw.dma_dim_goal_curr_vw T3 ON lower(T1.doc_type_nm) = lower(T3.trans_type_nm)
-LIMIT 1 OVER(PARTITION BY T1.agreement_nr, T1.doc_type_nm, COALESCE("SE2DocTypeCycleTime", "HODocTypeCycleTime") ORDER BY T1.row_process_dtm)  --coelesce is causing issues with aliased fields
+	AND (CASE WHEN T3.function_nm = 'SE2' THEN 57 ELSE 73 END) = T1.source_system_id
+-- LIMIT 1 OVER(PARTITION BY T1.agreement_nr, T1.doc_type_nm, COALESCE("SE2DocTypeCycleTime", "HODocTypeCycleTime") ORDER BY T1.row_process_dtm)  --coelesce is causing issues with aliased fields
