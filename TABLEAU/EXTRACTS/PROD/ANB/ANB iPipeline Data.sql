@@ -1,46 +1,35 @@
 /*
-FILENAME: ANB iPipeline Data
-CREATED BY: Bill Trombley
-LAST UPDATED:
-CHANGES MADE:
+FILENAME: ANNUITY NEW BUSINESS iPIPELINE DATA
+UPDATED BY: John Avgoustakis, Vince Bonaddio 
+LAST UPDATED: 06/27/2022
+CHANGES MADE: Vertica Migration
 */
 
-SELECT	OrderEntryID,
-				OwnerFullName,
-				OwnerFirstName,
-				OwnerMiddleName,
-				OwnerLastName,
-				OwnerGovernmentID,
-				AnnuitantFullName,
-				AnnuitantFirstName,
-				AnnuitantMiddleName,
-				AnnuitantLastName,
-				ProductType,
-				ProductName,
-				AgencyNumber,
-				AgentID, 
-				CarrierCode,
-				CAST(ElectronicSubmitDate AS DATE) AS ElectronicSubmitDate,
-				T3.IsHoliday AS IsHolidayElec,
-				T3.IsWeekday AS IsWeekdayElec,
-				CAST(SuitCompleteDateApproved AS DATE) AS SuitCompleteDateApproved,
-				CAST(SuitCompleteDateTransmitted AS DATE) AS SuitCompleteDateTransmitted,
-				T2.IsHoliday AS IsHolidaySuit,
-				T2.IsWeekday AS IsWeekdaySuit,
-				CAST(ApplicationStatusChangeDate AS DATE) AS ApplicationStatusChangeDate,
-				TotalInitialPremium,
-				ApplicationStatus,
-				CopiedFromTransIdentifier,
-				AutoApprovedIndicator,
-				SRC_SYS_ID,
-				T1.RUN_ID,
-				UPDT_RUN_ID,
-				TRANS_DT
-FROM	PROD_DMA_VW.IPIPELINE_ORDERS_HIST_VW T1
-LEFT JOIN 
-	PROD_DMA_VW.Date_DIM_VW T2 ON T2.SHORTDATE = T1.SuitCompleteDateTransmitted
-LEFT JOIN 
-	PROD_DMA_VW.Date_DIM_VW T3 ON T3.SHORTDATE = T1.ElectronicSubmitDate
+SELECT	
 
-WHERE ElectronicSubmitDate IS NOT NULL   --Count for Katie's Team Work Received
- AND (CarrierCode = '65935' OR CarrierCode = '93432')
+	  T1.order_entry_id AS "OrderEntryID"
+    , T1.product_type AS "ProductType"
+    , T1.product_nm AS "ProductName"
+    , T1.agency_num AS "AgencyNumber"
+    , T1.agent_id AS "AgentID"
+    , T1.carrier_cd AS "CarrierCode"
+    , CAST(T1.electronic_submit_dt AS DATE) AS "ElectronicSubmitDate"
+    , CAST(T3.is_holiday AS INTEGER) AS "IsHolidayElec"
+    , CAST(T3.is_weekday AS INTEGER) AS "IsWeekdayElec"
+    , CAST(T1.suit_comp_dt_approved AS DATE) AS "SuitCompleteDateApproved"
+    , CAST(T1.suit_comp_dt_transmit AS DATE) AS "SuitCompleteDateTransmitted"
+    , CAST(T2.is_holiday AS INTEGER) AS "IsHolidaySuit"
+    , CAST(T2.is_weekday AS INTEGER) AS "IsWeekdaySuit"
+    , CAST(T1.app_status_change_dt AS DATE) AS "ApplicationStatusChangeDate"
+    , T1.total_init_prem AS "TotalInitialPremium"
+    , T1.app_status AS "ApplicationStatus"
+    , T1.copied_from_trans_id AS "CopiedFromTransIdentifier"
+    , T1.auto_approved_ind AS "AutoApprovedIndicator"
+    , T1.row_process_dtm AS "TRANS_DT"
+FROM dma_vw.dim_ipipeline_orders_curr_vw T1
+LEFT JOIN dma_vw.dma_dim_date_vw T2 ON T2.short_dt = CAST(T1.suit_comp_dt_transmit AS DATE)
+LEFT JOIN dma_vw.dma_dim_date_vw T3 ON T3.short_dt = CAST(T1.electronic_submit_dt AS DATE)
+WHERE T1.electronic_submit_dt IS NOT NULL   --Count for Katie's Team Work Received
+ AND (carrier_cd = '65935' OR carrier_cd = '93432')
+ 
+ 

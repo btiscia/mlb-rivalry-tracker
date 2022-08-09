@@ -1,8 +1,8 @@
 /*
-FILENAME: DI OPERATIONS HISTORICAL DETAILS CURRENT
+FILENAME: DMS HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
-LAST UPDATED: 05/13/2022
-CHANGES MADE: Vertica Migration
+LAST UPDATED: 04/28/2022
+CHANGES MADE: Vertica Migration, EOD Indicator is now in the view.
 */
 
 
@@ -21,7 +21,6 @@ SELECT
 	, T1.work_event_nm AS "Work Event Name"
 	, T1.priority_nm AS "Priority"
 	, T1.admn_sys_cde AS "Admin System"
-	, T1.admn_sys_id AS "Admin System ID"
 	, T1.process_nm AS "Process Name"
 	, T1.process_id AS "Process ID"
 	, T1.process_order AS "Process Order"
@@ -29,7 +28,7 @@ SELECT
 	, T1.party_type_nm AS "Party Type Name"
 	, T1.employee_organization_nm AS "Employee Organization Name"
 	, T1.employee_department_nm AS "Employee Department Name"
-	--, T1.mmid AS "MMID"
+	, T1.mmid AS "MMID"
 	, T1.site_nm AS "Site Name"
 	, T1.work_event_organization_nm AS "Work Event Organization Name"
 	, T1.work_event_department_nm AS "Work Event Department Name"
@@ -40,19 +39,16 @@ SELECT
 	, T1.division_cd AS "Division Code"	
 	, T1.system_division_nm AS "Line of Business"
 	, T1.tat AS "TAT" 
-	, T1.days_past_tat AS "Days Past TAT"
-	, T1.days_past_tat AS "Total TAT Days" --Should be reviewed
-	, T1.trans_type_id "TransactionTypeId"
-	, T1.long_completed_dt AS "Completed Time Stamp"
+	, T1.long_completed_dt AS "Completed Date Stamp"
 	, T1.NIGO_des AS "NIGODescription"
 	, CASE WHEN igo_ind = 1 AND nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
 	, CASE WHEN igo_ind = 1 AND nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
 	, T1.igo_ind AS "IGO NIGO Count"
 	, T1.sht_cmnt_des AS "Short Comments"
-	, T1.rqstr_des AS "Requestor Type Name"
-	, T1.ProductTypeName AS "Product Type Name"
 	, CASE WHEN T1.met_expected_ind = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 	, T1.met_expected_ind AS "Met Expected Ind Count"
+	, T1.days_past_tat AS "Total TAT Days"
+	, T1.item_count AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
 	, T1.current_prod_credit AS "Productivity Credits"
 	, flex_ind AS "Flex Count"
@@ -62,9 +58,10 @@ SELECT
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
-	, COUNT(DISTINCT T1.fact_integrated_natural_key_hash_uuid) AS "Transaction Count"
-	--, T1.eod_pend_ind AS "EOD Pending Indicator"	
-FROM dma_vw.fact_integrated_dio_curr_vw T1
-WHERE T1.trans_type_id IN (1,3)
-AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52
+	, T1.document_ct AS "Document Count"
+	, T1.eod_pend_ind AS "EOD Pending Indicator"
+	
+FROM dma_vw.fact_integrated_dms_curr_vw T1
+WHERE (T1.work_event_department_id = 13
+OR T1.employee_department_id in (13,51))
+AND (T1.trans_type_id IN (1,3) OR CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36)))

@@ -1,121 +1,71 @@
 /*
-* This routine pulls current transaction history
-*  Peer Review & Change Log:
-*  Peer Review Date: 
-*  Source for this routine is  PROD_DMA_VW_ACT_ANO_CURR_INTEGRATED_FCT_VW
-*  Author: Lorraine Christian
-*  Created: 3/4/2020
-*  Revisions:  7/14/2020 Added an addition NIGO Code of '361'.  This is applicable for Annuity Only.  Refer to IGO Count.  - LC
-====================================================================== 
-======================================================================
-                
-======================================================================*/
+FILENAME: ANNUITY OPERATIONS HISTORICAL DETAILS CURRENT
+CREATED BY: John Avgoustakis, William Trombley
+LAST UPDATED: 06/10/2022
+CHANGES MADE: Vertica Migration
+*/
+
 
 SELECT
-TransactionTypeName AS "Transaction Type"
-,SourceTransactionID AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-
-,CASE WHEN BCCIndicator = 0
-	THEN 'N'
-	ELSE 'Y'
-END AS "Society 1851"
-
-,systemDivisionname AS "Line of Business"
-        
-,CASE 
-     WHEN TRANSACTIONTYPEID = 1   THEN ReceivedDate
-     WHEN TRANSACTIONTYPEID = 2 THEN LoadDate
-     WHEN TRANSACTIONTYPEID = 3 THEN CompletedDate
-END AS "Date"    
-     
-,EmployeeRoleName AS "Employee Role Name"
-,COALESCE(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,COALESCE(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,TeamName AS "Team Name"
-,FunctionName AS "Function Name"
-,SegmentName AS "Segment Name"
-,WorkEventName AS "Work Event Name"
-,PriorityID AS "Priority"
-,AdminSystemID AS "Admin System ID"
-,AdminSystemCode AS "Admin System"
-,ProcessName AS "Process Name"
-,ProcessID AS "Process ID"
-,ProcessOrder AS "Process Order"
-,ServiceChannelName AS "Service Channel Code"
-,PartyTypeName AS "Party Type Name"
-,EmployeeOrganizationName AS "Employee Organization Name"
-,EmployeeDepartmentName AS "Employee Department Name"           
-,SiteName AS "Site Name" 
-,WorkEventOrganizationName AS "Work Event Organization Name"
---,WorkEventOranizationName 
-,WorkEventDepartmentName AS "Work Event Department Name"
-,PrimaryRoleName AS "Primary Role Name"
-,SystemName AS "System Name"
-,WorkEventNumber AS "Work Event Number"
-,DepartmentCode AS "Department Code"
-,DivisionCode AS "Division Code"
-,TAT
-,TransactionTypeId
-,CompletedIndicator
-,LongCompletedDate AS "Completed Time Stamp" --Added completed time stamp
-,CATSexpectedcompleteddate AS "Follow Up Date"
-,NIGODescription
-,TransDate AS "Transaction Date"
-,ShortComments AS "Short Comments"
-,ItemCount AS "Transaction Count"
-,DaysPastTAT AS "Total TAT Days"
-,CASE WHEN MetExpectedIndicator = 1 AND DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
-,MetExpectedIndicator AS "Met Expected Ind Count"
---,CurrentProdCredit AS "Productivity Credits" removed 4/29/2020 replaced with case statement below
- , CASE
-            WHEN SrcSysID = 24 THEN ProdCredit
-            ELSE CurrentProdCredit
-            END AS "Productivity Credits"
-,CASE WHEN IGOIndicator = 1 AND NIGOCode = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
-,CASE WHEN IGOIndicator = 1 AND NIGOCode IN ('090','361') THEN 1 ELSE 0 END AS "IGO Count"  -- REPLACES LINE BELOW '361' is applicable for Annuity Only. 
---,CASE WHEN IGOIndicator = 1 AND NIGOCode = '090' THEN 1 ELSE 0 END AS "IGO Count"   REMOVED THIS LINE 7/14/2020
-,IGOIndicator AS "IGO NIGO Count"
---,GoalValue AS "IGO Goal"
-,FlexIndicator AS "Flex Count"
-,CASE WHEN DaysPastTAT <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
-,CASE WHEN DaysPastTAT = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
-,CASE WHEN DaysPastTAT = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
-,CASE WHEN DaysPastTAT = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
-,CASE WHEN DaysPastTAT >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
---,DocumentCount AS "Document Count"
-, CASE 
- 		WHEN MajorProductName IS NULL AND PrimaryLogID IN (6, 10) THEN 'Unknown' 
- 		WHEN MajorProductName IS NULL AND PrimaryLogID NOT IN (6, 10) THEN NULL 
- 		ELSE MajorProductName 
- 		END AS "Contract Type"
---,MajorProductName AS "Contract Type"  REMOVED 4/6/20220
-
--- Added for EOD Pending
-,CASE WHEN T1.transactiontypeid = 2 --this is a pending record
-                  AND T1.LoggedDate < CURRENT_DATE  --that was logged prior to today
-				  AND (CompRec.CompDate > T1.LoadDate OR CompRec.CompDate IS NULL) --that was completed after the load date of this pending record or hasn't been completed yet
-				  THEN 1 ELSE 0 END AS "EOD Pending Indicator" 
--- End of change
-
-
-FROM PROD_DMA_VW.ACT_ANO_CURR_INTEGRATED_VW T1  --Removed this mart PSC_MART_CURR_IVW T1
---LEFT OUTER JOIN (SELECT GoalValue, DepartmentID, FunctionID FROM PROD_DMA_VW.GOAL_DIM_VW WHERE EndDate = '9999-12-31' AND GoalTypeID = 5) T2 
---ON T1.FunctionID = T2.FunctionID AND T1.DepartmentID = T2.DepartmentID
-
--- Added for EOD Pending
-LEFT 
-JOIN (SELECT DISTINCT
-                              a.sourcetransactionid AS SourceTrans,
-                              First_Value( a.CompletedDate) OVER (PARTITION BY a.sourcetransactionid
-							  ORDER BY a.SequenceNumber DESC, LoadDate DESC) AS CompDate  
-                FROM PROD_dma_vw.act_ano_integrated_fct_vw AS a
-	         WHERE a.completedindicator = 1 --completed
-				    AND a.transactiontypeid = 3 --completed
-					AND a.completeddate < CURRENT_DATE) AS CompRec --exclude completed today bc today isn't over yet
-   ON CompRec.SourceTrans = T1.SourceTransactionId
--- end of change 
-
-WHERE (WorkEventDepartmentID IN (9,11)
-OR T1. DepartmentID IN (9,11))
-AND (TransactionTypeId IN (1,3) OR CAST(loggeddate AS DATE) >=  (ADD_MONTHS(CURRENT_DATE, -36))) --Added to limit pending records to rolling 3 years
+	  T1.transaction_type_nm AS "Transaction Type"
+	, T1.fact_integrated_natural_key_hash_uuid AS "Natural Key"
+	, T1.source_transaction_id AS "Source Transaction ID"
+	, T1.agreement_nr AS "Policy Number"
+	, T1.report_dt AS "Date"
+	, T1.employee_role_nm AS "Employee Role Name"
+	, COALESCE(employee_last_nm || ', ' || employee_first_nm, 'Unknown') AS 'Employee'
+	, COALESCE(manager_last_nm || ', ' || manager_first_nm , 'Unknown') AS 'Manager'
+	, T1.employee_team_nm AS "Team Name"
+	, T1.function_nm AS "Function Name"
+	, T1.segment_nm AS "Segment Name"
+	, T1.work_event_nm AS "Work Event Name"
+	, T1.priority_id AS "Priority"
+	, T1.admn_sys_cde AS "Admin System"
+	, T1.admn_sys_id AS "Admin System ID"
+	, T1.process_nm AS "Process Name"
+	, T1.process_id AS "Process ID"
+	, T1.process_order AS "Process Order"
+	, T1.chnl_dspy_nm AS "Service Channel Code" 
+	, T1.party_type_nm AS "Party Type Name"
+	, T1.employee_organization_nm AS "Employee Organization Name"
+	, T1.employee_department_nm AS "Employee Department Name"
+	, T1.site_nm AS "Site Name"
+	, T1.work_event_organization_nm AS "Work Event Organization Name"
+	, T1.work_event_department_nm AS "Work Event Department Name"
+	, T1.primary_role_nm AS "Primary Role Name"
+	, T1.work_event_system_nm AS "System Name"
+	, T1.work_event_num AS "Work Event Number"
+	, T1.department_cd AS "Department Code"
+	, T1.division_cd AS "Division Code"	
+	, CASE WHEN T1.trans_type_id = 3 THEN 1 ELSE 0 END AS "Completed Indicator"
+	, T1.system_division_nm AS "Line of Business"
+	, T1.tat AS "TAT" 
+	, T1.days_past_tat AS "Days Past TAT"
+	, T1.days_past_tat AS "Total TAT Days" --Should be reviewed
+	, T1.trans_type_id "TransactionTypeId"
+	, T1.long_completed_dt AS "Completed Time Stamp"
+	, T1.NIGO_des AS "NIGODescription"
+	, CASE WHEN igo_ind = 1 AND nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
+	, CASE WHEN igo_ind = 1 AND nigo_cd IN ('090','361') THEN 1 ELSE 0 END AS "IGO Count"
+	, T1.igo_ind AS "IGO NIGO Count"
+	, T1.short_comment AS "Short Comments"
+	, CASE WHEN T1.work_event_met_expected = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
+	, T1.work_event_met_expected AS "Met Expected Ind Count"
+	, T1.row_process_dtm AS "Transaction Date"
+	, CASE WHEN T1.source_system_id = 24 THEN T1.prod_credit ELSE T1.current_prod_credit END AS "Productivity Credits"
+	, flex_ind AS "Flex Count"
+	, bcc_ind AS "Society 1851"
+	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
+	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
+	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
+	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
+	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
+	,  CASE WHEN T1.major_product_type_desc IS NULL AND T1.primary_log_id IN (6,10) THEN 'Unknown'
+			WHEN T1.major_product_type_desc IS NULL AND T1.primary_log_id NOT IN (6,10) THEN NULL
+			ELSE T1.major_product_type_desc
+	   END AS "Contract Type"
+	, T1.item_ct AS "Transaction Count"
+FROM dma_vw.fact_integrated_ano_curr_vw T1
+WHERE (work_event_department_id IN (9,11) OR employee_department_id IN (9,11))
+AND T1.trans_type_id IN (1,3)
+AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))

@@ -1,7 +1,7 @@
 /*
-FILENAME: ANN OPS DAILY TIME
-CREATED BY: John Avgoustakis
-LAST UPDATED: 6/14/2022
+FILENAME: PSC DAILY TIME
+CREATED BY: John Avgoutakis
+LAST UPDATED: 3/18/2022
 CHANGES MADE: Vertica SQL Creation.
 */
 
@@ -101,4 +101,4 @@ SELECT
 FROM dma_vw.fact_aggregated_performance_vw T1
 LEFT JOIN dma.dma_dim_employee_pit T2 ON T1.team_party_id = T2.team_party_id
 WHERE "Date" BETWEEN (Current_Date - INTERVAL '3' MONTH) AND (Current_Date + INTERVAL '10' DAY)
-AND T1.department_id IN (9,11)
+AND T1.department_id = 4
