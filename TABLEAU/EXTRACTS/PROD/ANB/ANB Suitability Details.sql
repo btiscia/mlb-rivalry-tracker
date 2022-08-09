@@ -1,95 +1,48 @@
 /*
-Name: ANBSuitability Details
-Author/Editor: John Avgoustakis
-Comments: Updated Suitability Submit Date
-Comments: Updated to add Envision product
---Applications are the process from Original Order Submit Date - Anywhere into the Issue Process
+Name: ANB Suitability Details
+Author/Editor: Vince Bonaddio / Bill Trombley
+Comments: Converted to Vertica
+-- Applications are the process from Original Order Submit Date - Anywhere into the Issue Process
 -- Contract is New Business Submit Forward
 */
 
-
-SELECT 
-T1.OriginalOrderID  
-,T1.OrderEntryID  --Case Level
-,T1.ParentOrderID
-, CASE WHEN ParentCancelDate IS NOT NULL THEN COALESCE(T1.OriginalOrderSubmitDate, PendDate) 
-    ELSE PendDate END AS "Suitability Submit Date"
-, T1.PendDate AS "Electronic Submit Date" --Electronic Submit Date
-, T1.CancelReworkDate
-, T1.TransmitDate AS "Transmit Date"
-, T1.ApprovedDate AS "Approved Date"
-, T1.RejectDate AS "Reject Date"
-, T1.CancelDate AS "Cancel Date"
-,CASE WHEN COALESCE(T1.ApprovedDate,T1.TransmitDate) IS NOT NULL THEN 'Approved'
-            WHEN T1.RejectDate IS NOT NULL THEN 'Rejected'
-            WHEN T1.CancelDate IS NOT NULL THEN 'Cancelled'
-    END AS "Final Disposition" --Final Disposition --Suitability Volume is based on a count of final disposition
-, COALESCE(T1.TransmitDate, T1.ApprovedDate, T1.RejectDate, T1.CancelDate) AS "Final Disposition Date" --Final Disposition Date
-, CAST("Final Disposition Date" AS DATE) -  CAST("Suitability Submit Date" AS DATE) AS "Suitability Cycle Time"
-, CASE WHEN CAS_IND = 'N' AND TO_NUMBER(T2.AGENCYNUMBER) IS NOT NULL THEN 'CAB' 
-        WHEN TO_NUMBER(T2.AGENCYNUMBER) IS NOT NULL THEN 'CAS'
-        ELSE 'Unknown' END AS "Distributor"
-, CASE WHEN TO_NUMBER(T2.AGENCYNUMBER) IS NULL THEN 'SDP' ELSE 'MMFA' END AS "Channel"
---, OREPLACE(PRODUCTNAME,'MassMutual ','') AS "Product"
-, CASE
-   		WHEN ProductName LIKE ('%Capital Vantage%') THEN 'Capital Vantage'
-   		WHEN ProductName LIKE ('%Transitions Select%') THEN 'Transition Select'
-  		WHEN ProductName LIKE ('%RetireEase Choice%') THEN 'RetireEase Choice'
-   		WHEN ProductName LIKE ('%RetireEase%') THEN 'RetireEase'
-   		WHEN ProductName LIKE ('%Stable Voyage%') THEN 'Stable Voyage'
-   		WHEN ProductName LIKE ('%Odyssey Select%') THEN 'Odyssey Select'
-   		WHEN ProductName LIKE ('%Index Horizons%') THEN 'Index Horizons'
-   		WHEN ProductName LIKE ('%Envision%') THEN 'Envision'
-                ELSE 'Unknown'
-                END AS Product
-, COALESCE(CASE WHEN PRODUCTNAME LIKE '%RetireEase%' THEN 'Income Annuity'
-                        WHEN PRODUCTNAME LIKE '%Index Horizons%' THEN 'Fixed Indexed' END,T2.PRODUCTTYPE) AS "Product Category"
-, SUBSTR(TRIM(T6.BUSINESS_PARTNER_ID), CHARACTER_LENGTH(TRIM(T6.BUSINESS_PARTNER_ID)) - 5 FOR 6) AS AgentID
-, T6.LST_NM||', '||T6.FIRST_NM AS "Advisor"
-, CASE WHEN FirmCodeWithPrefix IS NULL THEN FirmCode
-    ELSE FirmCodeWithPrefix END AS Firm
-, CASE WHEN T2.AGENCYNUMBER = 'FIL' THEN '244' 
-    ELSE T2.AGENCYNUMBER END AS FirmNum
-, CASE WHEN FirmNum = 'EDJ' THEN '999 - Edward Jones'
-    WHEN FirmCodeWithPrefix IS NULL AND FirmNum IS NULL THEN '999 - Unknown'
-    WHEN FirmCodeWithPrefix IS NULL THEN '999 - ' || FirmNum
-    ELSE FirmDisplayName END AS "Firm Name"
-, CASE WHEN DistributionChannelType = 'DISO' OR FirmCodeWithPrefix IN ('A000','A199') THEN 'CLOSED AGENCIES'
-    WHEN DistributionChannelType IN ('DDC','OTHR') OR OriginalFirmCodeWithPrefix IN ('A113','A119','A226','A244','A249') THEN 'Direct Brokerage'
-    WHEN OriginalFirmCodeWithPrefix = 'A109' THEN 'Lifebridge Agency'
-    WHEN FirmCodeWithPrefix IN ('A020','A028') THEN 'UPPER MIDWEST'
-    WHEN FirmCodeWithPrefix IN ('A253','A275') THEN 'MIDWEST-SOCA'
-    WHEN FirmCodeWithPrefix = 'A271' THEN 'SE-MW'
-    WHEN FirmCodeWithPrefix = 'A262' THEN 'VIRGINA-NORTH'
-    WHEN FirmCode IN ('FIL','FILI') THEN 'Fidelity'
-    WHEN FirmCodeWithPrefix IS NULL THEN 'UNKNOWN' 
-    ELSE Region END AS "Region Name"
-, T3.HLDG_KEY AS "Holding Key"
-, T2.AutoApprovedIndicator
-, T1.ParentCancelDate AS "ParentCancelReworkDate" --(Parent Cancel Rework Date)
-, CASE WHEN T1.ParentCancelDate IS NOT NULL THEN 1 ELSE 0 END AS "ResubmitIndicator" -- Use the Electronic Submit Date to Anchor Resubmit Counts
-, CAST("Electronic Submit Date" AS DATE) - CAST("ParentCancelReworkDate" AS DATE) AS "Resubmit Lag Time" -- Resubmit Lag Time, Create this metric when talking to Resubmit Volume - Resubmit Lag Time (Time between Parent Cancel Date and Pend Date)
-, CASE WHEN T5.NBPURCHASEWITHAPPINDICATOR = 1 THEN 'NB Purchase w App'
-    WHEN T5.INCOMINGTRANSFERINDICATOR = 1 THEN 'Incoming Transfer'
-    WHEN T5.ANNUITYAPPINDICATOR = 1 THEN 'Annuity Application'
-    WHEN T5.SDELECTAPPINDICATOR = 1 THEN 'SD Elect App'
-    WHEN T5.NBREG60INDICATOR = 1 THEN 'NB Reg 60'
-    WHEN T5.EXCLUDEDINDICATOR = 1 THEN 'Excluded'
-    WHEN T5.OVERLAPINDICATOR = 1 THEN 'Overlap'
-    ELSE 'N/A' END AS "NB Doc Type"
-, CAST(T1.TransmitDate AS DATE) - CAST(T1.PendDate AS DATE) AS InitialReviewCycleTime
-, T8.IGOIndicator  -- Some are Paper apps, Concerned we may be missing the ones that are not electronically submitted.
-, T1.TransDate
-FROM PROD_DMA_VW.IPIPELINE_ORDER_FCT_VW T1
-LEFT JOIN PROD_DMA_VW.IPIPELINE_ORDERS_VW T2 ON T1.ORDERENTRYID = OREPLACE(T2.ORDERENTRYID,'-','')
-LEFT JOIN (SELECT DISTINCT (SUBSTR(TRIM(TRAILING FROM DISTRIBUTION_TRANS_ID),1,10)) ORDER_ENTRY_ID, AGREEMENT_ID, HLDG_KEY
-                                , ROW_NUMBER() OVER (PARTITION BY ORDER_ENTRY_ID ORDER BY TRANS_DT) SEQ_NUM
-                        FROM PROD_USIG_STND_VW.AGMT_REPLACEMENTS_CMN_VW T1
-                        WHERE HLDG_KEY_SFX = ' ' AND SRC_SYS_ID = 57 AND ORDER_ENTRY_ID IS NOT NULL AND ORDER_ENTRY_ID <> ' ' AND ORDER_ENTRY_ID NOT LIKE ALL ('0188%','MMFG%')
-                        QUALIFY ROW_NUMBER() OVER (PARTITION BY AGREEMENT_ID ORDER BY TRANS_DT) = 1) T3 ON T1.ORDERENTRYID = T3.ORDER_ENTRY_ID
-LEFT JOIN (SELECT * FROM PROD_DMA_VW.SE2_DOC_TYPE_HISTORY_VW WHERE TYPE2CURRENTFLAG = 1) T5 ON TRIM(LEADING '0' FROM T3.HLDG_KEY) = T5.CONTRACTNUMBER
-LEFT JOIN PROD_USIG_STND_VW.PDCR_DEMOGRAPHICS_VW T6 ON TRIM(LEADING '0' FROM OREPLACE(OREPLACE(T2.AGENTID,'AA',''),'aa','')) = TRIM(LEADING '0' FROM T6.BUSINESS_PARTNER_ID)          
-LEFT JOIN PROD_DMA_VW.FIRM_DIM_VW T7 ON T2.AGENCYNUMBER = T7.ORIGINALFIRMCODE
-LEFT JOIN PROD_DMA_VW.ANB_IR_FORMS_VW T8 ON T1.ORDERENTRYID = T8.APPLICATIONID
-
-WHERE CAST(PendDate AS DATE) >= '2019-07-01'
+SELECT T1.original_order_id AS 'Original Order ID'
+    , T1.order_entry_id AS 'Order Entry ID'
+    , T1.copied_from_trans_id AS 'Parent Order ID'
+    , CASE WHEN parent_cancel_dt IS NOT NULL THEN COALESCE(T1.original_order_submit_dt, electronic_submit_dt)
+        ELSE electronic_submit_dt END AS "Suitability Submit Date"
+    , T1.electronic_submit_dt AS 'Electronic Submit Date'
+    , T1.cancel_rework_dt AS 'Cancel Rework Date'
+    , T1.suit_comp_dt_transmit AS 'Transmit Date'
+    , T1.approved_dt
+    , T1.reject_dt AS 'Reject Date'
+    , T1.cancel_dt AS 'Cancel Date'
+    , T1.final_disposition AS 'Final Disposition'
+    , T1.final_disposition_dt as "Final Disposition Date"
+    , CAST(final_disposition_dt AS DATE) - CAST("Suitability Submit Date" AS DATE) AS 'Suitability Cycle Time'
+    , CAST(T2.cas_ind AS INTEGER) AS 'cas_ind'
+    , COALESCE(T3.distributor,'Unknown') AS 'Distributor'
+    , COALESCE(T3.channel,'MMFA') AS 'Channel'
+    , T1.product AS 'Product Name'
+    , T1.product_category AS 'Product Category'
+    , T2.business_partner_id AS 'Agent ID'
+    , T2.last_nm || ', ' || T2.first_nm AS 'Advisor'
+    , T3.agency_id_prefix AS 'Firm'
+    , T3.firm_num_annuity AS 'Firm Number'
+    , COALESCE(T3.firm_display_nm,'999 - Unknown') AS 'Firm Name'
+    , T4.agreement_nr AS 'Agreement Number'
+    , CAST(T1.auto_approved_ind AS INTEGER) AS 'Auto Approved Indicator'
+    , T1.parent_cancel_dt AS 'Parent Cancel Rework Date'
+    , CASE WHEN T1.parent_cancel_dt IS NOT NULL THEN 1 ELSE 0 END AS 'Resubmit Indicator'
+    , CAST(T1.electronic_submit_dt AS DATE) - CAST(T1.parent_cancel_dt AS DATE) AS 'Resubmit Lag Time'
+    , T5.doc_type_nm AS 'NB Doc Type'
+    , CAST(T1.suit_comp_dt_transmit AS DATE) - CAST(T1.electronic_submit_dt AS DATE) AS 'Initial Review Cycle Time'
+    , COALESCE(CASE WHEN T1.auto_approved_ind = 1 THEN 1 ELSE CAST(T6.suitability_ind AS INTEGER) END, 1) AS 'IGO Indicator'
+    , T1.row_process_dtm AS 'TransDate'
+FROM dma_vw.sem_anb_ipipeline_vw T1
+LEFT JOIN edw_semantic_vw.sem_producer_demographics_current_vw T2 ON TRIM(LEADING '0' FROM T1.agent_id) = TRIM(LEADING '0' FROM T2.business_partner_id)
+LEFT JOIN dma_vw.dma_dim_firm_curr_vw T3 ON TRIM(LEADING '0' FROM T1.agency_num) = TRIM(LEADING '0' FROM T3.agency_id)
+LEFT JOIN edw_semantic_vw.sem_agreement_current_vw T4 ON T1.dim_agreement_natural_key_hash_uuid = T4.dim_agreement_natural_key_hash_uuid
+LEFT JOIN dma_vw.anb_doc_type_vw T5 ON T1.dim_agreement_natural_key_hash_uuid = T5.dim_agreement_natural_key_hash_uuid
+LEFT JOIN dma_vw.bibt_rel_initial_reviews_vw T6 ON T1.order_entry_id = T6.application_id
+WHERE T1.electronic_submit_dt >= '2019-07-01'

@@ -68,7 +68,7 @@ SELECT
 			ELSE T1.major_product_type_desc
 	   END AS "Contract Type"
 	, T1.item_ct AS "Transaction Count"
-	, T2.goal_val AS "IGO GOAL"
+	, T2.goal_val AS "IGO Goal"
 FROM dma_vw.fact_integrated_ano_pit_vw T1
 
 LEFT OUTER JOIN (SELECT goal_val, department_id, function_id FROM dma_vw.dma_dim_goal_pit_vw WHERE end_dt = '9999-12-31' AND goal_type_id = 5) T2
@@ -76,4 +76,4 @@ ON T1.function_id = T2.function_id AND T1.employee_department_id = T2.department
 
 WHERE (work_event_department_id IN (9,11) OR employee_department_id IN (9,11))
 AND T1.trans_type_id IN (1,3)
-AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
+--AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))

@@ -1,7 +1,7 @@
 /*
 FILENAME: DI CLAIMS CYCLE TIME
 CREATED BY: John Avgoutakis
-LAST UPDATED: 5/24/2022
+LAST UPDATED: 6/01/2022
 CHANGES MADE: Vertica SQL Creation.
 */
 
@@ -34,9 +34,9 @@ SELECT
 , birth_dt AS "Birth Date"
 , residence_state AS "Residence State"
 , examiner_id AS "ExaminerID"
-, examiner_nm AS "Examiner"
+, COALESCE(employee_last_nm || ',' || employee_first_nm, 'Unknown') AS "Examiner"
+, COALESCE(manager_last_nm || ',' || manager_first_nm, 'Unknown') AS "Manager"
 , examiner_party_employee_id "ExaminerPartyEmployeeID"
-, manager_nm AS "Manager"
 , team_nm AS "Team"
 FROM dma_vw.sem_fact_dic_cycle_time_vw
 WHERE (restricted_claim_ind = 0 OR restricted_claim_ind IS NULL)
