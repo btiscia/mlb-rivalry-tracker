@@ -1,142 +1,103 @@
 /*
 * This routine pulls digital adoption PIT transactions with employee info and customer demographics 
-*  Peer Review & Change Log:
-*  Peer Review Date: 
 *  Source for this routine is  PROD_DMA_VW.ACT_DIGITAL_ADOPT_MART_PIT_VW
-*  Author: Kristin Carlile
-*  Created: 4/12/2021
-* Revised: 1/24/2022 added processing type field - Kristin Carlile
-*Revised: 3/14/2022 added i nsome fields that were previously commented out for customer download based on feedback -Kristin Carlile
+*  Created: 6/14/2022 initial Vertica load -Kristin Carlile
 */
 
-SELECT 
-IntegratedActivityID AS "Integrated Activity ID"
-, SourceActivityID AS "Source Activity ID"
-, SrcSysID AS "SrcSysID"
---, SourceFactTableID
-, SourceTransactionID AS "Source Transaction ID"
-, WorkID AS "Work ID"
-, WorkEventID AS "Work Event ID"
-, ServiceChannelCode AS "Service Channel Code"
-, ServiceChannelName AS "Service Channel Name"
-, TeamPartyID AS "Team Party ID" 
-, PartyEmployeeID
-, MMID
---, SourceAgreementID
---, SourceHoldingKey
---, SourceAdminSystemID
---, SourceAdminSystemCode
---, RecIdent
---, PrimaryLogID
---, PrimaryLogValueDescription
-, RequestorTypeCode
-, RequestorTypeName AS "Requestor Type Name" 
-, LoggedByTeamPartyID as "Logged by Team party ID"
-, LoggedByPartyEmployeeID as "Logged by Party Employee ID"
-, LoggedByMMID as "Logged by MMID"
-, LoadDate as "Load Date" 
-, LoggedDate as "Logged Date"
-, ReceivedDate as "Received Date"
-, CompletedDate as "Completed Date"
-, ProdCredit as "Prod Credit"
-, BCCIndicator as "BCC Indicator" 
-, ShortComment as "Short Comment" 
-, DirectLinkType as "Direct Link Type" 
-, AgreementID as "Agreement ID"
-, HoldingKey as "Holding Key"
-, HoldingKeyPrefix as "Holding Key Prefix" 
-, HoldingKeySuffix as "Holding Key Suffix"
-, AgreementSourceCode as "Agreement Source Code"
-, LOBCode as "LOB Code"
-, LOBName as "LOB Name"
-, MajorProductName as "Major Product Name"
-, MinorProductName as "Minor Product Name"
-, FaceAmount as "Face Amount"
-, PolicyEffectiveDate as "Policy Effective Date"
-, PolicyAge as "Policy Age"
-, MemberID
-, PartyID
---, PartyAgreementStartDate
---, PartyAgreementEndDate
-, PartyAgreementRoleCode
-, PartyAgreementRoleName
-, PartyAgreementRoleSubtypeCode
-, CustomerEffectiveDate as "Customer Effective Date"
-, CustomerTenure as "Customer Tenure"
-, CustomerPartyTypeCode
---, BirthDate as "Birth Date"
-, CustomerAge as "Customer Age"
-, ResidenceState as "Residence State"
-, ResidenceZipCode as "Residence Zip Code"
-, GenderCode as "Gender"
-, RegistrationDate as "Registration Date"
-, RegistrationStatusCode as "Registration Status Code" 
-, ExistingRegistrationIndicator as "Existing Registration Indicato"
-, NewRegistrationIndicator as "New Registration Indicator"
-, NewRegistrationCount as "New Registration Count"
-, NoRegistrationIndicator as "No Registration Indicator"
-, EmployeeTenure as "Employee Tenure"
-, WorkEventNumber as "Work Event Number" 
-, WorkEventOrganizationID as "Work Event Organization ID"
-, WorkEventDepartmentID as "Work Event Department ID"
-, DivisionCode as "Division Code" 
-, DepartmentCode as "Department Code" 
---, FunctionID
---, SegmentID
-, GroupID as "Group ID"
-, GroupTypeID as "Group Type ID"
---, PrimaryRoleID
-, WorkEventName as "Work Event Name"
-, WorkEventOrganizationName as "Work Event Organization Name"
-, SystemDivisionName as "System Division Name" 
-, WorkEventDepartmentName as "Work Event Department Name"
-, SystemDepartmentName
-, FunctionName as "Function"
-, SegmentName as "Segment"
-, GroupName as "Group Name"
-, GroupTypeName
---, PrimaryRoleName
---, WorkEventActiveIndicator as "Work Event Active Indicator"
-, ActionableIndicator as "Actionable Indicator"
-, SystemName as "System Name"
---, WorkEventDimStartDate
---, WorkEventDimEndtDate
---, WorkEventDimTransDate
-,ProcessingType as "Processing Type"
---, SiteID as "Site ID"
-,SiteName as "Site Name"
-, EmployeeOrganizationID as "Employee Organization ID"
-, EmployeeDepartmentID as "Employee Department ID"
---, TeamID
-, EmployeeOrganizationName as "Employee Organization Name"
-, EmployeeDepartmentName as "Employee Department Name"
---, ParentTeamName 
-, TeamName as "Team Name"
-, ManagerLastName || ', ' || ManagerFirstName as "Manager Name"
-, ManagerEmail as "Manager Email" 
-, TeamLeadLastName || ', ' || TeamLeadFirstName as "Team Lead Name"
-, EmployeeRoleName as "Employee Role Name" 
-, EmployeeRoleGradeID as "Employee Role Grade ID"
-, EmployeePartyTypeName
-, EmployeeLastName || ', ' || EmployeeFirstName as "Employee Name"
-, EmployeeEmail as "Employee Email"
-, InternalIndicator as "Internal Indicator"
-, FTE 
-, FTEHours as "FTE Hours"
-, ClassRank as "Class Rank"
---, EmployeeReportingIndicator as "Employee Reporting Indicator" 
---, TimeOutReportIndicator as "TimeOut Report Indicator"
---, LTCIndicator as "LTC Indicator"
---, TrexIndicator as "TREX Indicator"
-, HireDate as "Hire Date"
-, EffectiveDate as "Effective Date"
-, TerminationDate as "Termination Date"
---, EmployeeDimStartDate
---, EmployeeDimEndDate
---, EmployeeDimTransDate
-, SourceSystemID as "Source System ID"
---, RunID
---, UpdateRunID
-, TransDate as "Trans Date"
-
-FROM PROD_DMA_VW.ACT_DIGITAL_ADOPT_MART_PIT_VW
+SELECT system_id AS "System ID"
+, source_transaction_id AS "Source Transaction ID"
+, work_id AS "Work ID"
+, work_event_id AS "Work Event ID"
+, service_channel_cd AS "Service Channel Code"
+, service_channel_nm AS "Service Channel Name"
+, team_party_id AS "Team Party ID" 
+, party_employee_id
+, mmid
+, requestor_type_cd as "Requestor Type Code"
+, requestor_type_nm AS "Requestor Type Name" 
+, logged_by_team_party_id as "Logged by Team party ID"
+, logged_by_party_employee_id as "Logged by Party Employee ID"
+, logged_by_mmid as "Logged by MMID"
+, load_dt as "Load Date" 
+, logged_dt as "Logged Date"
+, received_dt as "Received Date"
+, completed_dt as "Completed Date"
+, prod_credit as "Prod Credit"
+, bcc_ind as "BCC Indicator" 
+, short_comment as "Short Comment" 
+, direct_link_type_txt as "Direct Link Type" 
+, agreement_nr as "Holding Key"
+, agreement_nr_pfx as "Holding Key Prefix" 
+, agreement_nr_sfx as "Holding Key Suffix"
+, agreement_source_cde as "Agreement Source Code"
+, line_of_business_cde as "LOB Code"
+, line_of_business_desc as "LOB Name"
+, major_product_type_desc as "Major Product Name"
+, minor_product_type_desc as "Minor Product Name"
+, face_amt as "Face Amount"
+, agreement_effective_dt as "Policy Effective Date"
+, agreement_age as "Policy Age"
+, party_id as "Member ID"
+, party_role_cde
+, party_role_desc
+, party_sub_role_cde
+, party_sub_role_desc
+, party_data_begin_dtm as "Customer Effective Date"
+, customer_tenure as "Customer Tenure"
+, party_type_cde
+, customer_age as "Customer Age"
+, residence_state_cde as "Residence State"
+, residence_zip_cde as "Residence Zip Code"
+, gender_cde as "Gender"
+, registration_dt as "Registration Date"
+, registration_status_cde as "Registration Status Code" 
+, existing_registration_ind as "Existing Registration Indicato"
+, new_registration_ind as "New Registration Indicator"
+, new_registration_count as "New Registration Count"
+, employee_tenure as "Employee Tenure"
+, work_event_num as "Work Event Number" 
+, work_event_organization_id as "Work Event Organization ID"
+, work_event_department_id as "Work Event Department ID"
+, division_cd as "Division Code" 
+, department_cd as "Department Code" 
+, group_id as "Group ID"
+, group_type_id as "Group Type ID"
+, work_event_nm as "Work Event Name"
+, work_event_organization_nm as "Work Event Organization Name"
+, system_division_nm as "System Division Name" 
+, work_event_department_nm as "Work Event Department Name"
+, system_department_nm as "System Department Name"
+, function_nm as "Function"
+, segment_nm as "Segment"
+, group_nm as "Group Name"
+, group_type_nm as "Group Type Name"
+, actionable_ind as "Actionable Indicator"
+, system_nm as "System Name"
+, processing_type_nm as "Processing Type"
+, site_nm as "Site Name"
+, organization_id as "Employee Organization ID"
+, department_id as "Employee Department ID"
+, organization_nm as "Employee Organization Name"
+, department_nm as "Employee Department Name"
+, team_nm as "Team Name"
+, manager_last_nm || ', ' || manager_first_nm as "Manager Name"
+, role_nm as "Employee Role Name" 
+, role_grade_id as "Employee Role Grade ID"
+, party_type_nm
+, employee_last_nm || ', ' || employee_first_nm as "Employee Name"
+, internal as "Internal Indicator"
+, hire_dt as "Hire Date"
+, effective_dt as "Effective Date"
+, termination_dt as "Termination Date"
+, source_system_id as "Source System ID"
+, row_process_dtm as "Trans Date"
+/* Following fields removed when switch to Vertica because these are not used/needed by the business
+, no_registration_ind as "No Registration Indicator"
+, employee_email as "Employee Email"
+, manager_email as "Manager Email" 
+, team_lead_last_nm || ', ' || team_lead_first_nm as "Team Lead Name"
+, fte 
+, fte_hrs as "FTE Hours"
+, class_rank as "Class Rank"
+*/
+FROM dma_vw.fact_integrated_digital_adoption_pit_vw
