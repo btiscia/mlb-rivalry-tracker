@@ -11,7 +11,7 @@ SELECT
 	, T1.order_entry_id AS "OrderEntryID"
 	, T1.dim_agreement_natural_key_hash_uuid AS "AgreementID"
 	, T1.policy_num AS "PolicyNumber"
-	, T1.doc_type_nm AS "NewBusinessDocType"
+	, COALESCE (T1.doc_type_nm, 'N/A') AS "NewBusinessDocType"
 	, UPPER(T1.contract_jurisdiction_state_cde) AS "ContractState"
 	, T1.resident_state_cde AS "ResidenceState"
 	, T1.agent_id AS "AgentID"
