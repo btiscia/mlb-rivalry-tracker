@@ -35,7 +35,7 @@ SELECT
 , T5.nigo_dt AS "IRNIGODate"
 , CASE WHEN T3.nigo_reason IS NULL THEN T1.suitability_approved_dt ELSE CAST(COALESCE(T2.reject_dt, T2.cancel_dt, T5.bingo_dt) AS DATE) END AS "IRBINGODate"
 , T4.igo_ind::INT AS "BINGOIndicator"
-, (IRBINGODate::date - T5.nigo_date::date) AS "NIGOResolution"
+, (IRBINGODate::date - T5.nigo_dt::date) AS "NIGOResolution"
 , T1.final_disposition AS "FinalDisposition"
 , T1.final_disposition_dt
 , T1.row_process_dtm AS "TransDate"
