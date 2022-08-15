@@ -49,7 +49,7 @@ SELECT
 	, CAST(CURRENT_DATE() AS DATE) - T1.final_disposition_dt AS "CalDaysSinceNBSub"
 	, T1.issue_dt - T1.application_signed_dt AS "CalDaysSignToIssue"
 	, T1.application_signed_dt - T1.application_submit_dt AS "CalDaysSignToSub"
-	, T1.original_order_submit_dt - T1.application_signed_dt AS "CalDaysAppSignToSuitSub"
+	, T1.suitability_submit_dt - T1.application_signed_dt AS "CalDaysAppSignToSuitSub"
 	, T1.nb_submit_dt - T1.application_signed_dt AS "CalDaysSignToNBSub"
 	, T1.issue_dt - T1.application_submit_dt AS "SubtoIssueCycleTime"
 	, T1.nb_submit_dt - T1.application_submit_dt AS "CalDaysSubToNBSub"
