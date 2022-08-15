@@ -1,8 +1,8 @@
 /*
 FILENAME: ANNUITY NEW BUSINESS IR AND SE2
 UPDATED BY: John Avgoustakis, Vince Bonaddio
-LAST UPDATED: 07/20/2022
-CHANGES MADE: Vertica Migration
+LAST UPDATED: 08/12/2022
+CHANGES MADE: Nigo Resolution update.
 */
 SELECT
  'IR' AS BINGOType
@@ -32,17 +32,22 @@ SELECT
 , T2.reject_dt AS "RejectDate"
 , T2.cancel_dt AS "CancelDate"
 , T2.approved_dt AS "ApprovedDate"
-, nigo_dt AS "IRNIGODate"
-, CASE WHEN T3.nigo_reason IS NULL THEN T1.suitability_approved_dt ELSE CAST(COALESCE(T2.reject_dt, T2.cancel_dt, bingo_dt) AS DATE) END AS "IRBINGODate"
+, T5.nigo_dt AS "IRNIGODate"
+, CASE WHEN T3.nigo_reason IS NULL THEN T1.suitability_approved_dt ELSE CAST(COALESCE(T2.reject_dt, T2.cancel_dt, T5.bingo_dt) AS DATE) END AS "IRBINGODate"
 , T4.igo_ind::INT AS "BINGOIndicator"
-, ("IRBINGODate" - "IRBINGODate") AS "NIGOResolution"
-, T2.final_disposition AS "FinalDisposition"
-, T2.final_disposition_dt
+, (IRBINGODate::date - T5.nigo_dt::date) AS "NIGOResolution"
+, T1.final_disposition AS "FinalDisposition"
+, T1.final_disposition_dt
 , T1.row_process_dtm AS "TransDate"
 FROM dma_vw.sem_dim_anb_application_curr_vw T1
 LEFT JOIN dma_vw.sem_anb_ipipeline_vw T2 ON T2.order_entry_id = T1.order_entry_id
 LEFT JOIN dma_vw.bibt_ir_initial_reviews_token_vw T3 ON T3.initial_review_id = T1.initial_review_id
-LEFT JOIN dma_vw.bibt_rel_initial_reviews_vw T4 ON T4.initial_review_id = T1.initial_review_id
-WHERE T1.initial_review_id IS NOT NULL
-AND EXTRACT(YEAR FROM T2.final_disposition_dt) >= EXTRACT(YEAR FROM CURRENT_DATE) - 2
-LIMIT 1 OVER(PARTITION BY T1.initial_review_id, T3.nigo_reason ORDER BY T3.updated_at)
+INNER JOIN dma_vw.bibt_rel_initial_reviews_vw T4 ON T4.initial_review_id = T1.initial_review_id
+LEFT JOIN(SELECT dim_agreement_natural_key_hash_uuid
+                , MIN(nigo_dt) AS nigo_dt
+                , MAX(nigo_res_dt) As bingo_dt
+          FROM dma_vw.anb_dim_nigo_vw
+          WHERE source_system_id = 35
+          GROUP BY dim_agreement_natural_key_hash_uuid) T5 ON T1.dim_agreement_natural_key_hash_uuid = T5.dim_agreement_natural_key_hash_uuid
+WHERE EXTRACT(YEAR FROM T1.final_disposition_dt) >= EXTRACT(YEAR FROM CURRENT_DATE) - 2
+LIMIT 1 OVER(PARTITION BY T1.initial_review_id, T3.nigo_reason ORDER BY T4.updated_at DESC)
