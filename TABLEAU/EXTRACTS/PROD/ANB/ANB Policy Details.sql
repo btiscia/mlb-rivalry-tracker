@@ -46,7 +46,7 @@ SELECT
 	, T1.withdraw_dt AS "WithdrawnDate"
 	, CAST(CURRENT_DATE() AS DATE) - LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) AS "CalDaysSinceSub"
 	, CAST(CURRENT_DATE() AS DATE) - T1.nb_submit_dt AS "CalDaysSinceNBSub"
-	, T1.issue_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt), T1.application_submit_dt) AS "CalDaysSignToIssue"
+	, T1.issue_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToIssue"
 	, LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToSub"
 	, T1.suitability_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysAppSignToSuitSub"
 	, T1.nb_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToNBSub"
