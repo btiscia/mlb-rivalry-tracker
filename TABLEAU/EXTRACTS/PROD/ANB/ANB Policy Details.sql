@@ -42,7 +42,7 @@ SELECT
 	, T1.bingo_dt AS "BINGODate"
 	, T1.final_disposition_dt AS "FinalDispositionDate" 
 	, T1.issue_dt AS "IssueDate"
-	, T1.reject_dt AS "RejectDate"
+	, T1.free_look_dt AS "FreeLookDate"
 	, T1.withdraw_dt AS "WithdrawnDate"
 	, CAST(CURRENT_DATE() AS DATE) - LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) AS "CalDaysSinceSub"
 	, CAST(CURRENT_DATE() AS DATE) - T1.nb_submit_dt AS "CalDaysSinceNBSub"
@@ -75,8 +75,8 @@ SELECT
 	  	   ELSE NULL
 	  END AS "DocTypeCycleTime"
 	, CASE
+		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.free_look_dt IS NOT NULL THEN 'Free Look'
 		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.withdraw_dt IS NOT NULL THEN 'Withdrawn'
-		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.reject_dt IS NOT NULL THEN 'Rejected'
 		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.issue_dt IS NOT NULL AND T1.issue_dt <> '0001/01/01' THEN 'Issued'
 	  END AS "PlacementStatus"	  
 	, (
