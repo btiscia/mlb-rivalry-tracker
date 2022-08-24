@@ -2,10 +2,9 @@
 Name: ANB Modern Policy Details
 Author/Editor: Vince Bonaddio / Bill Trombley
 Updated By: Jess Madru
-Last Updated: 8/9/2022
+Last Updated: 8/24/2022
 Comments: Repoint to vertica.
 */
---ChannelType, FirstNIGODate, NewBusinessEndDate, and Region are no longer in this extract. Verify when updating dashboards that these are not needed
 SELECT
 	  T1.agreement_nr AS "HoldingKey"
 	, T1.order_entry_id AS "OrderEntryID"
@@ -39,7 +38,7 @@ SELECT
 	, T1.nb_submit_dt AS "NewBusinessSubmitDate"
 	, T1.paw_dt AS "PAWDate"
 	, T1.toa_dt AS "TOADate"
-	, T1.bingo_dt AS "BINGODate"
+	, CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END AS "BINGODate"
 	, T1.final_disposition_dt AS "FinalDispositionDate" 
 	, T1.issue_dt AS "IssueDate"
 	, T1.free_look_dt AS "FreeLookDate"
@@ -53,7 +52,7 @@ SELECT
 	, T1.issue_dt - LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) AS "SubtoIssueCycleTime"
 	, T1.nb_submit_dt - LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) AS "CalDaysSubToNBSub"
 	, T1.issue_dt - T1.nb_submit_dt AS "CalDaysNBRcvdToIssued"
-	, T1.bingo_dt - T1.nb_submit_dt AS "NBSubToBINGO"
+	, (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) - T1.nb_submit_dt AS "NBSubToBINGO"
 	, T1.paw_dt - T1.nb_submit_dt AS "CalDaysNBSubToPAW"
 	, T2.business_day AS "BusinessDay"
 	, T1.suitability_approved_dt - T1.suitability_submit_dt AS "CalDaysSuitSubToSuitApvd"
@@ -62,8 +61,8 @@ SELECT
 	, CAST(T1.order_change_dt AS DATE) - T1.suitability_submit_dt AS "CalDaysSuitSubToSuitTrans"
 	, T1.issue_dt - T1.suitability_submit_dt AS "CalDaysSuitSubToIssue"
 	, T1.nb_submit_dt - CAST(T1.order_change_dt AS DATE) AS "CalDayssuitCmpltToNBRcvd"
-	, T1.paw_dt - T1.bingo_dt AS "CalDaysBINGOToPAW"
-	, T1.toa_dt - T1.bingo_dt AS "CalDaysBINGOToTOA"
+	, T1.paw_dt - (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) AS "CalDaysBINGOToPAW"
+	, T1.toa_dt - (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) AS "CalDaysBINGOToTOA"
 	, T1.issue_dt - T1.toa_dt AS "CalDaysTOAToIssue"
 	, T3.function_nm AS "FunctionName"
 	, T3.goal_val AS "SLA"
@@ -100,6 +99,6 @@ SELECT
 	WHERE dma_vw.dma_dim_date_vw.short_dt = CAST(CURRENT_DATE() AS DATE)
 	) AS "PrevBusDayOfToday" 
 FROM dma_vw.sem_dim_anb_application_curr_vw T1
-LEFT JOIN dma_vw.dma_dim_date_vw T2 ON T1.bingo_dt = T2.short_dt 
+LEFT JOIN dma_vw.dma_dim_date_vw T2 ON (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) = T2.short_dt 
 LEFT JOIN dma_vw.dma_dim_goal_curr_vw T3 ON lower(T1.doc_type_nm) = lower(T3.trans_type_nm)
 	AND (CASE WHEN T3.function_nm = 'SE2' THEN 57 ELSE 73 END) = T1.source_system_id
