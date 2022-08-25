@@ -1,5 +1,5 @@
 /*
-FILENAME: ANNUITY NEW BUSINESS iPIPELINE DATA
+FILENAME: ANB iPipeline Data
 UPDATED BY: John Avgoustakis, Vince Bonaddio 
 LAST UPDATED: 06/27/2022
 CHANGES MADE: Vertica Migration

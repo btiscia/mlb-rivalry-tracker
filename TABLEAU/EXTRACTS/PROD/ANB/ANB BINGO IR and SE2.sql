@@ -1,8 +1,8 @@
 /*
-FILENAME: ANNUITY NEW BUSINESS IR AND SE2
+FILENAME: ANB BINGO IR
 UPDATED BY: John Avgoustakis, Vince Bonaddio
-LAST UPDATED: 08/12/2022
-CHANGES MADE: Nigo Resolution update.
+LAST UPDATED: 08/24/2022
+CHANGES MADE: Vertica Migration
 */
 SELECT
  'IR' AS BINGOType
@@ -11,12 +11,13 @@ SELECT
 , T1.order_entry_id AS "OrderEntryID"
 , T1.initial_review_id AS "InitialReviewID"
 , T1.channel AS "Channel"
-, T1.distributor AS Distributor
+, CASE WHEN UPPER(T1.distributor) = 'SDP' THEN 'MMSD' ELSE T1.distributor END AS "Distributor"
+, T1.distributor as "Distributor2"
 , T1.product AS "Product"
 , T1.product_category AS "ProductCategory"
 , T1.resident_state_cde AS ResidenceState
-, T1.firm_num AS "FirmNum"
-, T1.firm_nm AS "FirmName"
+, T1.agency_num as "FirmNum"
+, CASE WHEN T1.agency_num is NULL and T1.firm_nm is NULL then '999 - Unknown' ELSE T1.firm_nm END AS "FirmName"
 , CAST(T1.agent_id AS VARCHAR(10)) AS "AgentID"
 , T1.advisor_nm AS "Advisor"
 , T1.doc_type_nm AS "DocType"
