@@ -1,5 +1,5 @@
 /*
-FILENAME: ANNUITY NEW BUSINESS SUBMIT DETAILS
+FILENAME: ANB Submit Details
 UPDATED BY: John Avgoustakis, Vince Bonaddio 
 LAST UPDATED: 06/27/2022
 CHANGES MADE: Vertica Migration

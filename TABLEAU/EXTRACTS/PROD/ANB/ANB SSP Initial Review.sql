@@ -1,23 +1,14 @@
 /*
-* This routine pulls IR NIGO Review Entries
-*  Peer Review & Change Log:
-*  Peer Review Date:
-*  Source for this routine is
-*  Author: Zach Dorval/Lorraine Christian
-*  Created: 11/3/2020
-*  Updated By: John Avgoustakis
-*  Updated: 7/5/2022
-* Revision by Lorraine:  Added IssueDateIsHoliday and BINGO Status (lines 48,50-52, 64 )
-* Revision by Vince:  Removed several joins and added initial review id field.
-* Revision by John: Converted to Vertica.
-======================================================================
-
-
-======================================================================*/
+Name: ANB SSP Initial Review
+Author/Editor:  Zach Dorval/John Avgoustakis
+Updated By: John Avgoustakis
+Last Updated: 8/24/2022
+Comments: Repoint to vertica.
+*/
 
 SELECT  
-	  T6.major_prod_nme AS "ReviewTypeCode"
-    , T1.application_id AS "Application ID"
+      T6.major_prod_nme AS "ReviewTypeCode"
+    , T1.application_id AS "ApplicationID"
     , T1.initial_review_id AS "InitialReviewID"
     , T1.agency_num AS "AgencyID"
     , T1.agent_id AS "AgentID"

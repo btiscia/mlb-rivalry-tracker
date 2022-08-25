@@ -1,12 +1,11 @@
 /*
-FILENAME: ANNUITY NEW BUSINESS IR WORKFLOW DETAILS
+FILENAME: ANB IR Workflow Details
 UPDATED BY: John Avgoustakis, Vince Bonaddio 
 LAST UPDATED: 07/18/2022
 CHANGES MADE: Vertica Migration
 */
 
 SELECT 
-
 	T1.fact_activity_natural_key_hash_uuid AS "Natural Key"
     , T1.source_transaction_id AS "OrderEntryID"
     , T1.product_category AS "Product Category"
@@ -61,4 +60,3 @@ FROM dma_vw.sem_fact_anb_suit_activity_vw T1
 LEFT JOIN dma_vw.dim_ipipeline_orders_curr_vw T5 ON T1.source_transaction_id = T5.order_entry_id
 WHERE T1.work_event_id NOT IN (27834,27836,27837)
 LIMIT 1 OVER (PARTITION BY T1.source_transaction_id, T1.work_event_id, T1.trans_type_id ORDER BY T1.load_dt)
-
