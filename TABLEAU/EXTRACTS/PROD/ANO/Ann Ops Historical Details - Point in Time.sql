@@ -55,7 +55,7 @@ SELECT
 	, CASE WHEN T1.work_event_met_expected = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 	, T1.work_event_met_expected AS "Met Expected Ind Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, CASE WHEN T1.source_system_id = 24 THEN T1.prod_credit ELSE T1.current_prod_credit END AS "Productivity Credits"
+	, T1.prod_credit AS "Productivity Credits"
 	, T1.flex_ind AS "Flex Count"
 	, T1.bcc_ind AS "Society 1851"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
