@@ -1,268 +1,78 @@
 /*
-FILENAME: LA CLAIMS CAPACITY
+FILENAME: LA Claims Forecast Executive
 CREATED BY: Jay Johnson
-LAST UPDATED: 11/22/2021
+LAST UPDATED: 3/28/2022
 CHANGES MADE: Modifications to the source tables.
+**Notes:  This is in the Executive forecast dashboard.  
+*This runs as of 3-29-79
 */
 
-SELECT
-CAST ('TimeOut' AS VARCHAR (50)) AS "TransactionTypeName"
-, NULL AS ForecastID
-, T2.MMID
-, EmployeeLastName || ', ' || EmployeeFirstName AS Employee
-, CASE 
-			WHEN T3.EE_EndDate = '9999-12-31' THEN 'Curr Employee'
-            ELSE 'Termed Emplyee'
-            END AS "Active Schedule Ident"
-, ManagerLastName || ', ' || ManagerFirstName AS Manager
-, TeamName AS "Team Name"
-, T2.RoleID
-, T2.RoleName AS "Role Name"
-, CASE 
-		    WHEN T2.RoleName LIKE 'Life Claim%' THEN 'Life Claim Examiner'
-		    WHEN T2.RoleName LIKE 'Life Pay%' THEN 'Life Pay'
-		    ELSE T2.RoleName
-		    END AS "WorkRole" 
-, EE_Startdate
-, RoleStartDate
-, EE_EndDate
-, ShortDate AS "Date"
-, IsHoliday
-, IsWeekday
-, CASE 
-            WHEN T2.RoleName LIKE ('%Consultant') THEN CAST(11 AS INTEGER)
-            WHEN (ShortDate-RoleStartDate) MONTH(4) >9 THEN CAST(10 AS INTEGER)
-			ELSE  CAST(((ShortDate-RoleStartDate) MONTH(4)) AS INTEGER)
-			END AS Experience
-, CASE 
-            WHEN T2.RoleName LIKE ('%Consultant') THEN 'Consultant'
-            WHEN (ShortDate-RoleStartDate) MONTH(4) >9 THEN 'Experienced'
-			ELSE  'New Hire'
-			END AS EE_TYPE
-, T4.Effective AS "%Effective"
-, CAST(NULL AS FLOAT ) AS "EffectiveFTE"
-, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_high95"
-, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_high80"
-, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_low80"
-, CAST(NULL AS FLOAT ) AS "ForecastEffectiveFTE_low95"
-, ActualFlexHours AS "Actual Flex Hours"
-, CASE 
-			WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
-		    ELSE PlannedOOOHourS
-		    END AS "Planned OOO Hours"
-, PlannedOTHours AS "Planned OT Hours"
-, PlannedExcusedHours AS "Planned Excused Hours"
-, PlannedMakeupHours AS "Planned Makeup Hours"
-, COALESCE(ProductivityCredits,0) AS "Productivity Credits"
-, AllDayOOO AS "All Day OOO"
-, ScheduledHours AS "Working Hours"
-, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  0
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ScheduledHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ScheduledHours
-		    ELSE ScheduledHours
-		    END AS "Actual Working Hrs"    
-, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualOTHours
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualOTHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualOTHours 
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualOTHours  
-		    ELSE ActualOTHours
-		    END AS "Actual OT Hrs"
-
-, ActualOTHours
-
-, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN   ActualMakeupHours
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   ActualMakeupHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualMakeupHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualMakeupHours
-		    ELSE  ActualMakeupHours
-		    END AS  "Actual Makeup Hrs" --New   
-, ActualMakeupHours 
-
-, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ActualExcusedHours
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ActualExcusedHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN ActualExcusedHours
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN ActualExcusedHours
-		    ELSE ActualExcusedHours
-		    END AS "Actual Excused Hrs" --New   
-, ActualExcusedHours 
-, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN  (ScheduledHours)
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)   
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours)
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours) 
-		    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours)
-		    END AS "Actual Capacity" --New    
-		    		    
-, ("Actual Capacity" - "Shrinkage Hrs"  )* T4.Effective  AS "Effective Capacity"
-, CAST(NULL AS INTEGER) AS "ForecastCapacity_high95"
-, CAST(NULL AS INTEGER) AS "ForecastCapacity_high80"
-, CAST(NULL AS INTEGER) AS "ForecastCapacity_low80"
-, CAST(NULL AS INTEGER) AS "ForecastCapacity_low95" 
-, ("Actual Capacity" - "Effective Capacity")-"Shrinkage Hrs" AS "Efficiency Loss"  
-, CASE 
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
-		    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (AdminTime)
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  0
-		    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN   AdminTime
-		    WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-		    ELSE  AdminTime
-		    END AS "Admin Time"
-, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    ELSE ActualNonWorkingHours
-		    END AS "Actual Non-Production Hrs"
-, ActualOOOHours
-, CASE 
-			WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
-		    ELSE ActualOOOHours
-		    END AS "Actual OOO Hrs"   
-, CASE 
-		WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ( "Actual OOO Hrs" )
-	    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-	    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN 0 -- "Actual OOO Hrs"
-	    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs")
-	    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ( "Actual Non-Production Hrs" + "Actual OOO Hrs" + AdminTime)
-	    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  ( "Actual Non-Production Hrs" + ActualOOOHours)
-	    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  ("Actual Non-Production Hrs" + ActualOOOHours+ AdminTime)
-	    ELSE ( "Actual Non-Production Hrs" +  ActualOOOHours+ AdminTime)
-	    END AS "Shrinkage Hrs" 
-	    
-, CAST (NULL AS FLOAT) AS "%Shrinkage"       
-, CAST(NULL AS FLOAT) AS "ForecastShrinkage_high95"
-, CAST(NULL AS FLOAT) AS "ForecastShrinkage_high80"
-, CAST(NULL AS FLOAT) AS "ForecastShrinkage_low80"
-, CAST(NULL AS FLOAT) AS "ForecastShrinkage_low95"
-, CASE 
-			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    ELSE COALESCE(CAST("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
-		    END AS "Productivity Hours"  
-, CASE 
-			WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-		    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-		    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-		    ELSE ActualWorkingHours
-		    END AS "Actual Production Hours"    
-		    
-, "Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
-FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
-JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-JOIN ( SELECT DISTINCT MMID
-							, RoleID
-							, RoleName
-							, MIN(CASE 
-							                  WHEN EXTRACT(YEAR FROM StartDate) = '1900' THEN HireDate
-				                               ELSE StartDate
-				                               END) OVER (PARTITION  BY MMID) AS EE_Startdate
-							, MIN(CASE 
-				                               WHEN EXTRACT(YEAR FROM StartDate) = '1900' THEN HireDate
-				                               ELSE StartDate
-				                               END) OVER (PARTITION BY MMID,ROLEID) AS RoleStartDate
-							, MAX(EndDate) OVER (PARTITION BY MMID) AS EE_EndDate
-				FROM PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW ) T3 ON T2.MMID = T3.MMID AND T2.RoleID = T3.RoleID
-
-JOIN DMA_GRP_DL.Analytics_Capacity_Expc_LOV T4 ON 
-
-
-																				CASE 
-	                																	WHEN T2.RoleName LIKE ('%Consultant') THEN CAST(11 AS INTEGER)
-	               																		WHEN (ShortDate-RoleStartDate) MONTH(4) >9 THEN CAST(10 AS INTEGER)
-																						ELSE  CAST(((ShortDate-RoleStartDate) MONTH(4)) AS INTEGER)
-																				END = T4.Experiance
-AND T1.DepartmentID IN (8)
-AND T2.RoleID IN (13,15,16,17,19,22) 
-AND PartyTypeName = 'EMPLOYEE'
-
-UNION ALL
-
-SELECT
-CAST ('Forecast' AS VARCHAR (50)) AS "TransactionTypeName"
-, T1.ForecastID
-, CAST(NULL AS VARCHAR(50)) AS "MMID"
-, CAST(NULL AS VARCHAR(100)) AS "Employee"
-, CAST(NULL AS VARCHAR(100)) AS "Active Schedule Ident"
-, CAST(NULL AS VARCHAR(100)) AS "Manager"
-, CAST(NULL AS VARCHAR(100)) AS "Team Name"
-, CAST(NULL AS INTEGER) AS "RoleID"
-, CAST(NULL AS VARCHAR(100)) AS "Role Name"
-, T1.WorkRole 
-, CAST(NULL AS DATE) AS "EE_Startdate"
-, CAST(NULL AS DATE) AS "RoleStartDate"
-, CAST(NULL AS DATE) AS "EE_EndDate"
-,T1.ForecastDate AS "Date" 
-, CAST(NULL AS INTEGER) AS "IsHoliday"
-, CAST(NULL AS INTEGER) AS "IsWeekday"
-, CAST(NULL AS INTEGER) AS "Experience"
-, CAST(NULL AS VARCHAR(100)) AS "EE_TYPE"
-,CAST(NULL AS INTEGER) AS "%Effective"
-, T1.ForecastEffectiveFTE "EffectiveFTE"
-, T1.ForecastEffectiveFTE_high95
-, T1.ForecastEffectiveFTE_high80
-, T1.ForecastEffectiveFTE_low80
-, T1.ForecastEffectiveFTE_low95
-, CAST(NULL AS INTEGER) AS "Actual Flex Hours"
-, CAST(NULL AS INTEGER) AS "Planned OOO Hours"
-, CAST(NULL AS INTEGER) AS "Planned OT Hours"
-, CAST(NULL AS INTEGER) AS "Planned Excused Hours"
-, CAST(NULL AS INTEGER) AS "Planned Makeup Hours"
-, CAST(NULL AS INTEGER) AS "Productivity Credits"
-, CAST(NULL AS INTEGER) AS "All Day OOO"
-, CAST(NULL AS INTEGER) AS "Working Hours"
-, CAST(NULL AS INTEGER) AS "Actual Working Hrs"    
-, CAST(NULL AS INTEGER) AS "Actual OT Hrs"
-, CAST(NULL AS INTEGER) AS ActualOTHours
-, CAST(NULL AS INTEGER) AS "Actual Makeup Hrs"
-, CAST(NULL AS INTEGER) AS ActualMakeupHours
-, CAST(NULL AS INTEGER) AS "Actual Excused Hrs"
-, CAST(NULL AS INTEGER) AS ActualExcusedHours 
-, CAST(NULL AS INTEGER) AS "Actual Capacity"
-, T1.ForecastCapacity AS "Effective Capacity"
-, T1.ForecastCapacity_high95
-, T1.ForecastCapacity_high80
-, T1.ForecastCapacity_low80
-, T1.ForecastCapacity_low95
-, CAST(NULL AS INTEGER) AS "Efficiency Loss"   
-, CAST(NULL AS INTEGER) AS "Admin Time"
-, CAST(NULL AS INTEGER) AS "Actual Non-Production Hrs"
-, CAST(NULL AS INTEGER) AS "ActualOOOHours"
-, CAST(NULL AS INTEGER) AS "Actual OOO Hrs"   
-, CAST(NULL AS INTEGER) AS "Shrinkage Hrs" 
-, T1.ForecastShrinkage AS "%Shrinkage"
-, T1.ForecastShrinkage_high95
-, T1.ForecastShrinkage_high80
-, T1.ForecastShrinkage_low80
-, T1.ForecastShrinkage_low95
-, CAST(NULL AS INTEGER) AS "Productivity Hours"  
-, CAST(NULL AS INTEGER) AS "Actual Production Hours"
-, CAST(NULL AS INTEGER) AS "Hours Productive"
-FROM DMA_GRP_DL.Analytics_CapacityFX AS T1
+SELECT  
+D.ForecastID,
+D.ForecastDate,
+A.BusinessDays,
+Trim(D.WorkRole) as WorkRole,
+--D.WorkFunction,
+--D.ComplexityLevel,
+D.ForecastVolume,
+D.ForecastVolume_high95,
+D.ForecastVolume_high80,
+D.ForecastVolume_low80,
+D.ForecastVolume_low95,
+D.ForecastDemand,
+D.ForecastDemand_high95,
+D.ForecastDemand_high80,
+D.ForecastDemand_low80,
+D.ForecastDemand_low95,
+C.ForecastCapacity,
+C.ForecastCapacity_high95,
+C.ForecastCapacity_high80,
+C.ForecastCapacity_low80,
+C.ForecastCapacity_low95,
+C.ForecastEffectiveFTE,
+C.ForecastEffectiveFTE_high95,
+C.ForecastEffectiveFTE_high80,
+C.ForecastEffectiveFTE_low80,
+C.ForecastEffectiveFTE_low95,
+C.ForecastShrinkage,
+C.ForecastShrinkage_high95,
+C.ForecastShrinkage_high80,
+C.ForecastShrinkage_low80,
+C.ForecastShrinkage_low95
+FROM  dma_analytics.analytics_capacity_fx AS C
+JOIN 
+(SELECT  
+ForecastID,
+ForecastDate,
+WorkRole,
+--WorkFunction,
+--ComplexityLevel,
+Sum(ForecastVolume) AS ForecastVolume,
+Sum(ForecastVolume_high95) AS ForecastVolume_high95,
+Sum(ForecastVolume_high80)AS ForecastVolume_high80,
+Sum(ForecastVolume_low80)AS ForecastVolume_low80 ,
+Sum(ForecastVolume_low95)AS ForecastVolume_low95,
+Sum(ForecastDemand)AS ForecastDemand,
+Sum(ForecastDemand_high95)AS ForecastDemand_high95,
+Sum(ForecastDemand_high80)AS ForecastDemand_high80,
+Sum(ForecastDemand_low80)AS ForecastDemand_low80,
+Sum(ForecastDemand_low95)AS ForecastDemand_low95
+FROM dma_analytics.analytics_demand_fx--RT20_00002983_LC_Forecast_New
+GROUP BY 1,2,3) D
+ON
+C.ForecastDate = D.ForecastDate AND
+C.WorkRole = D.WorkRole AND
+C.ForecastID = D.ForecastID
+LEFT JOIN (
+    SELECT
+        first_day_of_month,
+        Count(CASE WHEN is_holiday = false AND  is_weekday = True THEN short_dt END) AS BusinessDays
+            FROM  dma_vw.dma_dim_date_vw
+            GROUP BY 1) A
+ON A.first_day_of_month = D.ForecastDate
 INNER JOIN
-(SELECT DISTINCT Department, ForecastDate ,MAX(ForecastID) OVER (PARTITION BY Department,ForecastDate) AS FxID 
-FROM DMA_GRP_DL.Analytics_CapacityFX
-WHERE   EXTRACT(YEAR FROM ForecastDate) = EXTRACT (YEAR FROM CURRENT_DATE- INTERVAL '0' YEAR)
+(SELECT DISTINCT Department, ForecastDate ,Max(ForecastID) Over (PARTITION BY Department,ForecastDate) AS FxID 
+FROM dma_analytics.analytics_capacity_fx
+WHERE   Extract(YEAR From ForecastDate) = Extract (YEAR From Current_Date- INTERVAL '0' YEAR)
 AND Department = 'Life Claims') AS T2
-ON (ForecastID = FxID AND T1.ForecastDate = T2.ForecastDate AND T1.Department=T2.Department)
+ON (C.ForecastID = FxID AND C.ForecastDate = T2.ForecastDate AND C.Department=T2.Department)

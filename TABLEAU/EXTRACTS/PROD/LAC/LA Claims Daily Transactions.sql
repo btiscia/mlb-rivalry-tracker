@@ -1,125 +1,46 @@
-SELECT 
-CASE 
-	WHEN CompletedIndicator = 1 THEN 'Completed'
-	WHEN SequenceNumber = 1 THEN 'Received'
-	ELSE 'Pending'
-END AS "Transaction Type"
-,ActivityID
-,Main.SourceTransactionID AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,CASE
-	WHEN CompletedIndicator = 1 THEN Main.LongCompletedDate 
-	WHEN SequenceNumber = 1 THEN CAST(ReceivedDate AS TIMESTAMP(6))
-	ELSE CAST(LoadDate AS TIMESTAMP(6))
-END AS "Date"
-,LoggedDate AS "Logged Date"
-,COALESCE(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"	
-,COALESCE(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName	AS "Team Name"
-,FunctionName	AS "Function Name"
-,SegmentName	AS "Segment Name"
-,WorkEventName	AS "Work Event Name"
-,Priority	
-,AdminSystem AS "Admin System"	
-,ServiceChannelName	AS "Service Channel Code"
-,PartyTypeName	AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber	AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,(SELECT COUNT(*) FROM PROD_DMA_VW.DATE_DIM_VW WHERE IsHoliday = 1 AND ShortDate BETWEEN DateDimDate.ShortDate AND DateDimExpected.ShortDate) AS "Holidays"	
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,NIGOCode AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE
-	WHEN Completed.SourceTransactionID IS NULL THEN 0
-	ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,Main.TransDate AS "Trans Date"
-FROM PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW Main 
-LEFT JOIN
-(SELECT DISTINCT
-SourceTransactionID
-,CompletedDate
-FROM PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW
-WHERE CompletedIndicator = 1
-AND (WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
-AND CompletedDate >= ADD_MONTHS(CURRENT_DATE, -3)) Completed
-ON Main.SourceTransactionID = Completed.SourceTransactionID
-LEFT JOIN PROD_DMA_VW.DATE_DIM_VW DateDimExpected
-ON Main.ExpectedCompletedDate = DateDimExpected.ShortDate
-LEFT JOIN PROD_DMA_VW.DATE_DIM_VW DateDimDate
-ON "Date" = DateDimDate.ShortDate
-WHERE (WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
-AND "Date" >= ADD_MONTHS(CURRENT_DATE, -3)
+/*
+FILENAME: LAC DAILY TRANSACTIONS
+CREATED BY: John Avgoutakis
+LAST UPDATED: 02/14/2022
+CHANGES MADE: Repointed to Vertica.
+*/
 
-UNION ALL
 
-SELECT 
-'Received' AS "Transaction Type"
-,ActivityID
-,Main.SourceTransactionID AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,CAST(ReceivedDate AS TIMESTAMP(6)) AS "Date"
-,LoggedDate AS "Logged Date"
-,COALESCE(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"	
-,COALESCE(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName	AS "Team Name"
-,FunctionName	AS "Function Name"
-,SegmentName	AS "Segment Name"
-,WorkEventName	AS "Work Event Name"
-,Priority	
-,AdminSystem AS "Admin System"	
-,ServiceChannelName	AS "Service Channel Code"
-,PartyTypeName	AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber	AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,(SELECT COUNT(*) FROM PROD_DMA_VW.DATE_DIM_VW WHERE IsHoliday = 1 AND ShortDate BETWEEN DateDimDate.ShortDate AND DateDimExpected.ShortDate) AS "Holidays"	
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,NIGOCode AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE
-	WHEN Completed.SourceTransactionID IS NULL THEN 0
-	ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,Main.TransDate AS "Trans Date"
-FROM PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW Main 
-LEFT JOIN
-(SELECT DISTINCT
-SourceTransactionID
-,CompletedDate
-FROM PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW
-WHERE CompletedIndicator = 1
-AND (WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
-AND CompletedDate >= ADD_MONTHS(CURRENT_DATE, -3)) Completed
-ON Main.SourceTransactionID = Completed.SourceTransactionID
-LEFT JOIN PROD_DMA_VW.DATE_DIM_VW DateDimExpected
-ON Main.ExpectedCompletedDate = DateDimExpected.ShortDate
-LEFT JOIN PROD_DMA_VW.DATE_DIM_VW DateDimDate
-ON "Date" = DateDimDate.ShortDate
-WHERE (WorkEventDepartmentID IN (7,8)
-OR DepartmentID IN (7,8))
-AND CompletedIndicator = 1
-AND SequenceNumber = 1
-AND "Date" >= ADD_MONTHS(CURRENT_DATE, -3)
+SELECT
+	  T1.transaction_type_nm AS "Transaction Type"
+	, T1.fact_integrated_natural_key_hash_uuid AS "Natural Key"
+	, T1.source_transaction_id AS "Source Transaction ID"
+	, T1.pol_nr AS "Policy Number"
+	, CASE WHEN T1.trans_type_id = 3 THEN T1.long_completed_dt ELSE T1.report_dt END AS "Date"
+	, T1.logged_dt AS "Logged Date"
+	, COALESCE(employee_last_nm || ', ' || employee_first_nm, 'Unknown') AS 'Employee'
+	, COALESCE(manager_last_nm || ', ' || manager_first_nm , 'Unknown') AS 'Manager'
+	, T1.employee_role_nm AS "Employee Role Name"
+	, T1.employee_team_nm AS "Team Name"
+	, T1.work_event_function_nm AS "Function Name"
+	, T1.work_event_segment_nm AS "Segment Name"
+	, T1.work_event_nm AS "Work Event Name"
+	, T1.priority_nm AS "Priority"
+	, T1.admn_sys_cde AS "Admin System"
+	, T1.chnl_dspy_nm AS "Service Channel Code" 	
+	, T1.party_type_nm AS "Party Type Name"	
+	, T1.site_nm AS "Site Name"	
+	, T1.work_event_num AS "Work Event Number"	
+	, T1.expected_completed_dt AS "Expected Completed Date"	
+	, T1.tat AS "TAT" 	
+	, T1.days_past_tat AS "Days Past TAT"	
+	, T1.met_expected_ind AS "Met Expected Indicator"
+	, T1.met_expected AS "Met Expected"	
+	, T1.prod_credit AS "Productivity Credits"	
+	, T1.NIGO_des AS "NIGODescription"
+	, T1.nigo_cd AS "NIGO Code"
+	, T1.igo_ind AS "IGO Indicator"	
+	, T1.flex_ind AS "Flex Indicator"
+	, CAST(T1.actionable_ind AS INT) AS "Actionable Indicator"
+	, CASE WHEN T1.source_transaction_id IS NULL THEN 0 ELSE 1 END AS "Completed Flag"	
+	, T1.sht_cmnt_des AS "Comments"
+	, T1.row_process_dtm AS "Transaction Date"	
+
+	
+FROM dma_vw.fact_integrated_lac_pit_vw T1
+WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)
