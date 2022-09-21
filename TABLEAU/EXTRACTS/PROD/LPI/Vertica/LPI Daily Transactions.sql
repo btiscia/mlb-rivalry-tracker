@@ -3,6 +3,7 @@ FILENAME: LPI DAILY TRANSACTIONS
 CREATED BY: John Avgoutakis
 LAST UPDATED: 02/24/2022
 CHANGES MADE: Repointed to Vertica.
+Changes 9/21/2022: Productivity Credits changed
 */
 
 
@@ -31,7 +32,8 @@ SELECT
 	, T1.days_past_tat AS "Days Past TAT"	
 	, T1.met_expected_ind AS "Met Expected Indicator"
 	, T1.met_expected AS "Met Expected"	
-	, T1.current_prod_credit AS "Productivity Credits"	
+	, T1.prod_credit AS "Productivity Credits"  -- added 9/19/22
+	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/19/22
 	, T1.NIGO_des AS "NIGODescription"
 	, T1.nigo_cd AS "NIGO Code"
 	, T1.igo_ind AS "IGO Indicator"	
@@ -39,7 +41,7 @@ SELECT
 	, CAST(T1.actionable_ind AS INT) AS "Actionable Indicator"
 	, CASE WHEN T1.source_transaction_id IS NULL THEN 0 ELSE 1 END AS "Completed Flag"	
 	, T1.sht_cmnt_des AS "Comments"
-	, T1.row_process_dtm AS "Transaction Date"
+	, T1.row_process_dtm AS "Transaction Date"	
 
 	
 FROM dma_vw.fact_integrated_lpi_pit_vw T1
