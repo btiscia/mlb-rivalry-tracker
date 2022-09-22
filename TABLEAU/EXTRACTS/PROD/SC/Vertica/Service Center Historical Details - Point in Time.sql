@@ -3,6 +3,7 @@ FILENAME: SERVICE CENTER HISTORICAL DETAILS PIT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 1/27/2022
 CHANGES MADE: Vertica SQL Creation.
+CHANGES MADE:  Production Credits changed 9/22/2022
 */
 
 
@@ -52,8 +53,9 @@ SELECT
 	, T1.tat AS "Total TAT Days"
 	, 1 AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
-	--, T2.goal_val AS "IGO Goal"
+	, T1.prod_credit AS "Productivity Credits"  -- added 9/21/22
+	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/21/22
+	--, T2.goal_val AS "IGO Goal" -- Kristin Carlile changed
 	, T1.flex_ind AS "Flex Count"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
 	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
