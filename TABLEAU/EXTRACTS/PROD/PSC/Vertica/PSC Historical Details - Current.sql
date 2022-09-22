@@ -3,6 +3,7 @@ FILENAME: PSC HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 1/18/2022
 CHANGES MADE: Pointed to Vertica and added item_count.
+CHANGES MADE:  Production Credits changed 9/22/2022
 */
 
 
@@ -49,7 +50,8 @@ SELECT
 	, T1.days_past_tat AS "Total TAT Days"
 	, T1.item_count AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
+    , T1.prod_credit AS "Productivity Credits"  -- added 9/20/22
+	--, T1.current_prod_credit AS "Productivity Credits" --removed 9/20/2022
 	, T2.goal_val AS "IGO Goal"
 	, flex_ind AS "Flex Count"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
