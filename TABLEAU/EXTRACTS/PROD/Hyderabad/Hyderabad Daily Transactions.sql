@@ -1,311 +1,47 @@
 /*
-* This routine pulls daily transactions for Hyderabad
-
-*  Peer Review & Change Log:
-*  Peer Review : 
-*  Source for this routine is PROD_DMA_VW.ACT_DMS_CURR_INTEGRATED_VW  and  PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW and PROD_DMA_VW.DATE_DIM_VW
-*  Author: Kristin Carlile
-*  Created: 8/4/2021
+FILENAME: HYDERABAD DAILY TRANSACTIONS
+CREATED BY: Kristin Carlile
+LAST UPDATED: 05/11/2022
+CHANGES MADE: Repointed to Vertica.
 */
 
-SELECT 'Received' AS "Transaction Type"
-,ActivityID AS "ActivityID"
-,cast(SourceTransactionID AS VARCHAR(50)) AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,Cast(ReceivedDate AS TIMESTAMP(6)) AS "Date"    
-,LoggedDate AS "Logged Date"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName    AS "Team Name"
-,FunctionName    AS "Function Name"
-,SegmentName    AS "Segment Name"
-,WorkEventName    AS "Work Event Name"
-,Priority    
-,AdminSystem AS "Admin System"    
-,SystemName AS "System Name"
-,ServiceChannelName    AS "Service Channel Code"
-,PartyTypeName    AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber    AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,cast(NIGOCode AS INTEGER) AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE WHEN SourceTransactionID IS NULL THEN 0
-    ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,TransDate AS "Trans Date"
-,WorkEventDepartmentName as "Department Name"
-,DepartmentCode as "Department Code"
-,DivisionCode as "Division"
-,COUNT(distinct ActivityID) as "Transaction Count"
---,TransactionTypeID AS "Transaction Type ID" 
-FROM PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW 
-WHERE (DepartmentID =51)
-AND "Date" >= Add_Months(Current_Date, -3)
-AND "Team Name" not in ('Business Content Management & Communications', 'Learning & Performance')
-AND sequencenumber =1
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34, 35,36,37
-
-UNION ALL
-
-SELECT 'Pending' AS "Transaction Type"
-,ActivityID AS "ActivityID"
-,cast(iv.SourceTransactionID AS VARCHAR(50)) AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,Cast(TransDate AS TIMESTAMP(6)) AS "Date"    
-,LoggedDate AS "Logged Date"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName    AS "Team Name"
-,FunctionName    AS "Function Name"
-,SegmentName    AS "Segment Name"
-,WorkEventName    AS "Work Event Name"
-,Priority    
-,AdminSystem AS "Admin System"    
-,SystemName AS "System Name"
-,ServiceChannelName    AS "Service Channel Code"
-,PartyTypeName    AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber    AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,cast(NIGOCode AS INTEGER) AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE WHEN iv.SourceTransactionID IS NULL THEN 0
-    ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,TransDate AS "Trans Date"
-,WorkEventDepartmentName as "Department Name"
-,DepartmentCode as "Department Code"
-,DivisionCode as "Division"
-,COUNT(distinct activityid) as "Transaction Count"
---,TransactionTypeID AS "Transaction Type ID" 
-FROM PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW as IV
- JOIN ( SELECT DISTINCT SourceTransactionID
-                                ,Max(SequenceNumber) AS MAXSEQ
-                   FROM PROD_DMA_VW.ACTIVITY_FCT_VW
-                   GROUP BY 1 ) AS MAXTRANS 
-           ON IV.SourceTransactionID = MAXTRANS.SourceTransactionID 
-          AND IV.SequenceNumber = MAXTRANS.MAXSEQ
-WHERE (DepartmentID =51)
-AND "Date" >= Add_Months(Current_Date, -3)
-AND "Team Name" not in ('Business Content Management & Communications', 'Learning & Performance')
-AND completedindicator = 0
-AND workeventdepartmentname is not null
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34, 35,36,37
-
-UNION ALL
-
-SELECT 'Completed' AS "Transaction Type"
-,ActivityID AS "ActivityID"
-,cast(SourceTransactionID AS VARCHAR(50)) AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,LongCompletedDate AS "Date"    
-,LoggedDate AS "Logged Date"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName    AS "Team Name"
-,FunctionName    AS "Function Name"
-,SegmentName    AS "Segment Name"
-,WorkEventName    AS "Work Event Name"
-,Priority    
-,AdminSystem AS "Admin System"    
-,SystemName AS "System Name"
-,ServiceChannelName    AS "Service Channel Code"
-,PartyTypeName    AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber    AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,cast(NIGOCode AS INTEGER) AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE WHEN SourceTransactionID IS NULL THEN 0
-    ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,TransDate AS "Trans Date"
-,WorkEventDepartmentName as "Department Name"
-,DepartmentCode as "Department Code"
-,DivisionCode as "Division"
-,COUNT(distinct ActivityID) as "Transaction Count"
-FROM PROD_DMA_VW.TRANS_PIT_INTEGRATED_VW
-WHERE (DepartmentID =51)
-AND "Date" >= Add_Months(Current_Date, -3)
-AND "Team Name" not in ('Business Content Management & Communications', 'Learning & Performance')
-AND completedindicator = 1
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34, 35,36,37
-
-UNION ALL
-
-SELECT 'Completed' AS "Transaction Type"
-,SourceActivityID AS "ActivityID"
-,SourceTransactionID AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,LongCompletedDate AS "Date"    
-,LoggedDate AS "Logged Date"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName    AS "Team Name"
-,FunctionName    AS "Function Name"
-,SegmentName    AS "Segment Name"
-,WorkEventName    AS "Work Event Name"
-,Priority    
-,AdminSystem AS "Admin System"    
-,SystemName AS "System Name"
-,ServiceChannelName    AS "Service Channel Code"
-,PartyTypeName    AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber    AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,cast(NIGOCode AS INTEGER) AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE WHEN SourceTransactionID IS NULL THEN 0
-    ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,TransDate AS "Trans Date"
-,WorkEventDepartmentName as "Department Name"
-,DepartmentCode as "Department Code"
-,DivisionCode as "Division"
-,SUM(itemcount) as "Transaction Count"
-FROM PROD_DMA_VW.ACT_DMS_PIT_INTEGRATED_VW
-WHERE (DepartmentID =51)
-AND "Date" >= Add_Months(Current_Date, -3)
-AND "Team Name" not in ('Business Content Management & Communications', 'Learning & Performance')
-AND "System Name" not in ('CATS')
-AND transactiontypeid = 3
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34, 35,36,37
-
-UNION ALL
-
-SELECT 'Received' AS "Transaction Type"
-,SourceActivityID AS "ActivityID"
-,SourceTransactionID AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,Cast(ReceivedDate AS TIMESTAMP(6)) AS "Date"     
-,LoggedDate AS "Logged Date"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName    AS "Team Name"
-,FunctionName    AS "Function Name"
-,SegmentName    AS "Segment Name"
-,WorkEventName    AS "Work Event Name"
-,Priority    
-,AdminSystem AS "Admin System"    
-,SystemName AS "System Name"
-,ServiceChannelName    AS "Service Channel Code"
-,PartyTypeName    AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber    AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,cast(NIGOCode AS INTEGER) AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE WHEN SourceTransactionID IS NULL THEN 0
-    ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,TransDate AS "Trans Date"
-,WorkEventDepartmentName as "Department Name"
-,DepartmentCode as "Department Code"
-,DivisionCode as "Division"
-,SUM(itemcount) as "Transaction Count"
-FROM PROD_DMA_VW.ACT_DMS_PIT_INTEGRATED_VW
-WHERE (DepartmentID =51)
-AND "Date" >= Add_Months(Current_Date, -3)
-AND "Team Name" not in ('Business Content Management & Communications', 'Learning & Performance')
-AND "System Name" not in ('CATS')
-AND transactiontypeid = 1
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34, 35,36,37
-UNION ALL
-
-SELECT 'Pending' AS "Transaction Type"
-,SourceActivityID AS "ActivityID"
-,SourceTransactionID AS "Source Transaction ID"
-,HoldingKey AS "Policy Number"
-,Cast(ReceivedDate AS TIMESTAMP(6)) AS "Date"     
-,LoggedDate AS "Logged Date"
-,Coalesce(EmployeeLastName || ', ' || EmployeeFirstName, 'Unknown') AS "Employee"    
-,Coalesce(ManagerlastName || ', ' || ManagerFirstName, 'Unknown') AS "Manager"
-,EmployeeRoleName AS "Employee Role Name"
-,TeamName    AS "Team Name"
-,FunctionName    AS "Function Name"
-,SegmentName    AS "Segment Name"
-,WorkEventName    AS "Work Event Name"
-,Priority    
-,AdminSystem AS "Admin System"    
-,SystemName AS "System Name"
-,ServiceChannelName    AS "Service Channel Code"
-,PartyTypeName    AS "Party Type Name"
-,SiteName AS "Site Name"
-,WorkEventNumber    AS "Work Event Number"
-,ExpectedCompletedDate AS "Expected Completed Date"
-,TAT
-,DaysPastTAT AS "Days Past TAT"
-,MetExpectedIndicator AS "Met Expected Indicator"
-,MetExpected AS "Met Expected"
-,CurrentProdCredit AS "Productivity Credits"
-,NIGODescription
-,cast(NIGOCode AS INTEGER) AS "NIGO Code"
-,IGOIndicator AS "IGO Indicator"
-,FlexIndicator AS "Flex Indicator"
-,ActionableIndicator AS "Actionable Indicator"
-,CASE WHEN SourceTransactionID IS NULL THEN 0
-    ELSE 1
-END AS "Completed Flag"
-,ShortComment AS "Comments"
-,TransDate AS "Trans Date"
-,WorkEventDepartmentName as "Department Name"
-,DepartmentCode as "Department Code"
-,DivisionCode as "Division"
-,SUM(itemcount) as "Transaction Count"
-FROM PROD_DMA_VW.ACT_DMS_PIT_INTEGRATED_VW
-WHERE (DepartmentID =51)
-AND "Date" >= Add_Months(Current_Date, -3)
-AND "Team Name" not in ('Business Content Management & Communications', 'Learning & Performance')
-AND transactiontypeid = 2
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37
+SELECT
+	  T1.transaction_type_nm AS "Transaction Type"
+	, T1.fact_integrated_natural_key_hash_uuid AS "Natural Key"
+	, T1.source_transaction_id AS "Source Transaction ID"
+	, T1.pol_nr AS "Policy Number"
+	, T1.item_count AS "Transaction Count"
+	, CASE WHEN T1.trans_type_id = 3 THEN T1.long_completed_dt ELSE T1.report_dt END AS "Date"
+	, T1.logged_dt AS "Logged Date"
+	, COALESCE(employee_last_nm || ', ' || employee_first_nm, 'Unknown') AS 'Employee'
+	, COALESCE(manager_last_nm || ', ' || manager_first_nm , 'Unknown') AS 'Manager'
+	, T1.employee_role_nm AS "Employee Role Name"
+	, T1.employee_team_nm AS "Team Name"
+	, T1.work_event_function_nm AS "Function Name"
+	, T1.work_event_segment_nm AS "Segment Name"
+	, T1.work_event_nm AS "Work Event Name"
+	, T1.priority_nm AS "Priority"
+	, T1.admn_sys_cde AS "Admin System"
+	, T1.work_event_system_nm AS "System Name"
+	, T1.chnl_dspy_nm AS "Service Channel Code" 	
+	, T1.party_type_nm AS "Party Type Name"	
+	, T1.site_nm AS "Site Name"	
+	, T1.work_event_num AS "Work Event Number"	
+	, T1.expected_completed_dt AS "Expected Completed Date"	
+	, T1.tat AS "TAT" 	
+	, T1.days_past_tat AS "Days Past TAT"	
+	, T1.met_expected_ind AS "Met Expected Indicator"
+	, T1.met_expected AS "Met Expected"	
+	, T1.prod_credit AS "Productivity Credits"	
+	, T1.NIGO_des AS "NIGODescription"
+	, T1.nigo_cd AS "NIGO Code"
+	, T1.igo_ind AS "IGO Indicator"	
+	, T1.flex_ind AS "Flex Indicator"
+	, CAST(T1.actionable_ind AS INT) AS "Actionable Indicator"
+	, CASE WHEN T1.source_transaction_id IS NULL THEN 0 ELSE 1 END AS "Completed Flag"	
+	, T1.sht_cmnt_des AS "Comments"
+	, T1.row_process_dtm AS "Transaction Date"
+	, T1.trans_type_id AS "Transaction Type ID"
+	, T1.item_count AS "Item Count"
+FROM dma_vw.fact_integrated_gcc_pit_vw T1
+WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)
