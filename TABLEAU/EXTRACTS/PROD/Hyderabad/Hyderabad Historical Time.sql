@@ -1,105 +1,105 @@
 /*
-* This routine pulls daily time for Hyderabad
-
-*  Peer Review & Change Log:
-*  Peer Review Date: 
-*  Source for this routine is PROD_DMA_VW.PERFORMANCE_FCT_VW, PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW 
-*  Author: Kristin Carlile 9/1/2021
-*  Revised:   -New Daily Historical Time Updated 12/19 by John Avgosutakis/Vince Bonaddio
-*/   
+FILENAME: HYDERABAD HISTORICAL TIME
+CREATED BY: Kristin Carlile
+LAST UPDATED: 05/11/2022
+CHANGES MADE: Vertica SQL Creation.
+*/
 
 
-SELECT
-ShortDate AS "Date"
-,IsHoliday
-,IsWeekday
-,EmployeeLastName || ', ' || EmployeeFirstName AS Employee
-,CASE 
-    WHEN T1.FTE < 1 THEN 'Non-Production'
-    ELSE 'Production'
-END AS "Employee Type"
-, ManagerLastName || ', ' || ManagerFirstName AS Manager
-, TeamName AS "Team Name"
-, RoleName AS "Role Name"
-, RoleGradeName AS "Role Grade Name"
-, ProductionGoal AS "Prod Goal"
-, NonProductionGoal AS "Non Prod Goal"
-, ActualFlexHours AS "Actual Flex Hours"
---, ActualNonWorkingHours
-,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE ActualNonWorkingHours
-    END AS "Actual Non-Production Hours"
-,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
-    ELSE ActualOOOHours
-    END AS "Actual OOO Hours"
-,ActualOTHours AS "Actual OT Hours"
-,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE ActualWorkingHours
-    END AS "Actual Production Hours"
-    
-,ActualExcusedHours AS "Actual Excused Hours"
-,ActualMakeupHours AS "Actual Makeup Hours"
-,PlannedFlexHours AS "Planned Flex Hours"
+SELECT 
 
-,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
-    ELSE PlannedNonWorkingHours
-    END AS "Planned Non-Production Hours"
-    
-,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN ScheduledHours 
-    ELSE PlannedOOOHours
-    END AS "Planned OOO Hours"
-    
-,PlannedOTHours AS "Planned OT Hours"
+  T1.short_dt AS "Date"
+, CAST(T1.is_holiday AS INT) AS IsHoliday
+, CAST(T1.is_weekday AS INT) AS IsWeekday
+, COALESCE(T2.employee_last_nm || ', ' || T2.employee_first_nm, 'Unknown') AS 'Employee'
+, COALESCE(T2.manager_last_nm || ', ' || T2.manager_first_nm , 'Unknown') AS 'Manager'
+, CASE WHEN T1.fte < 1 THEN 'Non_Production' ELSE 'Production' END AS "Employee Type"
+, T2.team_nm AS "Team Name"
+, T2.role_nm AS "Role Name"
+, T2.role_grade_nm AS "Role Grade Name"
+, T1.prod_goal AS "Prod Goal"
+, T1.non_prod_goal AS "Non Prod Goal"
+, T1.actual_flex_hrs AS "Actual Flex Hours"
 
-,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
-    ELSE PlannedWorkingHours
-    END AS  "Planned Prod Hours"
-    
-,PlannedExcusedHours AS "Planned Excused Hours"
-,PlannedMakeupHours AS "Planned Makeup Hours"
-,ScheduledHours AS "Working Hours"
-,AdminTime AS "Admin Time"
-,Coalesce(ProductivityCredits,0) AS "Productivity Credits"
-,AllDayOOO AS "All Day OOO"
+, CASE WHEN all_day_ooo = 1 OR (actual_ooo_hrs >= working_hours AND working_hours <> 0) THEN 0
+    WHEN (working_hours + actual_ot_hrs + actual_makeup_hrs) = 0 THEN 0 
+    WHEN (is_holiday = 1 OR working_hours = 0) AND (actual_ot_hrs + actual_makeup_hrs) = 0 THEN  0
+    ELSE actual_non_prod_hrs
+  END AS "Actual Non-Production Hours"
 
-,CASE WHEN AllDayOOO = 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1 OR ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    ELSE Coalesce(Cast("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
-    END AS "Productivity Hours"
-    
-,"Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
+, CASE WHEN all_day_ooo = 1 OR (actual_ooo_hrs >= working_hours AND working_hours <> 0) THEN working_hours 
+    ELSE actual_ooo_hrs
+  END AS "Actual OOO Hours"
 
-,CASE WHEN AllDayOOO >= 1 OR (ActualOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
-    WHEN (ScheduledHours + ActualOTHours + ActualMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) = 0 THEN  0
-    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours)
-    WHEN (IsHoliday = 1) AND (ActualOTHours + ActualMakeupHours) > 6 THEN  (ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours - AdminTime)
-    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) < 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours)
-    WHEN (ScheduledHours = 0) AND (ActualOTHours + ActualMakeupHours) >= 6 THEN  (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours - AdminTime)
-    ELSE (ScheduledHours + ActualOTHours + ActualMakeupHours - ActualExcusedHours - "Actual Non-Production Hours" - ActualOOOHours - AdminTime) 
-    END AS "Available Time"
-    
-,CASE WHEN AllDayOOO >= 1 OR (PlannedOOOHours >= ScheduledHours AND ScheduledHours <> 0) THEN 0 
-    WHEN (ScheduledHours + PlannedOTHours + PlannedMakeupHours) = 0 THEN 0 
-    WHEN (IsHoliday = 1) AND (PlannedOTHours + PlannedMakeupHours) = 0 THEN  0
-    WHEN (IsHoliday = 1) AND (PlannedOTHours + PlannedMakeupHours) < 6 THEN  (PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours)
-    WHEN (IsHoliday = 1) AND (PlannedOTHours + PlannedMakeupHours) > 6 THEN  (PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime)
-    WHEN (ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) < 6 THEN  (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours)
-    WHEN (ScheduledHours = 0) AND (PlannedOTHours + PlannedMakeupHours) >= 6 THEN  (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime)
-    ELSE (ScheduledHours + PlannedOTHours + PlannedMakeupHours - PlannedExcusedHours - PlannedNonWorkingHours - PlannedOOOHours - AdminTime) 
+, actual_ot_hrs AS "Actual OT Hours"
+
+, CASE WHEN all_day_ooo = 1 OR (actual_ooo_hrs >= working_hours AND working_hours <> 0) THEN 0
+    WHEN (working_hours + actual_ot_hrs + actual_makeup_hrs) = 0 THEN 0 
+    WHEN (is_holiday = 1 OR working_hours = 0) AND (actual_ot_hrs + actual_makeup_hrs) = 0 THEN  0
+    ELSE actual_prod_hrs
+  END AS "Actual Production Hours"
+  
+, T1.actual_excused_hrs AS "Actual Excused Hours"
+, T1.actual_makeup_hrs AS "Actual Makeup Hours"
+, T1.planned_flex_hrs AS "Planned Flex Hours"
+
+, CASE WHEN all_day_ooo >= 1 OR (planned_ooo_hrs >= working_hours AND working_hours <> 0) THEN 0
+    WHEN (working_hours + planned_ot_hrs + planned_makeup_hrs) = 0 THEN 0 
+    WHEN (is_holiday = 1 OR working_hours = 0) AND (planned_ot_hrs + planned_makeup_hrs) = 0 THEN  0
+    ELSE planned_non_prod_hrs
+  END AS "Planned Non-Production Hours"
+
+, CASE WHEN all_day_ooo >= 1 OR (planned_ooo_hrs >= working_hours AND working_hours <> 0) THEN working_hours 
+   ELSE planned_ooo_hrs
+  END AS "Planned OOO Hours"  
+  
+, T1.planned_ot_hrs AS "Planned OT Hours"
+  
+, CASE WHEN all_day_ooo >= 1 OR (planned_ooo_hrs >= working_hours AND working_hours <> 0) THEN 0
+    WHEN (working_hours + planned_ot_hrs + planned_makeup_hrs) = 0 THEN 0 
+    WHEN (is_holiday = 1 OR working_hours = 0) AND (planned_ot_hrs + planned_makeup_hrs) = 0 THEN  0
+    ELSE planned_prod_hrs
+  END AS "Planned Prod Hours"
+  
+, T1.planned_excused_hrs AS "Planned Excused Hours"
+, T1.planned_makeup_hrs AS "Planned Makeup Hours"
+, T1.working_hours AS "Working Hours"
+, T1.admin_time AS "Admin Time"
+, COALESCE(T1.prod_credit,0) AS "Productivity Credits"
+, T1.all_day_ooo AS "All Day OOO" 
+  
+, CASE WHEN all_day_ooo = 1 OR (actual_ooo_hrs >= working_hours AND working_hours <> 0) THEN 0
+    WHEN (working_hours + actual_ot_hrs + actual_makeup_hrs) = 0 THEN 0 
+    WHEN (is_holiday = 1 OR working_hours = 0) AND (actual_ot_hrs + actual_makeup_hrs) = 0 THEN  0
+    ELSE COALESCE(CAST("Productivity Credits" AS DECIMAL(12,5)),0) / 60 
+  END AS "Productivity Hours"
+ 
+, "Productivity Hours" + "Actual Production Hours" AS "Hours Productive"
+  
+, CASE WHEN all_day_ooo >= 1 OR (actual_ooo_hrs >= working_hours AND working_hours <> 0) THEN 0 
+    WHEN (working_hours + actual_ot_hrs + actual_makeup_hrs) = 0 THEN 0 
+    WHEN (is_holiday = 1) AND (actual_ot_hrs + actual_makeup_hrs) = 0 THEN  0
+    WHEN (is_holiday = 1) AND (actual_ot_hrs + actual_makeup_hrs) < 6 THEN  (actual_ot_hrs + actual_makeup_hrs - actual_excused_hrs - "Actual Non-Production Hours" - actual_ooo_hrs)
+    WHEN (is_holiday = 1) AND (actual_ot_hrs + actual_makeup_hrs) > 6 THEN  (actual_ot_hrs + actual_makeup_hrs - actual_excused_hrs - "Actual Non-Production Hours" - actual_ooo_hrs - admin_time)
+    WHEN (working_hours = 0) AND (actual_ot_hrs + actual_makeup_hrs) < 6 THEN  (working_hours + actual_ot_hrs + actual_makeup_hrs - actual_excused_hrs - "Actual Non-Production Hours" - actual_ooo_hrs)
+    WHEN (working_hours = 0) AND (actual_ot_hrs + actual_makeup_hrs) >= 6 THEN  (working_hours + actual_ot_hrs + actual_makeup_hrs - actual_excused_hrs - "Actual Non-Production Hours" - actual_ooo_hrs - admin_time)
+    ELSE (working_hours + actual_ot_hrs + actual_makeup_hrs - actual_excused_hrs - "Actual Non-Production Hours" - actual_ooo_hrs - admin_time) 
+  END AS "Available Time"
+
+
+,CASE WHEN all_day_ooo >= 1 OR (planned_ooo_hrs >= working_hours AND working_hours <> 0) THEN 0 
+    WHEN (working_hours + planned_ot_hrs + planned_makeup_hrs) = 0 THEN 0 
+    WHEN (is_holiday = 1) AND (planned_ot_hrs + planned_makeup_hrs) = 0 THEN  0
+    WHEN (is_holiday = 1) AND (planned_ot_hrs + planned_makeup_hrs) < 6 THEN  (planned_ot_hrs + planned_makeup_hrs - planned_excused_hrs - planned_non_prod_hrs - planned_ooo_hrs)
+    WHEN (is_holiday = 1) AND (planned_ot_hrs + planned_makeup_hrs) > 6 THEN  (planned_ot_hrs + planned_makeup_hrs - planned_excused_hrs - planned_non_prod_hrs - planned_ooo_hrs - admin_time)
+    WHEN (working_hours = 0) AND (planned_ot_hrs + planned_makeup_hrs) < 6 THEN  (working_hours + planned_ot_hrs + planned_makeup_hrs - planned_excused_hrs - planned_non_prod_hrs - planned_ooo_hrs)
+    WHEN (working_hours = 0) AND (planned_ot_hrs + planned_makeup_hrs) >= 6 THEN  (working_hours + planned_ot_hrs + planned_makeup_hrs - planned_excused_hrs - planned_non_prod_hrs - planned_ooo_hrs - admin_time)
+    ELSE (working_hours + planned_ot_hrs + planned_makeup_hrs - planned_excused_hrs - planned_non_prod_hrs - planned_ooo_hrs - admin_time) 
     END AS "Planned Available Time"
-  ,T1.DepartmentID 
-    
-FROM PROD_DMA_VW.PERFORMANCE_FCT_VW T1
-LEFT JOIN PROD_DMA_VW.EMPLOYEE_PIT_DIM_VW T2 ON T1.TeamPartyID = T2.TeamPartyID
-WHERE "Date" BETWEEN  Add_Months(Current_Date, -36) AND Current_Date + INTERVAL '10' DAY
-AND T1.DepartmentID = 51
+
+
+FROM dma_vw.fact_aggregated_performance_vw T1
+LEFT JOIN dma.dma_dim_employee_pit T2 ON T1.team_party_id = T2.team_party_id
+WHERE "Date" BETWEEN (Current_Date - INTERVAL '36' MONTH) AND (Current_Date + INTERVAL '10' DAY)
+AND T1.department_id IN (51)
+AND T2.team_nm NOT IN ('Business Content Management & Communications', 'Learning & Performance')
