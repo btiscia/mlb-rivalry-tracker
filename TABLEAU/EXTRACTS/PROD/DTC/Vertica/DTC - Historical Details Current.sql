@@ -3,6 +3,7 @@ FILENAME: DTC HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 4/14/2022
 CHANGES MADE: Vertica SQL Creation.
+CHANGES MADE:  Prod Credits Swapped 10/25/2022 LC
 */
 
 
@@ -49,7 +50,9 @@ SELECT
 	, T1.tat AS "Total TAT Days"
 	, 1 AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
+	, T1.prod_credit AS "Productivity Credits"  -- added 10/26/2022
+	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 10/26/22
+
 	, flex_ind AS "Flex Count"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
 	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
