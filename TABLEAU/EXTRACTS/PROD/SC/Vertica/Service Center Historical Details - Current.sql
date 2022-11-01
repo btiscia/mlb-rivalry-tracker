@@ -3,6 +3,7 @@ FILENAME: SERVICE CENTER HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 1/26/2022
 CHANGES MADE: Vertica SQL Creation.
+CHANGES MADE:  Production Credits changed 9/22/2022
 */
 
 
@@ -44,17 +45,18 @@ SELECT
 	, CASE WHEN igo_ind = 1 AND nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
 	, T1.igo_ind AS "IGO NIGO Count"
 	, T1.sht_cmnt_des AS "Short Comments"
-	, CASE WHEN T1.source_firm_num = '-'THEN NULL ELSE T1.source_firm_num END AS "Requesting Firm"
-	, T1.requestor_type_cd AS "Requestor Type Code"
-	, T1.requestor_type_name AS "Requestor Type Name"
+	, CASE WHEN source_firm_num = '-'THEN NULL ELSE source_firm_num END AS "Requesting Firm"
+	, requestor_type_cd AS "Requestor Type Code"
+	, requestor_type_name AS "Requestor Type Name"
 	, CASE WHEN T1.met_expected_ind = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 	, T1.met_expected_ind AS "Met Expected Ind Count"
 	, T1.tat AS "Total TAT Days"
 	, 1 AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
-	--, T2.goal_val AS "IGO Goal"
-	, T1.flex_ind AS "Flex Count"
+        , T1.prod_credit AS "Productivity Credits"  -- added 9/21/22
+	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/21/22
+	--, T2.goal_val AS "IGO Goal"   -- Kristin C removed
+	, flex_ind AS "Flex Count"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
 	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"

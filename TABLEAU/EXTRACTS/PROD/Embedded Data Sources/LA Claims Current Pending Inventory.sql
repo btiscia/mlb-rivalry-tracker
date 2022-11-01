@@ -21,6 +21,7 @@ SELECT
 , work_event_department_nm AS WorkEventDepartmentName
 , function_nm AS FunctionName --had to add "Name" because of vertica
 , segment_nm AS Segment
+, insured_nm AS "Insured's Name"
 , rcvd_dt AS "Received Date"
 , expected_completed_dt AS "Target Complete Date"
 , cats_expected_completed_dt AS "CATS Expected Completed Date"

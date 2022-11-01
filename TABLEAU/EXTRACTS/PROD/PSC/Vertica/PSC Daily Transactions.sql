@@ -1,8 +1,9 @@
 /*
-FILENAME: PSC DAILY TRANSACTIONS
+FILENAME: PS DAILY TRANSACTIONS
 CREATED BY: John Avgoutakis
 LAST UPDATED: 03/18/2022
 CHANGES MADE: Repointed to Vertica.
+CHANGES MADE:  Production Credits changed 9/22/2022
 */
 
 
@@ -32,8 +33,9 @@ SELECT
 	, T1.tat AS "TAT" 	
 	, T1.days_past_tat AS "Days Past TAT"	
 	, T1.met_expected_ind AS "Met Expected Indicator"
-	, T1.met_expected AS "Met Expected"	
-	, T1.current_prod_credit AS "Productivity Credits"	
+	, T1.met_expected AS "Met Expected"
+        , T1.prod_credit AS "Productivity Credits"  -- added 9/20/22
+	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/20/22	
 	, T1.NIGO_des AS "NIGODescription"
 	, T1.nigo_cd AS "NIGO Code"
 	, T1.igo_ind AS "IGO Indicator"	

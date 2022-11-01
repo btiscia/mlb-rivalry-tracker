@@ -3,6 +3,7 @@ FILENAME: PSC HISTORICAL DETAILS PIT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 1/14/2022
 CHANGES MADE: Vertica SQL Creation.
+CHANGES MADE:  Production Credits changed 9/22/2022
 */
 
 
@@ -49,7 +50,8 @@ SELECT
 	, T1.days_past_tat AS "Total TAT Days"
 	, item_count AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
+    , T1.prod_credit AS "Productivity Credits"  -- added 9/20/22
+	--, T1.current_prod_credit AS "Productivity Credits" removed 9/20/2022
 	, T2.goal_val AS "IGO Goal"
 	, flex_ind AS "Flex Count"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
@@ -58,5 +60,5 @@ SELECT
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
 FROM dma_vw.fact_integrated_psc_pit_vw T1
-LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
+LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id
 WHERE T1.trans_type_id IN (1,3)
