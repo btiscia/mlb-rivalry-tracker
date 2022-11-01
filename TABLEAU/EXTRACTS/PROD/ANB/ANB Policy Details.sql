@@ -2,8 +2,8 @@
 Name: ANB Modern Policy Details
 Author/Editor: Vince Bonaddio / Bill Trombley
 Updated By: Jess Madru
-Last Updated: 8/24/2022
-Comments: Repoint to vertica.
+Last Updated: 10/27/2022
+Comments: Repoint to vertica, updated application_submit_dt logic OSDT#-4825
 */
 SELECT
 	  T1.agreement_nr AS "HoldingKey"
@@ -43,14 +43,13 @@ SELECT
 	, T1.issue_dt AS "IssueDate"
 	, T1.free_look_dt AS "FreeLookDate"
 	, T1.withdraw_dt AS "WithdrawnDate"
-	, CAST(CURRENT_DATE() AS DATE) - LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) AS "CalDaysSinceSub"
-	, CAST(CURRENT_DATE() AS DATE) - T1.nb_submit_dt AS "CalDaysSinceNBSub"
+	, CAST(CURRENT_DATE() AS DATE) - T1.application_submit_dt AS "CalDaysSinceSub"
+    , CAST(CURRENT_DATE() AS DATE) - T1.nb_submit_dt AS "CalDaysSinceNBSub"
 	, T1.issue_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToIssue"
-	, LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToSub"
+	, T1.application_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToSub"
 	, T1.suitability_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysAppSignToSuitSub"
 	, T1.nb_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToNBSub"
-	, T1.issue_dt - LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) AS "SubtoIssueCycleTime"
-	, T1.nb_submit_dt - LEAST(T1.application_submit_dt,ISNULL(T1.electronic_submit_dt, T1.application_submit_dt)) AS "CalDaysSubToNBSub"
+	, T1.issue_dt - T1.application_submit_dt AS "SubtoIssueCycleTime"
 	, T1.issue_dt - T1.nb_submit_dt AS "CalDaysNBRcvdToIssued"
 	, (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) - T1.nb_submit_dt AS "NBSubToBINGO"
 	, T1.paw_dt - T1.nb_submit_dt AS "CalDaysNBSubToPAW"
