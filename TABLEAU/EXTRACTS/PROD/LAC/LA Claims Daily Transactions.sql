@@ -1,8 +1,9 @@
 /*
 FILENAME: LAC DAILY TRANSACTIONS
 CREATED BY: John Avgoutakis
-LAST UPDATED: 02/14/2022
-CHANGES MADE: Repointed to Vertica.
+LAST UPDATED: 11/07/2022
+CHANGES MADE: 02/14/2022 - Repointed to Vertica.
+11/07/2022 - Added in product_type_desc
 */
 
 
@@ -40,7 +41,6 @@ SELECT
 	, CASE WHEN T1.source_transaction_id IS NULL THEN 0 ELSE 1 END AS "Completed Flag"	
 	, T1.sht_cmnt_des AS "Comments"
 	, T1.row_process_dtm AS "Transaction Date"	
-
-	
+    , upper(T1.product_type_desc) AS "Product"
 FROM dma_vw.fact_integrated_lac_pit_vw T1
 WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)

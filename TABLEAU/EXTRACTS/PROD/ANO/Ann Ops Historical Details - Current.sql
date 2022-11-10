@@ -1,8 +1,9 @@
 /*
 FILENAME: ANNUITY OPERATIONS HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoustakis, William Trombley
-LAST UPDATED: 06/10/2022
-CHANGES MADE: Vertica Migration
+LAST UPDATED: 11/02/2022
+CHANGES MADE: 06/10/2022- Vertica Migration
+11/02/2022 - Added in product_type_desc
 */
 
 
@@ -36,7 +37,7 @@ SELECT
 	, T1.work_event_system_nm AS "System Name"
 	, T1.work_event_num AS "Work Event Number"
 	, T1.department_cd AS "Department Code"
-	, T1.division_cd AS "Division Code"	
+	, T1.division_cd AS "Division Code"
 	, CASE WHEN T1.trans_type_id = 3 THEN 1 ELSE 0 END AS "Completed Indicator"
 	, T1.system_division_nm AS "Line of Business"
 	, T1.tat AS "TAT" 
@@ -65,7 +66,8 @@ SELECT
 			ELSE T1.major_product_type_desc
 	   END AS "Contract Type"
 	, T1.item_ct AS "Transaction Count"
+    , upper(T1.product_type_desc) AS "Product"
 FROM dma_vw.fact_integrated_ano_curr_vw T1
 WHERE (work_event_department_id IN (9,11) OR employee_department_id IN (9,11))
 AND T1.trans_type_id IN (1,3)
-AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
+--AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
