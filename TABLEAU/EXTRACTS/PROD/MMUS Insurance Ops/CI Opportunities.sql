@@ -1,4 +1,10 @@
-/* This is a MySQL query*/
+/*
+Name: CI Opportunities
+Author/Editor: Bill Trombley
+Data Conection: iobi-auroramy-prd-kaizen.cluster-ckfbr84lggsy.us-east-1.rds.amazonaws.com
+Last Updated: 11/21/2022
+Comments:
+*/
 
 select
   opportunities_id
@@ -31,5 +37,5 @@ select
 , benefit_dollars
 , goal_hours
 , benefit_and_owner_same
-from io_ci_opportunities.reporting_vw
+from iobi_kaizen_prd.reporting_vw
 where current_status = 'complete'
