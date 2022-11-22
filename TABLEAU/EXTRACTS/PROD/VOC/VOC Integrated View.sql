@@ -1,10 +1,10 @@
 /*  
 FILENAME: VOC INTEGRATED VIEW
 CREATED BY: Kristin Carlile
-LAST UPDATED: 5/27/2022
+LAST UPDATED: 5/2/2022
 CHANGES MADE: Vertica SQL Creation
-CHANGES MADE: Added surveys to exclude in where clause -KC
- */
+CHANGES MADE: Additional fields added for the Annuity CES dash: product, product_category, agency_id, firm_nm, channel, logical_delete_ind=FALSE 10/11/2022 Modified by LC
+*/
 
 SELECT survey_id
 , survey_number as "Survey Number"
@@ -24,6 +24,8 @@ SELECT survey_id
 , response_date as "Response Date"
 , lob_id as "LOB ID" 
 , lob_name as "LOB Name"
+, product
+, product_category
 , work_department_id as "Work Department ID"
 , work_organization_nm as "Work Organization Name"
 , department_nm as "Department Name"
@@ -49,8 +51,12 @@ SELECT survey_id
 , manager_last_nm || ', ' || manager_first_nm  as "Manager Name"
 , agent_id as "Agent ID"
 , agency_id as "Agency ID"
+, firm_nm
+, channel 
 FROM dma_vw.fact_VOC_integrated_vw
-WHERE survey_response_id not in
+WHERE logical_delete_ind=FALSE-- ***************** THIS FILTER is ANNUITY *** survey_id =6 and survey_question_id=20 and response_date between '2022-01-01' and '2022-08-31'/*)AS MAIN*/
+ORDER BY survey_response_id
+/*survey_response_id not in
 ('67f0641f-953d-a9f8-b02c-bd1b3cfe2849',
 'add8c099-4545-2682-ca64-9d79ad56fb58',
 'bfeaa0a6-1ee7-673b-5a19-93511ff24ab0',
@@ -66,4 +72,4 @@ WHERE survey_response_id not in
 'a29a4448-3086-9e07-e5c4-c087e53edc1d',
 'c3e78d04-75e8-18bb-2654-a3938c8ad62b',
 '42632554-9395-4010-8700-20b042e2c153'
-,'5a94c295-c6f5-7b4c-6ff9-30279a978a70')
+,'5a94c295-c6f5-7b4c-6ff9-30279a978a70')*/
