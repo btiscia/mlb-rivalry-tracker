@@ -1,8 +1,9 @@
 /*
 FILENAME: ANNUITY OPERATIONS CURRENT PENDING INVENTORY
 CREATED BY: John Avgoutakis
-LAST UPDATED: 09/22/2021
-CHANGES MADE: Created.
+LAST UPDATED: 11/15/2022
+CHANGES MADE: 09/22/2021 - Created
+11/15/2022 - Added in product_type_desc
 */
 
 SELECT  
@@ -36,7 +37,6 @@ SELECT
     WHEN T1.major_prod_nm = 'Ann&&Fa' AND T1.group_nm = 'Conditional Gain/Loss' THEN  'Medium'
     ELSE 'Low' 
 END AS Priority    
-    
 ,CASE
     WHEN T1.group_nm = 'Internal Replacement' THEN 1
     WHEN T1.major_prod_nm = 'Ann&&Va' AND T1.group_nm = 'Gain/Loss' THEN 1
@@ -64,6 +64,7 @@ END    AS "Priority Order"
 , T1.group_type_nm AS GroupTypeName
 , T1.row_process_dtm AS "Trans Date"
 , T1.major_prod_nm AS MajorProductName
+, initcap(T1.product_type_desc) AS "Product"
 FROM dma_vw.rpt_cats_curr_pend_vw T1
 WHERE (T1.employee_department_id = 11 OR T1.work_event_department_id = 11)
 AND (COALESCE(T1.function_nm,'Unknown') <> 'Flags/Blockers' or T1.function_nm IS NULL)
