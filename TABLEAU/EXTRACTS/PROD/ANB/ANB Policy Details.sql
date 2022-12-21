@@ -2,8 +2,8 @@
 Name: ANB Policy Details
 Author/Editor: Vince Bonaddio / Bill Trombley
 Updated By: Jess Madru
-Last Updated: 10/27/2022
-Comments: Repoint to vertica, updated application_submit_dt logic OSDT#-4825
+Last Updated: 12/9/2022
+Comments: Repoint to vertica, updated application_submit_dt logic OSDT#-4825, update issue_dt logic OSDT#-4909
 */
 SELECT
 	  T1.agreement_nr AS "HoldingKey"
@@ -28,7 +28,7 @@ SELECT
 	, T1.bingo_status AS "BINGOStatus"
 	, T1.bingo_ind AS "BINGOIndicator"
 	, T1.auto_approved_ind AS "AutoApprovalIndicator"
-	, CASE WHEN T1.issue_dt >= '2018-08-01' THEN 1 ELSE 0 END AS "IssueCountforBINGORate"
+	, CASE WHEN T1.issue_trans_dt >= '2018-08-01' THEN 1 ELSE 0 END AS "IssueCountforBINGORate"
 	, T1.application_submit_dt AS "ApplicationSubmitDate"
 	, T1.suitability_approved_dt AS "SuitabilityApprovalDate"
 	, T1.original_order_submit_dt AS "OriginalOrderSubmitDate"
@@ -41,16 +41,18 @@ SELECT
 	, CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END AS "BINGODate"
 	, T1.final_disposition_dt AS "FinalDispositionDate" 
 	, T1.issue_dt AS "IssueDate"
+	, T1.issue_trans_dt as "IssueTransDate"
+	, T1.issue_effective_dt as "IssueEffDate"
 	, T1.free_look_dt AS "FreeLookDate"
 	, T1.withdraw_dt AS "WithdrawnDate"
 	, CAST(CURRENT_DATE() AS DATE) - T1.application_submit_dt AS "CalDaysSinceSub"
   , CAST(CURRENT_DATE() AS DATE) - T1.nb_submit_dt AS "CalDaysSinceNBSub"
-	, T1.issue_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToIssue"
+	, T1.issue_trans_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToIssue"
 	, T1.application_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToSub"
 	, T1.suitability_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysAppSignToSuitSub"
 	, T1.nb_submit_dt - LEAST(T1.application_signed_dt,ISNULL(T1.electronic_submit_dt, T1.application_signed_dt)) AS "CalDaysSignToNBSub"
-	, T1.issue_dt - T1.application_submit_dt AS "SubtoIssueCycleTime"
-	, T1.issue_dt - T1.nb_submit_dt AS "CalDaysNBRcvdToIssued"
+	, T1.issue_trans_dt - T1.application_submit_dt AS "SubtoIssueCycleTime"
+	, T1.issue_trans_dt - T1.nb_submit_dt AS "CalDaysNBRcvdToIssued"
 	, (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) - T1.nb_submit_dt AS "NBSubToBINGO"
 	, T1.paw_dt - T1.nb_submit_dt AS "CalDaysNBSubToPAW"
 	, T2.business_day AS "BusinessDay"
@@ -58,16 +60,16 @@ SELECT
 	, T1.nb_submit_dt - T1.suitability_approved_dt AS "CalDaysSuitApvdToNBSub"
 	, CAST(T1.order_change_dt AS DATE) - T1.suitability_approved_dt AS "CalDaysSuitApvdToSuitTrans"
 	, CAST(T1.order_change_dt AS DATE) - T1.suitability_submit_dt AS "CalDaysSuitSubToSuitTrans"
-	, T1.issue_dt - T1.suitability_submit_dt AS "CalDaysSuitSubToIssue"
+	, T1.issue_trans_dt - T1.suitability_submit_dt AS "CalDaysSuitSubToIssue"
 	, T1.nb_submit_dt - CAST(T1.order_change_dt AS DATE) AS "CalDayssuitCmpltToNBRcvd"
 	, T1.paw_dt - (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) AS "CalDaysBINGOToPAW"
 	, T1.toa_dt - (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) AS "CalDaysBINGOToTOA"
-	, T1.issue_dt - T1.toa_dt AS "CalDaysTOAToIssue"
+	, T1.issue_trans_dt - T1.toa_dt AS "CalDaysTOAToIssue"
 	, T3.function_nm AS "FunctionName"
 	, T3.goal_val AS "SLA"
 	, T1.row_process_dtm AS "TransDate"
 	, T1.final_disposition_dt - T1.nb_submit_dt AS "CalDaysNBSubToFinalDisposition"
-	, CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_dt) - T2.business_day
+	, CASE WHEN LOWER(T1.doc_type_nm) = 'nb purchase w app' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.issue_trans_dt) - T2.business_day
 		   WHEN LOWER(T1.doc_type_nm) = 'incoming transfer' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.toa_dt) - T2.business_day
 		   WHEN LOWER(T1.doc_type_nm) = 'annuity application' THEN (SELECT business_day FROM dma_vw.dma_dim_date_vw WHERE short_dt = T1.paw_dt) - T2.business_day
 	  	   ELSE NULL
@@ -75,12 +77,12 @@ SELECT
 	, CASE
 		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.free_look_dt IS NOT NULL THEN 'Free Look'
 		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.withdraw_dt IS NOT NULL THEN 'Withdrawn'
-		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.issue_dt IS NOT NULL AND T1.issue_dt <> '0001/01/01' THEN 'Issued'
+		   WHEN T1.nb_submit_dt IS NOT NULL AND T1.issue_trans_dt IS NOT NULL AND T1.issue_trans_dt <> '0001/01/01' THEN 'Issued'
 	  END AS "PlacementStatus"	  
 	, (
 	SELECT cast(dma_vw.dma_dim_date_vw.is_holiday as int)
 	FROM dma_vw.dma_dim_date_vw
-	WHERE T1.issue_dt = dma_vw.dma_dim_date_vw.short_dt 
+	WHERE T1.issue_trans_dt = dma_vw.dma_dim_date_vw.short_dt 
 	) AS "IssueDateIsHoliday" 
 	, (
 	SELECT cast(dma_vw.dma_dim_date_vw.is_holiday as int)
@@ -101,4 +103,5 @@ FROM dma_vw.sem_dim_anb_application_curr_vw T1
 LEFT JOIN dma_vw.dma_dim_date_vw T2 ON (CASE WHEN T1.product = 'Envision' and T1.bingo_dt > T1.issue_dt then T1.issue_dt else T1.bingo_dt END) = T2.short_dt 
 LEFT JOIN dma_vw.dma_dim_goal_curr_vw T3 ON lower(T1.doc_type_nm) = lower(T3.trans_type_nm)
 	AND (CASE WHEN T3.function_nm = 'SE2' THEN 57 ELSE 73 END) = T1.source_system_id
+
 

@@ -1,9 +1,9 @@
 /*
 Name: ANB SSP Initial Review
 Author/Editor:  Zach Dorval/John Avgoustakis
-Updated By: John Avgoustakis
-Last Updated: 8/24/2022
-Comments: Repoint to vertica.
+Updated By: Jess Madru
+Last Updated: 12/9/2022
+Comments: Repoint to vertica, update issue_dt logic OSDT#-4909
 */
 
 SELECT  
@@ -36,8 +36,10 @@ SELECT
         END AS "InitialReviewIndicator"
     , T5.name AS "IRMarketTypeName"
     , T1.ir_product_id AS "IRProductID"
-    , CAST(T12.issue_dt AS DATE) AS "IssueDate"
-    , (SELECT is_holiday FROM dma_vw.dma_dim_date_vw WHERE T12.issue_dt = short_dt) AS "IssueDateIsHoliday"
+    , CAST(T12.issue_dt as DATE) as "IssueDate"
+    , CAST(T12.issue_trans_dt AS DATE) AS "IssueTransDate"
+    , CAST(T12.issue_effective_dt as DATE) as "IssueEffDate"
+    , (SELECT is_holiday FROM dma_vw.dma_dim_date_vw WHERE T12.issue_trans_dt = short_dt) AS "IssueDateIsHoliday"
     , T12.bingo_status AS "BINGOStatus"
     , T12.Channel
     , T1.nigo_reason AS "NigoReason"
