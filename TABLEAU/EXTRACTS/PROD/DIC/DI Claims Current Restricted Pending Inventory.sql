@@ -1,20 +1,19 @@
---Tableau Data Source: DI Claims - Current Restricted Pending Inventory
-
 /*
-* This routine pulls all DI Claims - CURRENT Pending Inventory items
-* Author: John Avgoustakis/Bill Trombley
-* Revision: 1/5/2022 - Bill Trombley - Removed Restricted Claim filter.
-* Revision: 9/27/2022 - Bill Tiscia - converted to Vertica
-======================================================================
+FILENAME: DI CLAIMS - Current Restricted Pending Inventory
+UPDATED BY: Jess Madru
+LAST UPDATED: 1/25/2023
+Revision: 1/5/2022 - Bill Trombley - Removed Restricted Claim filter.
+Revision: 9/27/2022 - Bill Tiscia - converted to Vertica
+Revision: 1/25/2023 - Jess Madru - Added Admin System field
+*/
 
-                
-======================================================================*/
 SELECT
 T1.Load_dt
 ,T1.fact_activity_natural_key_hash_uuid AS "Integrated Activity ID"
 ,T1.source_transaction_id AS "Source Transaction ID"
 ,T1.work_event_system_nm AS "System Name"
 ,T2.policy_num AS "Policy Number"
+,T2.admin_sys AS "Admin System"
 ,T1.base_claim_num AS "Base Claim Number"
 ,T1.short_claim_num AS "Claim #"
 ,T1.received_dt AS "Received Date"
@@ -62,4 +61,4 @@ FROM DMA_VW.FACT_INTEGRATED_DIC_CURR_VW T1
 INNER JOIN DMA_VW.DIC_DIM_CLAIM_CURR_VW T2 on T1.CLAIM_NUM = T2.CLAIM_NUM 
 WHERE T1.trans_type_id = 2
 AND T1.Load_dt = CURRENT_DATE
-GROUP BY  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37
+GROUP BY  1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38

@@ -2,7 +2,7 @@
 FILENAME: DIC DAILY TRANSACTIONS
 CREATED BY: John Avgoutakis
 UPDATED BY: Jess Madru
-LAST UPDATED: 10/27/2022
+LAST UPDATED: 1/25/2023
 CHANGES MADE: Added Admin System field
 */
 SELECT
@@ -10,6 +10,7 @@ SELECT
 	, T1.fact_integrated_natural_key_hash_uuid AS "IntegratedActivityID"
 	, T1.source_transaction_id AS "Source Transaction ID"
 	, T1.dim_agreement_nr AS "Policy Number"
+	, T1.admin_sys as "Admin System"
 	,short_claim_num AS "Short Claim Number"
 	,base_claim_num AS "Base Claim Number"
 	,claim_num AS "Claim Number"
@@ -47,9 +48,7 @@ SELECT
 	, CASE WHEN T1.source_transaction_id IS NULL THEN 0 ELSE 1 END AS "Completed Flag"
 	, T1.row_process_dtm AS "Trans Date"
 	, T1.check_dt as "Payment Check Date"
-	, T2.admn_sys_cde as "Admin System"
 FROM dma_vw.fact_integrated_dic_pit_vw T1
-LEFT JOIN dma_vw.dma_ref_admn_sys_cde_vw T2 on T1.ref_admn_sys_id_key_hash_uuid = T2.ref_admn_sys_id_key_hash_uuid 
 WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)
 AND trans_type_id in ('2','3','4')
 AND (work_event_department_id = 6 OR employee_department_id = 6)
