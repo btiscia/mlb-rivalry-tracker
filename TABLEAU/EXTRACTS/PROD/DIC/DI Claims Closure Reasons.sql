@@ -2,8 +2,8 @@
 FILENAME: DI CLAIMS CLOSURE REASONS
 CREATED BY: John Avgoutakis
 UPDATED BY: Jess Madru
-LAST UPDATED: 11/28/2022
-CHANGES MADE: Vertica SQL Creation, added medical review fields
+LAST UPDATED: 1/25/2023
+CHANGES MADE: Vertica SQL Creation, added medical review fields, add admin system field
 */
 
 SELECT
@@ -12,6 +12,7 @@ SELECT
 	, T2.dim_claim_natural_key_hash_uuid AS "ClaimDimensionUniqueID"
 	, T2.short_claim_num AS "Short Claim Number"
 	, T2.policy_num AS "Policy Number"
+	, T2.admin_sys AS "Admin System"
 	, T2.claim_category AS "Claim Category"
 	, T2.examiner_party_employee_id AS "ExaminerPartyEmployeeID"
 	, T4.employee_last_nm ||','|| T4.employee_first_nm AS "Examiner"

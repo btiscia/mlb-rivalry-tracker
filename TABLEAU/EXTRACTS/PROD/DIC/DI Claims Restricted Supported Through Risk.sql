@@ -1,8 +1,9 @@
 /*
 FILENAME: DI CLAIMS RESTRICTED SUPPORTED THROUGH RISK
 CREATED BY: John Avgoutakis
-LAST UPDATED: 5/23/2022
-CHANGES MADE: Vertica SQL Creation.
+UPDATED BY: Jess Madru
+LAST UPDATED: 1/26/2023
+CHANGES MADE: Vertica SQL Creation, added Admin System field
 */
 
 SELECT 
@@ -10,6 +11,7 @@ SELECT
 , T1.fact_risk_inventory_uuid AS "Risk Inventory ID"
 , T1.short_claim_num AS "Short Claim Number"
 , T1.claim_num AS "Claim Number"
+, T1.admin_sys AS "Admin System"
 , CASE 
     WHEN LOWER(T1.last_item_type)  = ('no/uncertain') THEN 'Uncertain'
     WHEN LOWER(T1.last_item_type)  LIKE '%yes%'  AND supported_through_dt IN( '2008-08-08','2010-10-10','2011-11-11') THEN 'Extended Duration' 
