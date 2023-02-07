@@ -1,8 +1,9 @@
 /*
 FILENAME: DI CLAIMS CLOSURE REASONS
 CREATED BY: John Avgoutakis
-LAST UPDATED: 5/5/2022
-CHANGES MADE: Vertica SQL Creation.
+UPDATED BY: Jess Madru
+LAST UPDATED: 1/25/2023
+CHANGES MADE: Vertica SQL Creation, added medical review fields, add admin system field
 */
 
 SELECT
@@ -11,6 +12,7 @@ SELECT
 	, T2.dim_claim_natural_key_hash_uuid AS "ClaimDimensionUniqueID"
 	, T2.short_claim_num AS "Short Claim Number"
 	, T2.policy_num AS "Policy Number"
+	, T2.admin_sys AS "Admin System"
 	, T2.claim_category AS "Claim Category"
 	, T2.examiner_party_employee_id AS "ExaminerPartyEmployeeID"
 	, T4.employee_last_nm ||','|| T4.employee_first_nm AS "Examiner"
@@ -24,6 +26,8 @@ SELECT
 	, T2.icd_1_group_nm AS "Diagnosis Group"
 	, T5.close_reason_nm AS "Close Reason Name"
 	, T5.close_reason_cat AS "Close Reason Category"
+	, T6.med_review_renewal AS "Med Review Renewal"
+	, T6.med_review_support_dt AS "Med Review Support Date"
 	, T2.row_process_dtm AS "Transaction Date"
 	
 FROM dibs.claim_status T1
@@ -39,6 +43,12 @@ LEFT JOIN
 LEFT JOIN dma_vw.dma_dim_employee_curr_vw T4 ON T2.examiner_party_employee_id = T4.party_employee_id 
 
 LEFT JOIN dma_vw.dic_ref_close_reason_vw T5 ON T1.close_reclose_reason = T5.close_reason_cd
+
+LEFT JOIN (SELECT claim_num, med_review_renewal, med_review_support_dt, begin_dt, current_row_ind, end_dt
+FROM dma_vw.dic_dim_medical_review_vw
+LIMIT 1 OVER (PARTITION BY claim_num ORDER BY begin_dt DESC)
+) T6
+ON T1.claim_no = T6.claim_num
 
 WHERE UPPER(T1.code) IN ('CL','RC')
 AND T2.open_dt >= '2016-01-01'  --Nothing opened prior to 1/1/2016

@@ -1,8 +1,8 @@
 /*
-FILENAME: DI CLAIMS HISTORICAL DETAILS POINT IN TIME
+FILENAME: DI CLAIMS HISTORICAL DETAILS - POINT IN TIME
 CREATED BY: Jess Madru
-LAST UPDATED: 9/12/2022
-CHANGES MADE: Pointed to Vertica
+LAST UPDATED: 1/26/2023
+CHANGES MADE: Pointed to Vertica, added Admin System field
 */
 SELECT
 	  T1.transaction_type_nm AS "Transaction Type"
@@ -12,6 +12,7 @@ SELECT
 	, T1.short_claim_num AS "Short Claim Number"
 	, base_claim_num AS "Base Claim Number"
 	, T1.claim_num AS "Claim Number"
+	, T1.admin_sys AS "Admin System"
 	, T1.report_dt AS "Date"
 	, T1.employee_role_nm AS "Employee Role Name"
 	, COALESCE(T1.employee_last_nm || ', ' || T1.employee_first_nm, 'Unknown') AS "Employee"

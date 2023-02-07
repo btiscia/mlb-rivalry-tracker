@@ -1,14 +1,15 @@
 /*
 FILENAME: DI CLAIMS CYCLE TIME
-CREATED BY: John Avgoutakis
-LAST UPDATED: 6/01/2022
-CHANGES MADE: Vertica SQL Creation.
+UPDATED BY: Jess Madru
+LAST UPDATED: 1/25/2023
+CHANGES MADE: Vertica SQL Creation, added Admin System field
 */
 
 SELECT
   report_dt AS "Date"
 , cycle_time_type AS "Cycle Time Type"
-, short_claim_num AS"Short Claim Number" 
+, short_claim_num AS "Short Claim Number"
+, admin_sys AS "Admin System"
 , no_forms_ind AS "No Forms Indicator"
 , cycle_time AS "Cycle Time"
 , met_expected AS "MetExpected"
@@ -34,9 +35,11 @@ SELECT
 , birth_dt AS "Birth Date"
 , residence_state AS "Residence State"
 , examiner_id AS "ExaminerID"
-, COALESCE(employee_last_nm || ',' || employee_first_nm, 'Unknown') AS "Examiner"
-, COALESCE(manager_last_nm || ',' || manager_first_nm, 'Unknown') AS "Manager"
+, COALESCE(employee_last_nm || ', ' || employee_first_nm, 'Unknown') AS "Examiner"
+, COALESCE(manager_last_nm || ', ' || manager_first_nm, 'Unknown') AS "Manager"
 , examiner_party_employee_id "ExaminerPartyEmployeeID"
 , team_nm AS "Team"
+, role_nm AS "Role"
+, role_grade_nm AS "RoleGrade"
 FROM dma_vw.sem_fact_dic_cycle_time_vw
 WHERE (restricted_claim_ind = 0 OR restricted_claim_ind IS NULL)
