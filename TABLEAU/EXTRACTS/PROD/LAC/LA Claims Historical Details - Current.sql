@@ -1,9 +1,10 @@
 /*
 FILENAME: LAC HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
-LAST UPDATED: 11/07/2022
+LAST UPDATED: 01/30/2023
 CHANGES MADE: 1/18/2022 - Repointed to Vertica and removed pending transactions.
 11/07/2022 - Added in product_type_desc
+02/07/2023 - Added in face_amt
 */
 
 
@@ -58,6 +59,7 @@ SELECT
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
     , upper(T1.product_type_desc) AS "Product"
+    , t1.face_amt AS "Face Amount"
 FROM dma_vw.fact_integrated_lac_curr_vw T1
 LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
 WHERE T1.trans_type_id IN (1,3)
