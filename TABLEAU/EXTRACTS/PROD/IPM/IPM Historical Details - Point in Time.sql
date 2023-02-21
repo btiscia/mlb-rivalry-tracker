@@ -1,8 +1,8 @@
 /*
-FILENAME: IPM HISTORICAL DETAILS PIT
+FILENAME: IPM HISTORICAL DETAILS - POINT IN TIME
 CREATED BY: Paul Gyasi
-LAST UPDATED: 11/15/2022
-CHANGES MADE: Vertica SQL Creation.
+LAST UPDATED: 02/8/2023
+CHANGES MADE: Removed all unused query and updated file name.
 */
 
 
@@ -50,7 +50,6 @@ SELECT
 	, 1 AS "Transaction Count"
 	, T1.row_process_dtm AS "Trans Date"
 	, T1.prod_credit AS "Productivity Credits"  -- added 9/16/22
-	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/16/22
 	, T2.goal_val AS "IGO Goal"
 	, flex_ind AS "Flex Count"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
@@ -61,7 +60,6 @@ SELECT
 FROM dma_vw.fact_integrated_ipm_pit_vw T1
 LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
 WHERE T1.trans_type_id IN (1,3)
---AND T1.work_event_num <> 4763
 AND (T1.employee_department_id = 14
 OR T1.work_event_department_id = 14)
 AND T1.employee_organization_id=43
