@@ -1,7 +1,7 @@
 /*
 FILENAME: IPM HISTORICAL DETAILS - POINT IN TIME
 CREATED BY: Paul Gyasi
-LAST UPDATED: 02/8/2023
+LAST UPDATED: 01/17/2023
 CHANGES MADE: Removed all unused query and updated file name.
 */
 
@@ -60,6 +60,7 @@ SELECT
 FROM dma_vw.fact_integrated_ipm_pit_vw T1
 LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
 WHERE T1.trans_type_id IN (1,3)
+--AND T1.work_event_num <> 4763
 AND (T1.employee_department_id = 14
 OR T1.work_event_department_id = 14)
 AND T1.employee_organization_id=43
