@@ -4,6 +4,7 @@ CREATED BY: John Avgoutakis
 LAST UPDATED: 11/15/2022
 CHANGES MADE: 09/16/2021 - Created
 11/15/2022 - Added in product_type_desc
+3/2/2023 - Added in face_amt
 */
 
 SELECT 
@@ -50,7 +51,8 @@ SELECT
 ,CASE WHEN  sht_cmnt_des Like '%DNT%'
 	THEN 'DNT' ELSE 'Non DNT'
 	END AS "DNT Indicator"
-, initcap(product_type_desc) AS "Product"	
+, initcap(product_type_desc) AS "Product"
+, face_amt AS "Face Amount"
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id IN (7,8)
 OR work_event_department_id IN (7,8))
