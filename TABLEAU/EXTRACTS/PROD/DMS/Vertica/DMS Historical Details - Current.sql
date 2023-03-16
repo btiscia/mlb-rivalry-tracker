@@ -3,6 +3,8 @@ FILENAME: DMS HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 04/28/2022
 CHANGES MADE: Vertica Migration, EOD Indicator is now in the view.
+CHANGES MADE: PROD CREDIT SWAPPED PG 10/19/22
+CHANGES MADE:  BCC_Ind now reflects Y/N instead of 1/0
 */
 
 
@@ -50,9 +52,9 @@ SELECT
 	, T1.days_past_tat AS "Total TAT Days"
 	, T1.item_count AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
+	, T1.prod_credit AS "Productivity Credits"  -- Added PG 10/19/22
 	, flex_ind AS "Flex Count"
-	, bcc_ind AS "Society 1851"
+	, CASE WHEN T1.bcc_ind IN (-99, 0) THEN 'N' ELSE 'Y' END AS "Society 1851" 
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
 	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
@@ -60,8 +62,8 @@ SELECT
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
 	, T1.document_ct AS "Document Count"
 	, T1.eod_pend_ind AS "EOD Pending Indicator"
-	
 FROM dma_vw.fact_integrated_dms_curr_vw T1
-WHERE (T1.work_event_department_id = 13
-OR T1.employee_department_id in (13,51))
-AND (T1.trans_type_id IN (1,3) OR CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36)))
+WHERE (T1.work_event_department_id = 13				
+OR T1.employee_department_id in (13,51))				
+AND (T1.trans_type_id IN (1,3) AND CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -60)) 
+OR CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36)))
