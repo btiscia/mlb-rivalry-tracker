@@ -3,6 +3,7 @@ FILENAME: DMS HISTORICAL DETAILS PIT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 01/12/2022
 CHANGES MADE: Vertica Migration.
+CHANGES MADE: PROD CREDIT SWAPPED PG 10/20/22
 */
 
 
@@ -49,10 +50,11 @@ SELECT
 	, T1.days_past_tat AS "Total TAT Days"
 	, T1.item_count AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
+	--, T1.current_prod_credit AS "Productivity Credits"
+	, T1.prod_credit AS "Productivity Credits"  -- added PG 10/20/22
 	--, T2.goal_val AS "IGO Goal"
 	, flex_ind AS "Flex Count"
-	, bcc_ind AS "Society 1851"
+    , CASE WHEN T1.bcc_ind IN (0, -99) THEN 'N' ELSE 'Y' END AS "Society 1851"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
 	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
