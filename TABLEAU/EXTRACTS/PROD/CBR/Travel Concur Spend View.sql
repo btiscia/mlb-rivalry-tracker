@@ -1,2 +1,3 @@
+----Travel Concur Spend View
 SELECT *
-FROM DMA_VW.TVL_CONCUR_SPND_RPT_VW
+FROM dma_vw.tvl_concur_spnd_rpt_new_vw
