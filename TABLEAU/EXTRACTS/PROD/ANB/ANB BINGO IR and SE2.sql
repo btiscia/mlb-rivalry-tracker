@@ -1,8 +1,10 @@
 /*
-FILENAME: ANB BINGO IR
+FILENAME: ANNUITY NEW BUSINESS IR AND SE2
 UPDATED BY: John Avgoustakis, Vince Bonaddio
-LAST UPDATED: 08/24/2022
-CHANGES MADE: Vertica Migration
+LAST UPDATED: 05/19/2023
+CHANGES MADE: 
+08/24/2022 - Vertica Migration
+05/19/2023 - added manager and team name field - change made by Bill Tiscia
 */
 SELECT
  'IR' AS BINGOType
@@ -40,6 +42,8 @@ SELECT
 , T1.final_disposition AS "FinalDisposition"
 , T1.final_disposition_dt
 , T1.row_process_dtm AS "TransDate"
+, ((T6.manager_last_nm || ', '::varchar(2)) || T6.manager_first_nm)   AS "Manager"
+, T6.team_nm AS "TeamName"
 FROM dma_vw.sem_dim_anb_application_curr_vw T1
 LEFT JOIN dma_vw.sem_anb_ipipeline_vw T2 ON T2.order_entry_id = T1.order_entry_id
 LEFT JOIN dma_vw.bibt_ir_initial_reviews_token_vw T3 ON T3.initial_review_id = T1.initial_review_id
@@ -50,5 +54,6 @@ LEFT JOIN(SELECT dim_agreement_natural_key_hash_uuid
           FROM dma_vw.anb_dim_nigo_vw
           WHERE source_system_id = 35
           GROUP BY dim_agreement_natural_key_hash_uuid) T5 ON T1.dim_agreement_natural_key_hash_uuid = T5.dim_agreement_natural_key_hash_uuid
+LEFT JOIN dma_vw.sem_fact_anb_suit_activity_vw T6 ON T1.dim_agreement_natural_key_hash_uuid = T6.dim_agreement_natural_key_hash_uuid
 WHERE EXTRACT(YEAR FROM T1.final_disposition_dt) >= EXTRACT(YEAR FROM CURRENT_DATE) - 2
 LIMIT 1 OVER(PARTITION BY T1.initial_review_id, T3.nigo_reason ORDER BY T4.updated_at DESC)
