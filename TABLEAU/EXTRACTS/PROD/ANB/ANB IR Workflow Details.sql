@@ -1,8 +1,8 @@
 /*
 FILENAME: ANB IR Workflow Details
-UPDATED BY: John Avgoustakis, Vince Bonaddio 
-LAST UPDATED: 07/18/2022
-CHANGES MADE: Vertica Migration
+UPDATED BY: Jess Madru
+LAST UPDATED: 5/24/2023
+CHANGES MADE: Vertica Migration, removed join to ipipeline
 */
 
 SELECT 
@@ -10,7 +10,7 @@ SELECT
     , T1.source_transaction_id AS "OrderEntryID"
     , T1.product_category AS "Product Category"
     , T1.product AS "Product"
-    --, CASE WHEN UPPER(T1.product) like 'MASSMUTUAL%' then substring(T1.product, 12) ELSE T1.product END AS "Product"	
+    --, CASE WHEN UPPER(T1.product) like 'MASSMUTUAL%' then substring(T1.product, 12) ELSE T1.product END AS "Product"
     , T1.distributor AS "Distributor"
     , T1.channel AS "Channel"
     , T1.contract_jurisdiction_state_cde AS "Contract State"
@@ -47,16 +47,12 @@ SELECT
     , T1.application_signed_dt AS "ApplicationSignDate"
     , T1.suitability_approved_dt AS "SuitabilityApprovalDate"
     , T1.original_order_submit_dt AS "OriginalOrderSubmitDate"
-    , T5.parent_cancel_dt AS "ParentCancelDate"
+    , T1.parent_cancel_dt AS "ParentCancelDate"
     , T1.suitability_submit_dt AS "SuitabilitySubmitDate"
-    , CASE WHEN (lower(T5.app_status) = 'cancel/reject'::varchar(13)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS "RejectDate"
-    , CASE WHEN (lower(T5.app_status) = 'cancelled'::varchar(9)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS "CancelDate"
-    , CASE WHEN (lower(T5.app_status) = 'cancel/rework'::varchar(13)) THEN T5.app_status_change_dt
-           ELSE NULL::timestamp END                                        AS "CancelReworkDate"
+    , T1.reject_dt AS "RejectDate"
+    , T1.cancel_dt AS "CancelDate"
+    , T1.cancel_rework_dt AS "CancelReworkDate"
     , T1.row_process_dtm as "TransDate"
 FROM dma_vw.sem_fact_anb_suit_activity_vw T1
-LEFT JOIN dma_vw.dim_ipipeline_orders_curr_vw T5 ON T1.source_transaction_id = T5.order_entry_id
 WHERE T1.work_event_id NOT IN (27834,27836,27837)
 LIMIT 1 OVER (PARTITION BY T1.source_transaction_id, T1.work_event_id, T1.trans_type_id ORDER BY T1.load_dt)
