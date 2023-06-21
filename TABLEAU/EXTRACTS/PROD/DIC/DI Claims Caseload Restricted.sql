@@ -1,8 +1,9 @@
 /*
 FILENAME: DI CLAIMS CASELOAD RESTRICTED
-UPDATED BY: Jess Madru
-LAST UPDATED: 1/25/2023
-CHANGES MADE: Added Admin System field
+UPDATED BY: Bill Tiscia
+LAST UPDATED: 06/15/2023
+CHANGES MADE: 01/25/2023 - Added Admin System field - Jess Madru
+06/15/2023 - Updated Indicator references - Bill Tiscia
 */
 
 SELECT T5.short_dt AS "Load Date"
@@ -28,33 +29,33 @@ SELECT T5.short_dt AS "Load Date"
 	, T1.examiner_party_employee_id 
 	, COALESCE(T4.med_review_category, 'No Review') AS "Category" 
 	, T1.disability_dt AS "Disability Date"
-	, T1.late_notice_ind AS "LateNoticeIndicator"
-	, T1.erisa_ind AS "ERISAIndicator"
-	, T1.contestable_ind AS "ContestableIndicator"
-	, T1.in_litigation_ind AS "InLitigationIndicator"
-	, T1.own_occ_ind AS "OwnOccupationIndicator"
-	, T1.reservation_of_rights_ind AS "ReservationOfRightsIndicator"
+	, CASE WHEN T1.late_notice_ind = True THEN 'Yes' ELSE 'No' END AS "LateNoticeIndicator"
+	, CASE WHEN T1.erisa_ind = True THEN 'Yes' ELSE 'No' END AS "ERISAIndicator"
+	, CASE WHEN T1.contestable_ind = True THEN 'Yes' ELSE 'No' END AS "ContestableIndicator"
+	, CASE WHEN T1.in_litigation_ind = True THEN 'Yes' ELSE 'No' END AS "InLitigationIndicator"
+	, CASE WHEN T1.own_occ_ind = True THEN 'Yes' ELSE 'No' END AS "OwnOccupationIndicator"
+	, CASE WHEN T1.reservation_of_rights_ind = True THEN 'Yes' ELSE 'No' END AS "ReservationOfRightsIndicator"
 	, CASE WHEN T4.med_review_support_dt IS NOT NULL THEN 1 ELSE 0 END AS "SupportIndicator"
 	, T1.worksite_ind AS "WorksiteIndicator"
-	, T1.eft_ind AS "EFTIndicator"
-	, T1.ssdi_approved_ind AS "SSDIApprovedIndicator"
+	, CASE WHEN T1.eft_ind = True THEN 1 ELSE 0 END AS "EFTIndicator"
+	, CASE WHEN T1.ssdi_approved_ind = True THEN 'Yes' ELSE 'No' END AS "SSDIApprovedIndicator"
 	, T1.benefit_end_dt AS "Max Benefit Date"
-	, T1.attorney_rep_ind AS "AttorneyRepIndicator"
-	, T1.recovery_benefit_ind AS "RecoveryBenefitIndicator"
+	, CASE WHEN T1.attorney_rep_ind = True THEN 'Yes' ELSE 'No' END AS "AttorneyRepIndicator"
+	, CASE WHEN T1.recovery_benefit_ind = True THEN 'Yes' ELSE 'No' END AS "RecoveryBenefitIndicator"
 	, T1.est_ben_duration AS "EstimatedBenefitDuration"
 	, T1.health_dt AS "HealthDate"
-	, T1.waiver_only_ind AS "WaiverOnlyIndicator"
+	, CASE WHEN T1.waiver_only_ind = True THEN 'Yes' ELSE 'No' END AS "WaiverOnlyIndicator"
 	, T1.birth_dt AS "Birth Date"
 	, T1.age_at_dod AS "AgeAtDOD"
-	, T1.preclaim_ind AS "PreClaimIndicator"
-	, T1.quick_decision_ind AS "QuickDecisionIndicator"
+	, CASE WHEN T1.preclaim_ind = True THEN 'Yes' ELSE 'No' END AS "PreClaimIndicator"
+	, CASE WHEN T1.quick_decision_ind = True THEN 'Yes' ELSE 'No' END AS "QuickDecisionIndicator"
 	, T2.last_pc_subst_dt AS "LastPreClaimSubstatusDate"
 	, T2.pc_del_dt AS "PreClaimDeleteDate"
 	, T2.ac_subst_dt AS "ApprovedSubstatusDate"
 	, T2.wo_subst_dt AS "WaiverOnlySubstatusDate"
 	, T2.ri_subst_dt AS "ReinsuranceReportDate"
-	, T1.restricted_claim_ind AS "RestrictedClaimIndicator"
-	, T1.appeal_ind AS "AppealIndicator"
+	, CASE WHEN T1.restricted_claim_ind = True THEN 'Restricted' ELSE 'Unrestricted' END AS "RestrictedClaimIndicator"
+	, CASE WHEN T1.appeal_ind = True THEN 'Yes' ELSE 'No' END AS "AppealIndicator"
 	, T1.icd_1_code AS "ICD1Code"
 	, T1.icd_1_desc AS "ICD1Description"
 	, T1.icd_1_ref_icd_group_natural_key_hash_uuid AS "ICD1GroupID"
