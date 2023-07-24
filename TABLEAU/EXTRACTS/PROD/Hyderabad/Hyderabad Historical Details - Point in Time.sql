@@ -1,9 +1,11 @@
 /*
-FILENAME: GCC HISTORICAL DETAILS CURRENT
+FILENAME: GCC HISTORICAL DETAILS POINT IN TIME
 CREATED BY: Kristin Carlile
-LAST UPDATED: 4/28/2022
-CHANGES MADE: Vertica SQL Creation.
-CHANGES MADE:  Prod credits swapped 9/28/2022 - LC
+LAST UPDATED: 04/28/2022
+CHANGES MADE: 
+04/28/2022 - Vertica SQL Creation.
+09/28/2022 - Prod credits swapped - by LC
+06/27/2023 - Added in Group Number and created Pol Num/Group Num field - by Bill Tiscia
 */
 
 
@@ -49,7 +51,7 @@ SELECT
 	, T1.met_expected_ind AS "Met Expected Ind Count"
 	, T1.tat AS "Total TAT Days"
 	, T1.row_process_dtm AS "Trans Date"
-        , T1.prod_credit AS "Productivity Credits"  -- added 9/28/22
+    , T1.prod_credit AS "Productivity Credits"  -- added 9/28/22
 	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/28/22
 	, T2.goal_val AS "IGO Goal"
 	, flex_ind AS "Flex Count"
@@ -59,6 +61,13 @@ SELECT
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
+	, trim(t3.group_num) as 'Group Number'
+	, case 
+		when T1.pol_nr is null and t3.group_num is not null then trim(t3.group_num)
+		when T1.pol_nr = '-99' and t3.group_num is not null then trim(t3.group_num)
+		else T1.pol_nr 
+		END as 'Policy / Group #'
 FROM dma_vw.fact_integrated_gcc_pit_vw T1
 LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
+left join (select distinct source_transaction_id, group_num from dma_vw.dipms_curr_pend_vw) t3 on T1.source_transaction_id = t3.source_transaction_id
 WHERE T1.trans_type_id IN (1,3)
