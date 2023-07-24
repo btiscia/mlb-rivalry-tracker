@@ -1,8 +1,11 @@
 /*
 FILENAME: DI OPERATIONS HISTORICAL DETAILS POINT IN TIME
 CREATED BY: John Avgoutakis
-LAST UPDATED: 05/13/2022
-CHANGES MADE: Vertica Migration
+LAST UPDATED: 07/05/2023
+CHANGES MADE: 
+05/13/2022 - Vertica Migration
+10/03/2022 - Added Case Statement for bcc_ind so it now reflects Y or N - by LC
+07/05/2023 - Added in Group Number and created Pol Num/Group Num field - by Bill Tiscia
 */
 
 
@@ -13,12 +16,13 @@ SELECT
 	, T1.pol_nr AS "Policy Number"
 	, T1.report_dt AS "Date"
 	, T1.employee_role_nm AS "Employee Role Name"
-	, COALESCE(employee_last_nm || ', ' || employee_first_nm, 'Unknown') AS 'Employee'
-	, COALESCE(manager_last_nm || ', ' || manager_first_nm , 'Unknown') AS 'Manager'
+	, COALESCE(T1.employee_last_nm || ', ' || T1.employee_first_nm, 'Unknown') AS 'Employee'
+	, COALESCE(T1.manager_last_nm || ', ' || T1.manager_first_nm , 'Unknown') AS 'Manager'
 	, T1.employee_team_nm AS "Team Name"
 	, T1.work_event_function_nm AS "Function Name"
 	, T1.work_event_segment_nm AS "Segment Name"
 	, T1.work_event_nm AS "Work Event Name"
+	, T1.work_event_system_nm AS "System Name"
 	, T1.priority_nm AS "Priority"
 	, T1.admn_sys_cde AS "Admin System"
 	, T1.admn_sys_id AS "Admin System ID"
@@ -34,10 +38,9 @@ SELECT
 	, T1.work_event_organization_nm AS "Work Event Organization Name"
 	, T1.work_event_department_nm AS "Work Event Department Name"
 	, T1.work_event_primary_role_nm AS "Primary Role Name"
-	, T1.work_event_system_nm AS "System Name"
 	, T1.work_event_num AS "Work Event Number"
 	, T1.department_cd AS "Department Code"
-	, T1.division_cd AS "Division Code"	
+	, T1.division_cd AS "Division Code"
 	, T1.system_division_nm AS "Line of Business"
 	, T1.tat AS "TAT" 
 	, T1.days_past_tat AS "Days Past TAT"
@@ -45,28 +48,36 @@ SELECT
 	, T1.trans_type_id "TransactionTypeId"
 	, T1.long_completed_dt AS "Completed Time Stamp"
 	, T1.NIGO_des AS "NIGODescription"
-	, CASE WHEN igo_ind = 1 AND nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
-	, CASE WHEN igo_ind = 1 AND nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
+	, CASE WHEN T1.igo_ind = 1 AND T1.nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
+	, CASE WHEN T1.igo_ind = 1 AND T1.nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
 	, T1.igo_ind AS "IGO NIGO Count"
 	, T2.goal_val AS "IGO Goal"
 	, T1.sht_cmnt_des AS "Short Comments"
 	, T1.rqstr_des AS "Requestor Type Name"
 	, T1.ProductTypeName AS "Product Type Name"
-	, CASE WHEN T1.met_expected_ind = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
+	, CASE WHEN T1.met_expected_ind = 1 AND T1.days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 	, T1.met_expected_ind AS "Met Expected Ind Count"
 	, T1.row_process_dtm AS "Transaction Date"
-	, T1.current_prod_credit AS "Productivity Credits"
-	, flex_ind AS "Flex Count"
-	, bcc_ind AS "Society 1851"
-	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
-	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
-	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
-	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
-	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
+	, T1.prod_credit AS "Productivity Credits"
+	, T1.flex_ind AS "Flex Count"
+	--, T1.bcc_ind AS "Society 1851"
+	, case when bcc_ind=0 then'N' when bcc_ind=1 then 'Y' end AS "Society 1851"
+	, CASE WHEN T1.days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
+	, CASE WHEN T1.days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
+	, CASE WHEN T1.days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
+	, CASE WHEN T1.days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
+	, CASE WHEN T1.days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
 	, COUNT(DISTINCT T1.fact_integrated_natural_key_hash_uuid) AS "Transaction Count"
 	--, T1.eod_pend_ind AS "EOD Pending Indicator"
+	, trim(t3.group_num) as 'Group Number'
+	, case 
+		when T1.pol_nr is null and t3.group_num is not null then trim(t3.group_num)
+		when T1.pol_nr = '-99' and t3.group_num is not null then trim(t3.group_num)
+		else T1.pol_nr 
+		END as 'Policy / Group #'
 FROM dma_vw.fact_integrated_dio_pit_vw T1
-LEFT JOIN (SELECT goal_val, department_id, function_id FROM dma_vw.dma_dim_goal_pit_vw WHERE end_dt ='9999-12-31' AND goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
+LEFT JOIN (SELECT goal_val, department_id, function_id FROM dma_vw.dma_dim_goal_pit_vw WHERE end_dt ='9999-12-31' AND goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id
+left join (select distinct source_transaction_id, group_num from dma_vw.dipms_curr_pend_vw) t3 on T1.source_transaction_id = t3.source_transaction_id
 WHERE T1.trans_type_id IN (1,3)
-AND CAST(T1.load_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52
+AND CAST(T1.report_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,57,58
