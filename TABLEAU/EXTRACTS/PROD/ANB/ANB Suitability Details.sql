@@ -1,48 +1,51 @@
 /*
 Name: ANB Suitability Details
-Author/Editor: Vince Bonaddio / Bill Trombley
-Comments: Converted to Vertica
--- Applications are the process from Original Order Submit Date - Anywhere into the Issue Process
--- Contract is New Business Submit Forward
+Author/Editor: John Avgoustakis, updated by Jess Madru
+Last Updated: 6/1/2023
+Comments: Replaced ipipeline views with Suitability report view
+Note: This version uses fields added from ipipeline
 */
-
-SELECT T1.original_order_id AS 'Original Order ID'
-    , T1.order_entry_id AS 'Order Entry ID'
-    , T1.copied_from_trans_id AS 'Parent Order ID'
-    , CASE WHEN parent_cancel_dt IS NOT NULL THEN COALESCE(T1.original_order_submit_dt, electronic_submit_dt)
-        ELSE electronic_submit_dt END AS "Suitability Submit Date"
-    , T1.electronic_submit_dt AS 'Electronic Submit Date'
-    , T1.cancel_rework_dt AS 'Cancel Rework Date'
-    , T1.suit_comp_dt_transmit AS 'Transmit Date'
-    , T1.approved_dt
-    , T1.reject_dt AS 'Reject Date'
-    , T1.cancel_dt AS 'Cancel Date'
-    , T1.final_disposition AS 'Final Disposition'
-    , T1.final_disposition_dt as "Final Disposition Date"
-    , CAST(final_disposition_dt AS DATE) - CAST("Suitability Submit Date" AS DATE) AS 'Suitability Cycle Time'
-    , CAST(T2.cas_ind AS INTEGER) AS 'cas_ind'
-    , COALESCE(T3.distributor,'Unknown') AS 'Distributor'
-    , COALESCE(T3.channel,'MMFA') AS 'Channel'
-    , T1.product AS 'Product Name'
-    , T1.product_category AS 'Product Category'
-    , T2.business_partner_id AS 'Agent ID'
-    , T2.last_nm || ', ' || T2.first_nm AS 'Advisor'
-    , T3.agency_id_prefix AS 'Firm'
-    , T3.firm_num_annuity AS 'Firm Number'
-    , COALESCE(T3.firm_display_nm,'999 - Unknown') AS 'Firm Name'
-    , T4.agreement_nr AS 'Agreement Number'
-    , CAST(T1.auto_approved_ind AS INTEGER) AS 'Auto Approved Indicator'
-    , T1.parent_cancel_dt AS 'Parent Cancel Rework Date'
-    , CASE WHEN T1.parent_cancel_dt IS NOT NULL THEN 1 ELSE 0 END AS 'Resubmit Indicator'
-    , CAST(T1.electronic_submit_dt AS DATE) - CAST(T1.parent_cancel_dt AS DATE) AS 'Resubmit Lag Time'
-    , T5.doc_type_nm AS 'NB Doc Type'
-    , CAST(T1.suit_comp_dt_transmit AS DATE) - CAST(T1.electronic_submit_dt AS DATE) AS 'Initial Review Cycle Time'
-    , COALESCE(CASE WHEN T1.auto_approved_ind = 1 THEN 1 ELSE CAST(T6.suitability_ind AS INTEGER) END, 1) AS 'IGO Indicator'
-    , T1.row_process_dtm AS 'TransDate'
-FROM dma_vw.sem_anb_ipipeline_vw T1
-LEFT JOIN edw_semantic_vw.sem_producer_demographics_current_vw T2 ON TRIM(LEADING '0' FROM T1.agent_id) = TRIM(LEADING '0' FROM T2.business_partner_id)
-LEFT JOIN dma_vw.dma_dim_firm_curr_vw T3 ON TRIM(LEADING '0' FROM T1.agency_num) = TRIM(LEADING '0' FROM T3.agency_id)
-LEFT JOIN edw_semantic_vw.sem_agreement_current_vw T4 ON T1.dim_agreement_natural_key_hash_uuid = T4.dim_agreement_natural_key_hash_uuid
-LEFT JOIN dma_vw.anb_doc_type_vw T5 ON T1.dim_agreement_natural_key_hash_uuid = T5.dim_agreement_natural_key_hash_uuid
-LEFT JOIN dma_vw.bibt_rel_initial_reviews_vw T6 ON T1.order_entry_id = T6.application_id
-WHERE T1.electronic_submit_dt >= '2019-07-01'
+SELECT 
+T1.dim_agreement_natural_key_hash_uuid as "Agreement Key"
+, trim(leading '0' from T1.agreement_nr) as "Agreement Number"
+,T1.original_order_id as "Original Order ID"    
+,T1.order_entry_id as "Order Entry ID"  
+,T1.copied_from_trans_id as "Parent Order ID"	
+, T1.suitability_submit_dt as "Suitability Submit Date"
+, T1.received_dt AS "Received Date" --this is a coalesce of electronic_submit_dt, created_at
+, T1.cancel_rework_dt as "Cancel Rework Date"
+, T1.suit_comp_dt_transmit as "Transmit Date"	
+, T1.suitability_approved_dt as "Suitability Approved Date"  --suitability_approved_dt is suit_complete_dt_approved aliased
+, T1.reject_dt AS "Reject Date"
+, T1.cancel_dt AS "Cancel Date"
+, CASE WHEN T1.reject_dt IS NOT NULL THEN 'Rejected'
+      WHEN T1.cancel_dt IS NOT NULL THEN 'Cancelled'
+      WHEN T1.cancel_rework_dt IS NOT NULL THEN 'Rework'
+ 	  WHEN COALESCE(T1.suitability_submit_dt, T1.suitability_approved_dt, T1.suit_comp_dt_transmit) IS NOT NULL THEN 'Transmitted' 
+    END AS "Final Disposition" --Final Disposition: Suitability Volume is based on a count of final disposition
+, COALESCE(T1.reject_dt, T1.cancel_dt, T1.cancel_rework_dt, T1.suit_comp_dt_transmit, T1.suitability_approved_dt, T1.suitability_submit_dt) AS "Final Disposition Date" 
+, CAST("Final Disposition Date" AS Date) -  CAST(T1.suitability_submit_dt AS Date) AS "Suitability Cycle Time"
+, T2.cas_ind as "CAS Ind" 
+, T1.distributor	AS "Distributor"
+, T1.channel AS "Channel"
+, T1.product as "Product"
+, T1.product_category AS "Product Category" 
+, T1.agent_id as "Agent ID"
+, T1.advisor_nm as "Advisor"
+, T1.agency_num as "Firm Number"
+, T1.firm_nm as "Firm Name"
+, T1.auto_approved_ind as "Auto Approved Ind"
+, T1.parent_cancel_dt AS "Parent Cancel Rework Date"
+, CASE WHEN T1.parent_cancel_dt IS NOT NULL THEN 1 ELSE 0 END AS "Resubmit Ind" 
+, CAST("Received Date" AS Date) - CAST("Parent Cancel Rework Date" AS Date) AS "Resubmit Lag Time" 
+, T5.doc_type_nm as "NB Doc Type"
+, CAST(T1.suit_comp_dt_transmit AS DATE) - CAST(T1.received_dt AS DATE) AS "Initial Review Cycle Time" 
+, T1.ir_igo_ind as "IGO Ind"
+, T1.row_process_dtm as "Trans Date"
+FROM dma_vw.sem_fact_anb_suit_activity_vw T1
+LEFT JOIN edw_semantic_vw.sem_producer_demographics_current_vw T2 on T1.agent_id = trim(leading '0' from T2.business_partner_id)
+LEFT JOIN (SELECT dim_agreement_natural_key_hash_uuid, doc_type_nm FROM dma_vw.anb_doc_type_vw T5 WHERE current_row_ind = 1) T5 ON T1.dim_agreement_natural_key_hash_uuid = T5.dim_agreement_natural_key_hash_uuid
+WHERE 
+CAST(T1.received_dt AS DATE) >= CURRENT_DATE - INTERVAL '3' YEAR
+and T1.division_cd = 'SI' and T1.department_cd = 'SU' and T1.trans_type_id = 3
+and (T1.agreement_nr is not null or T1.order_entry_id is not null)
