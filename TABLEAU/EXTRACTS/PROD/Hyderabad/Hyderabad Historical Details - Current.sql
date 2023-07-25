@@ -1,9 +1,11 @@
 /*
 FILENAME: GCC HISTORICAL DETAILS CURRENT
 CREATED BY: Kristin Carlile
-LAST UPDATED: 4/28/2022
-CHANGES MADE: Vertica SQL Creation.
-CHANGES MADE:  Prod Credits swapped out.  9/28/2022 LC
+LAST UPDATED: 06/30/2023
+CHANGES MADE: 
+04/28/2022 - Vertica SQL Creation.
+09/28/2022 - Prod Credits swapped out. - by LC
+06/30/2023 - Added in Group Number and created Pol Num/Group Num field - by Bill Tiscia
 */
 
 
@@ -59,6 +61,13 @@ SELECT
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
+	, trim(t3.group_num) as 'Group Number'
+	, case 
+		when T1.pol_nr is null and t3.group_num is not null then trim(t3.group_num)
+		when T1.pol_nr = '-99' and t3.group_num is not null then trim(t3.group_num)
+		else T1.pol_nr 
+		END as 'Policy / Group #'
 FROM dma_vw.fact_integrated_gcc_curr_vw T1
-LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
+LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id
+left join (select distinct source_transaction_id, group_num from dma_vw.dipms_curr_pend_vw) t3 on T1.source_transaction_id = t3.source_transaction_id 
 WHERE T1.trans_type_id IN (1,3)

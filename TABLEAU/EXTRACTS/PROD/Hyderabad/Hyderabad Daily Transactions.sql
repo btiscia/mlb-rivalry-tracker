@@ -1,8 +1,10 @@
 /*
 FILENAME: HYDERABAD DAILY TRANSACTIONS
 CREATED BY: Kristin Carlile
-LAST UPDATED: 05/11/2022
-CHANGES MADE: Repointed to Vertica.
+LAST UPDATED: 06/30/2023
+CHANGES MADE: 
+05/11/2022 - Repointed to Vertica
+06/30/2023 - Added in Group Number and created Pol Num/Group Num field - by Bill Tiscia
 */
 
 SELECT
@@ -43,5 +45,12 @@ SELECT
 	, T1.row_process_dtm AS "Transaction Date"
 	, T1.trans_type_id AS "Transaction Type ID"
 	, T1.item_count AS "Item Count"
+	, trim(t2.group_num) as 'Group Number'
+	, case 
+		when T1.pol_nr is null and t2.group_num is not null then trim(t2.group_num)
+		when T1.pol_nr = '-99' and t2.group_num is not null then trim(t2.group_num)
+		else T1.pol_nr 
+		END as 'Policy / Group #'
 FROM dma_vw.fact_integrated_gcc_pit_vw T1
+left join (select distinct source_transaction_id, group_num from dma_vw.dipms_curr_pend_vw) t2 on T1.source_transaction_id = t2.source_transaction_id
 WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)
