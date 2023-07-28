@@ -13,7 +13,7 @@ SELECT
 	, T1.fact_integrated_natural_key_hash_uuid AS "Natural Key"
 	, T1.source_transaction_id AS "Source Transaction ID"
 	, T1.pol_nr AS "Policy Number"
-	, CASE WHEN T1.trans_type_id = 3 THEN T1.long_completed_dt ELSE T1.report_dt END AS "Date"
+	, CASE WHEN T1.trans_type_id = 3 THEN coalesce(T1.long_completed_dt, T1.completed_dt) ELSE T1.report_dt END AS "Date"
 	, T1.logged_dt AS "Logged Date"
 	, COALESCE(T1.employee_last_nm || ', ' || T1.employee_first_nm, 'Unknown') AS "Employee"
 	, COALESCE(T1.manager_last_nm || ', ' || T1.manager_first_nm , 'Unknown') AS "Manager"
