@@ -1,3 +1,12 @@
+/*
+FILENAME: MMUS Work Allocation LPI
+CREATED BY: Lorraine Christian
+LAST UPDATED: 08/04/2023
+CHANGES MADE: New Dashboard
+LAST UPDATED: 
+*/
+
+
 /*Initial query
 /* Get processing type (STP) from the digital adoption mart */
 DROP TABLE IF EXISTS tmp_dig_adopt;
