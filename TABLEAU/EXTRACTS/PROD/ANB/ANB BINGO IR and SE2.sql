@@ -1,10 +1,11 @@
 /*
 FILENAME: ANNUITY NEW BUSINESS IR AND SE2
 UPDATED BY: John Avgoustakis, Vince Bonaddio
-LAST UPDATED: 05/19/2023
+LAST UPDATED: 08/9/2023
 CHANGES MADE: 
 08/24/2022 - Vertica Migration
 05/19/2023 - added manager and team name field - change made by Bill Tiscia
+8/9/2023 - removed final disposition field
 */
 SELECT
  'IR' AS BINGOType
@@ -39,7 +40,6 @@ SELECT
 , CASE WHEN T3.nigo_reason IS NULL THEN T1.suitability_approved_dt ELSE CAST(COALESCE(T2.reject_dt, T2.cancel_dt, T5.bingo_dt) AS DATE) END AS "IRBINGODate"
 , T4.igo_ind::INT AS "BINGOIndicator"
 , (IRBINGODate::date - T5.nigo_dt::date) AS "NIGOResolution"
-, T1.final_disposition AS "FinalDisposition"
 , T1.final_disposition_dt
 , T1.row_process_dtm AS "TransDate"
 , ((T6.manager_last_nm || ', '::varchar(2)) || T6.manager_first_nm)   AS "Manager"
