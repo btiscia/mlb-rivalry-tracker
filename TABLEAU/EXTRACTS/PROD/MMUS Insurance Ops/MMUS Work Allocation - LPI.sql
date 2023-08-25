@@ -6,23 +6,6 @@ CHANGES MADE: New Dashboard
 LAST UPDATED: 
 */
 
-
-/*Initial query
-/* Get processing type (STP) from the digital adoption mart */
-DROP TABLE IF EXISTS tmp_dig_adopt;
-CREATE LOCAL TEMPORARY TABLE tmp_dig_adopt on commit preserve rows as
- SELECT
-source_transaction_id
-, processing_type_nm
-FROM dma_vw.fact_integrated_digital_adoption_pit_vw
-WHERE
-completed_dt >= '2022-01-01'
--- HERE AND work_event_id IN (SELECT work_event_id FROM tmp_hyd_event_list )
-;
-SELECT analyze_statistics('tmp_dig_adopt');
-/*******************************************************************************************************/
-
-/* Main Query */
 SELECT
   T1.transaction_type_nm AS "Transaction Type"
 , T1.fact_integrated_natural_key_hash_uuid AS "Natural Key"
