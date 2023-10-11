@@ -46,7 +46,11 @@ WHEN t1.days_past_tat >= 6 AND t1.days_past_tat < 11 THEN '6-10 Days Past Due'
 WHEN t1.days_past_tat = 0 THEN 'Due Today'
 WHEN t1.days_past_tat = -1 THEN 'Due Tomorrow'
 WHEN t1.days_past_tat = -2 THEN 'Due In 2 Days'
-WHEN t1.days_past_tat = -3 THEN 'Due In 3 Days' END AS 'Pending Buckets',
+WHEN t1.days_past_tat = -3 THEN 'Due In 3 Days' 
+WHEN t1.days_past_tat = -4 THEN 'Due In 4 Days'
+WHEN t1.days_past_tat = -5 THEN 'Due In 5 Days'
+WHEN t1.days_past_tat <= -6 OR t1.days_past_tat IS NULL THEN 'Due In 6+ Days'
+END AS 'Pending Buckets',
 t1.tat_goal,
 t1.prod_credit,
 t1.sht_cmnt_des,
@@ -109,7 +113,11 @@ WHEN t1.days_past_tat >= 6 AND t1.days_past_tat < 11 THEN '6-10 Days Past Due'
 WHEN t1.days_past_tat = 0 THEN 'Due Today'
 WHEN t1.days_past_tat = -1 THEN 'Due Tomorrow'
 WHEN t1.days_past_tat = -2 THEN 'Due In 2 Days'
-WHEN t1.days_past_tat = -3 THEN 'Due In 3 Days' END AS 'Pending Buckets',
+WHEN t1.days_past_tat = -3 THEN 'Due In 3 Days' 
+WHEN t1.days_past_tat = -4 THEN 'Due In 4 Days'
+WHEN t1.days_past_tat = -5 THEN 'Due In 5 Days'
+WHEN t1.days_past_tat <= -6 OR t1.days_past_tat IS NULL THEN 'Due In 6+ Days'
+END AS 'Pending Buckets',
 t1.tat_goal ,
 t1.prod_credit,
 t1.short_comments,
