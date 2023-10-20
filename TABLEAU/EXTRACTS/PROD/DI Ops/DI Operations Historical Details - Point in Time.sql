@@ -1,17 +1,18 @@
 /*
 FILENAME: DI OPERATIONS HISTORICAL DETAILS POINT IN TIME
-CREATED BY: John Avgoutakis
-LAST UPDATED: 07/05/2023
+UPDATED BY: Jess Madru
+LAST UPDATED: 10/20/2023
 CHANGES MADE: 
 05/13/2022 - Vertica Migration
 10/03/2022 - Added Case Statement for bcc_ind so it now reflects Y or N - by LC
 07/05/2023 - Added in Group Number and created Pol Num/Group Num field - by Bill Tiscia
+10/20/2023 - added fields to support Work Distribution reporting
 */
 
 
 SELECT
 	  T1.transaction_type_nm AS "Transaction Type"
-	, T1.fact_integrated_natural_key_hash_uuid AS "Natural Key"
+	, T1.dim_agreement_natural_key_hash_uuid AS "Natural Key"
 	, T1.source_transaction_id AS "Source Transaction ID"
 	, T1.pol_nr AS "Policy Number"
 	, T1.report_dt AS "Date"
@@ -37,7 +38,8 @@ SELECT
 	, T1.site_nm AS "Site Name"
 	, T1.work_event_organization_nm AS "Work Event Organization Name"
 	, T1.work_event_department_nm AS "Work Event Department Name"
-	, T1.work_event_primary_role_nm AS "Primary Role Name"
+	, T1.work_event_department_id AS "Work Event Department ID"
+        , T1.work_event_primary_role_nm AS "Primary Role Name"
 	, T1.work_event_num AS "Work Event Number"
 	, T1.department_cd AS "Department Code"
 	, T1.division_cd AS "Division Code"
@@ -46,13 +48,14 @@ SELECT
 	, T1.days_past_tat AS "Days Past TAT"
 	, T1.days_past_tat AS "Total TAT Days" --Should be reviewed
 	, T1.trans_type_id "TransactionTypeId"
+        , T1.completed_dt as "Completed Date"
 	, T1.long_completed_dt AS "Completed Time Stamp"
 	, T1.NIGO_des AS "NIGODescription"
 	, CASE WHEN T1.igo_ind = 1 AND T1.nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
 	, CASE WHEN T1.igo_ind = 1 AND T1.nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
 	, T1.igo_ind AS "IGO NIGO Count"
 	, T2.goal_val AS "IGO Goal"
-	, T1.sht_cmnt_des AS "Short Comments"
+	--, T1.sht_cmnt_des AS "Short Comments"
 	, T1.rqstr_des AS "Requestor Type Name"
 	, T1.ProductTypeName AS "Product Type Name"
 	, CASE WHEN T1.met_expected_ind = 1 AND T1.days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
@@ -67,17 +70,33 @@ SELECT
 	, CASE WHEN T1.days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 	, CASE WHEN T1.days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN T1.days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
-	, COUNT(DISTINCT T1.fact_integrated_natural_key_hash_uuid) AS "Transaction Count"
-	--, T1.eod_pend_ind AS "EOD Pending Indicator"
+	, 1 AS "Transaction Count"
 	, trim(t3.group_num) as 'Group Number'
 	, case 
 		when T1.pol_nr is null and t3.group_num is not null then trim(t3.group_num)
 		when T1.pol_nr = '-99' and t3.group_num is not null then trim(t3.group_num)
 		else T1.pol_nr 
 		END as 'Policy / Group #'
+	, CASE
+     	when T1.role_grade_id = 14
+     	then 'Bot'
+     	when T1.party_type_id = 2
+     	then 'System Acct'
+     	when (T1.employee_department_id = 51
+        	or (COALESCE(T1.employee_department_id, -99) = -99
+        	and lower(T1.mmid) like 'ot%'))
+        	and T1.party_type_id <> 2
+     	then 'Hyderabad Employee'
+     	when (T1.employee_department_id NOT IN (51, -99)
+        	or (COALESCE(T1.employee_department_id, -99) = -99
+        	and left(lower(T1.mmid),2) in ('mm', 'ct')))
+        	and T1.party_type_id <> 2
+     	then 'US Employee'
+     	else 'Unknown'
+     	end as "Completed By Type"
+	, COALESCE(T1.logged_by_last_nm || ', ' || T1.logged_by_first_nm, 'Unknown') AS 'Logged By'
 FROM dma_vw.fact_integrated_dio_pit_vw T1
 LEFT JOIN (SELECT goal_val, department_id, function_id FROM dma_vw.dma_dim_goal_pit_vw WHERE end_dt ='9999-12-31' AND goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id
-left join (select distinct source_transaction_id, group_num from dma_vw.dipms_curr_pend_vw) t3 on T1.source_transaction_id = t3.source_transaction_id
+LEFT JOIN (select distinct source_transaction_id, group_num from dma_vw.dipms_curr_pend_vw) T3 on T1.source_transaction_id = t3.source_transaction_id
 WHERE T1.trans_type_id IN (1,3)
-AND CAST(T1.report_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
-GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,57,58
+AND YEAR(T1.report_dt) >= YEAR(CURRENT_DATE) - 3 --returns current year and 3 full years
