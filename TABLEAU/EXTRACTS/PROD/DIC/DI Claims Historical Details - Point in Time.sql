@@ -3,7 +3,10 @@ FILENAME: DI CLAIMS HISTORICAL DETAILS - POINT IN TIME
 CREATED BY: Jess Madru
 LAST UPDATED: 1/26/2023
 CHANGES MADE: Pointed to Vertica, added Admin System field
+10/5/2023 - Added fields for Work Distribution Reporting
+CHANGES MADE:  10/20/2023 - Logged by now in mart removed join to dma_vw.dma_dim_employee_pit_vw AS T4
 */
+
 SELECT
 	  T1.transaction_type_nm AS "Transaction Type"
 	, T1.row_process_dtm AS "Transaction Date"
@@ -73,7 +76,29 @@ SELECT
 	, T1.work_event_group_nm AS "Work Event Group Name"
 	, T1.work_event_group_type_nm AS "Work Event Group Type Name"
 	, T1.role_grade_nm AS "Employee Role Grade Name"
+	, CASE    
+	when T1.role_grade_id = 14
+     then 'Bot'
+     when T1.party_type_id = 2
+     then 'System Acct'
+     when (T1.employee_department_id = 51
+        or (COALESCE(T1.employee_department_id, -99) = -99
+        and lower(T1.mmid) like 'ot%'))
+        and T1.party_type_id <> 2
+     then 'Hyderabad Employee'
+     when (T1.employee_department_id NOT IN (51, -99)
+        or (COALESCE(T1.employee_department_id, -99) = -99
+        and left(lower(T1.mmid),2) in ('mm', 'ct')))
+        and T1.party_type_id <> 2
+     then 'US Employee'
+     else 'Unknown'
+     end as "Completed By Type"
+     , COALESCE(T1.logged_by_employee_last_nm || ', ' || T1.logged_by_employee_first_nm, 'Unknown') AS 'Logged By'        
+--   , COALESCE(T4.employee_last_nm || ', ' || T4.employee_first_nm, 'Unknown') AS 'Logged By'	
 FROM dma_vw.fact_integrated_dic_pit_vw T1
+/*LEFT OUTER JOIN
+dma_vw.dma_dim_employee_pit_vw AS T4
+ON T1.logged_by_team_party_id = T4.team_party_id*/
 LEFT JOIN (SELECT * FROM dma_vw.dma_rel_filter_conv_vw WHERE filter_group =30) T3 ON T1.work_event_id = T3.search_id
 WHERE (T1.restricted_row_ind = 0 OR T1.restricted_row_ind IS NULL)
 AND (work_event_department_id = 6 OR employee_department_id  = 6)
