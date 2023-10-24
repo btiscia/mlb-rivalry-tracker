@@ -2,6 +2,7 @@
 This routine pulls TimeOut data for past 13 months 
 Created: 6/15/2022 initial Vertica load -Kristin Carlile
 Updated to include individuals with employee ID changes - Bill Trombley
+10/20/2023: updated to go back 24 months rather than 13 months - Bill Tiscia
 */
 
 
@@ -52,6 +53,6 @@ join dma_vw.dma_dim_date_vw t2 on t1.day_of_week = t2.day_of_week and t2.short_d
 join dma_vw.dma_dim_employee_pit_vw t3 on t2.short_dt between t3.begin_dt and t3.end_dt and t1.party_employee_id = t3.party_employee_id
 left join dma_vw.sem_fact_timeout_activity_history_vw t4 on t4.meeting_dt = t2.short_dt and t1.party_employee_id = t4.party_employee_id
 left join dma_vw.dma_dim_goal_pit_vw t5 on t2.short_dt between t5.begin_dt and t5.end_dt and t5.department_id = t3.department_id and t5.role_id = t3.role_id and goal_type_id = 4
-where t2.short_dt between add_months(current_date,-13) and current_date - interval '1' day
+where t2.short_dt between add_months(current_date,-24) and current_date - interval '1' day
     and parent_time_category is not null
 group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
