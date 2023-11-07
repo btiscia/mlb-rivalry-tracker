@@ -1,11 +1,12 @@
 /*
 FILENAME: GCC HISTORICAL DETAILS POINT IN TIME
 CREATED BY: Kristin Carlile
-LAST UPDATED: 04/28/2022
+LAST UPDATED: 11/04/2023
 CHANGES MADE: 
 04/28/2022 - Vertica SQL Creation.
 09/28/2022 - Prod credits swapped - by LC
 06/27/2023 - Added in Group Number and created Pol Num/Group Num field - by Bill Tiscia
+11/04/2023 - Added MMID and Logged_DT - by nnisula
 */
 
 
@@ -15,6 +16,8 @@ SELECT
 	, T1.source_transaction_id AS "Source Transaction ID"
 	, T1.pol_nr AS "Policy Number"
 	, T1.report_dt AS "Date"
+	, T1.logged_dt as "Logged Date Time"
+    , T1.mmid as "Completed MMID"
 	, T1.employee_role_nm AS "Employee Role Name"
 	, COALESCE(employee_last_nm || ', ' || employee_first_nm, 'Unknown') AS 'Employee'
 	, COALESCE(manager_last_nm || ', ' || manager_first_nm , 'Unknown') AS 'Manager'
