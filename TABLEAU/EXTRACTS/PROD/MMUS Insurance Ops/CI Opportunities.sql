@@ -1,9 +1,10 @@
 /*
 Name: CI Opportunities
 Author/Editor: Bill Trombley
-Data Conection: iobi-auroramy-prd-kaizen.cluster-ckfbr84lggsy.us-east-1.rds.amazonaws.com
-Last Updated: 11/21/2022
-Comments:
+Last Updated: 03/08/2024
+Updates: 
+11/21/2022 - Data connection: iobi-auroramy-prd-kaizen.cluster-ckfbr84lggsy.us-east-1.rds.amazonaws.com
+03/08/2024 - Data connection moved to Vertica - B. Tiscia
 */
 
 select
@@ -37,5 +38,5 @@ select
 , benefit_dollars
 , goal_hours
 , benefit_and_owner_same
-from iobi_kaizen_prd.reporting_vw
+from dma_vw.kaizen_reporting_vw
 where current_status = 'complete'
