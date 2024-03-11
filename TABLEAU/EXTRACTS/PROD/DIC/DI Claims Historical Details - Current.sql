@@ -1,11 +1,11 @@
 /*
 FILENAME: DI CLAIMS HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
-UPDATED BY: Jess Madru
-LAST UPDATED: 1/25/2023
-CHANGES MADE: Pointed to Vertica and added item_count, added admin system field
+LAST UPDATED: 03/05/2024
+CHANGES MADE: 
+01/25/2023 - Pointed to Vertica and added item_count, added admin system field - Jess Madru
+03/05/2024 - added channel field - Bill Tiscia
 */
-
 
 SELECT
 	  T1.transaction_type_nm AS "Transaction Type"
@@ -18,8 +18,8 @@ SELECT
 	, T1.admin_sys AS "Admin System"
 	, T1.report_dt AS "Date"
 	, T1.employee_role_nm AS "Employee Role Name"
-	, COALESCE(employee_last_nm || ', ' || employee_first_nm, 'Unknown') AS "Employee"
-	, COALESCE(manager_last_nm || ', ' || manager_first_nm , 'Unknown') AS "Manager"
+	, COALESCE(T1.employee_last_nm || ', ' || T1.employee_first_nm, 'Unknown') AS "Employee"
+	, COALESCE(T1.manager_last_nm || ', ' || T1.manager_first_nm , 'Unknown') AS "Manager"
 	, T1.employee_team_nm AS "Team Name"
 	, T1.work_event_function_nm AS "Function Name"
 	, T1.work_event_segment_nm AS "Segment Name"
@@ -62,16 +62,17 @@ SELECT
 		   WHEN upper(T1.system_department_nm) = 'TREX WORK'THEN 'TREX Work'
 		   WHEN upper(T1.source_system_nm) = 'MEDVOC'THEN 'MEDVOC'	
 	  ELSE 'UNKNOWN' END AS "Processing System"		
-,COALESCE(T1.logged_by_employee_last_nm || ', ' || T1.logged_by_employee_first_nm, 'Unknown') AS "Logged by Employee" 
+    , COALESCE(T1.logged_by_employee_last_nm || ', ' || T1.logged_by_employee_first_nm, 'Unknown') AS "Logged by Employee" 
 	, T1.medical_review_rnl AS "Medical Review"
 	, CAST(T1.medical_review_support_dt AS DATE) AS "Medical Review Support Date"
 	, T1.received_dt AS "Received Date"
 	, T1.completed_dt AS "Completed Date"
-	, check_dt AS "Payment Check Date"
+	, T1.check_dt AS "Payment Check Date"
 	, T1.dibs_customer_nm AS "Claimant Name"
 	, T1.priority_nm AS "Priority Name"	
+	, CASE WHEN T1.mmsd_ind = True THEN 'MMSD' ELSE 'MMFA' END AS "Channel"
 	--No Longer Needed EOD Pending Indicator
 FROM dma_vw.fact_integrated_dic_curr_vw T1
-WHERE (restricted_row_ind = 0 OR restricted_row_ind IS NULL)
-AND (work_event_department_id = 6 OR employee_department_id  = 6)
+WHERE (T1.restricted_row_ind = 0 OR T1.restricted_row_ind IS NULL)
+AND (T1.work_event_department_id = 6 OR T1.employee_department_id  = 6)
 AND "Date" >= CURRENT_DATE - INTERVAL '3' YEAR
