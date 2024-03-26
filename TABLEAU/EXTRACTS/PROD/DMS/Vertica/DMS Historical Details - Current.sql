@@ -1,12 +1,9 @@
 /*
 FILENAME: DMS HISTORICAL DETAILS CURRENT
-CREATED BY: John Avgoutakis
-LAST UPDATED: 04/28/2022
-CHANGES MADE: Vertica Migration, EOD Indicator is now in the view.
-CHANGES MADE: PROD CREDIT SWAPPED PG 10/19/22
-CHANGES MADE:  BCC_Ind now reflects Y/N instead of 1/0
+UPDATED BY: Jess Madru
+LAST UPDATED: 3/24/2024
+CHANGES MADE: Vertica Migration, EOD Indicator is now in the view, PROD CREDIT SWAPPED PG 10/19/22, limited completed to rolling 36-months
 */
-
 
 SELECT
 	  T1.transaction_type_nm AS "Transaction Type"
@@ -65,5 +62,5 @@ SELECT
 FROM dma_vw.fact_integrated_dms_curr_vw T1
 WHERE (T1.work_event_department_id = 13				
 OR T1.employee_department_id in (13,51))				
-AND (T1.trans_type_id IN (1,3) AND CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -60)) 
+AND (T1.trans_type_id IN (1,3) AND CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36)) 
 OR CAST(T1.logged_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36)))
