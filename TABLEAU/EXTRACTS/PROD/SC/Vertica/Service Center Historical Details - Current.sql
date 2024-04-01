@@ -1,11 +1,9 @@
 /*
 FILENAME: SERVICE CENTER HISTORICAL DETAILS CURRENT
-CREATED BY: John Avgoutakis
-LAST UPDATED: 1/26/2022
-CHANGES MADE: Vertica SQL Creation.
-CHANGES MADE:  Production Credits changed 9/22/2022
+UPDATED BY: Jess Madru
+LAST UPDATED: 3/26/2024
+CHANGES MADE: Vertica SQL Creation, modified to add rolling 36 month date range
 */
-
 
 SELECT
 	  T1.transaction_type_nm AS "Transaction Type"
@@ -53,9 +51,7 @@ SELECT
 	, T1.tat AS "Total TAT Days"
 	, 1 AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-        , T1.prod_credit AS "Productivity Credits"  -- added 9/21/22
-	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/21/22
-	--, T2.goal_val AS "IGO Goal"   -- Kristin C removed
+    , T1.prod_credit AS "Productivity Credits"
 	, flex_ind AS "Flex Count"
 	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
 	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
@@ -64,6 +60,4 @@ SELECT
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
 FROM dma_vw.fact_integrated_sc_curr_vw T1
 LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
---WHERE (T1.work_event_department_id IN (29,30,31,32,33,34,35)
---OR T1.employee_department_id IN (29,30,31,32,33,34,35))
-WHERE T1.trans_type_id IN (1,3)
+WHERE T1.trans_type_id IN (1,3) AND CAST(T1.report_dt AS DATE)>= (Add_Months(CURRENT_DATE(), -36))
