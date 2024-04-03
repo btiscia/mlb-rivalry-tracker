@@ -1,8 +1,9 @@
 /*
 FILENAME: DNB Daily Reporting
 UPDATED BY: Bill Trombley
-LAST UPDATED: 3/4/2024
-CHANGES MADE: Added [Account Manager ID] and [Account Manager Name] OSDT-1327
+LAST UPDATED: 4/3/2024
+CHANGES MADE: 6/7/2023 - Vertica Migration, OSDT3-4818 - Update Daily Submit Logic
+4/3/2024 - Limited time frame of pull to 3 years
 */
 
 SELECT 
@@ -90,9 +91,6 @@ SELECT
 	,CAST([SignedReported] AS INTEGER) AS [SignedReported]
 	,ReceivedApprovedFiveDayBand = (SELECT FiveDayBand FROM LifeNewBizReporting.dbo.[LNB_CycleTimeBandsLOV] WHERE ReceivedApproved = CycleTimeDay)
 	,[Pyramid Indicator]
-	,[Channel]
-	,[Account Manager ID]
-	,[Account Manager Name]
 FROM
 	(
 		SELECT DISTINCT a.[Submit Date]
@@ -283,17 +281,14 @@ FROM
 		,CASE 
 			WHEN e.BusPrcsCode = '0171' THEN 'Y' 
 			ELSE 'N' 
-		END AS 'Pyramid Indicator',
-		CASE WHEN a.[MMSD] = 1 THEN 'MMSD' ELSE 'MMFA'END AS 'Channel'
-		,a.[AccountManagerID] AS 'Account Manager ID'
-		,a.[AccountManagerName] AS 'Account Manager Name'
+		END AS 'Pyramid Indicator'
 		FROM [LifeNewBizDataStaging].[dbo].[DINewBusinesReportingFile] a
 		LEFT JOIN LifeNewBizDataStaging.dbo.DITeamName b ON a.[UW ID] = b.MMID
 		LEFT JOIN LifeNewBizDataStaging.dbo.DIAndLifeConcur c ON a.[Policy #] = c.[Policy #] AND c.LOB = 'DI'
 		LEFT JOIN [RptgAndAnalytics].[Reference].[Agencies] d ON a.Agency = d.AgencyCode
 		LEFT JOIN [LifeNewBizDataStaging].[dbo].[DIPyramidIndicator] e ON a.[Policy #] = e.PolicyNum
-		WHERE a.[Submit Date] >= DateAdd(Year, -3, DateAdd(Month, DateDiff(Month, 0, GetDate()), 0) - 1) + 1
-	
+		WHERE a.[Submit Date] >= DATEADD(yy, DATEDIFF(yy, 0, GETDATE())-2, 0)
+		
 		UNION
 	
 		SELECT DISTINCT
@@ -360,14 +355,10 @@ FROM
 			,NULL AS [SignedReported]
 			,[App Sign Date]
 			,NULL AS [Pyramid Indicator]
-			,NULL AS [Channel]
-			,NULL AS [Account Manager ID]
-			,NULL AS [Account Manager Name]
-			
 		FROM LifeNewBizDataStaging.dbo.DIPendingInventory DIInv
 		LEFT OUTER JOIN [LifeNewBizDataStaging].[dbo].[DINewBusinesReportingFile] DIFF 
 			ON [Policy Num] = [Policy #]
-			AND [Submit Date] >= DateAdd(Year, -3, DateAdd(Month, DateDiff(Month, 0, GetDate()), 0) - 1) + 1 
+			AND [Submit Date] >= DATEADD(yy, DATEDIFF(yy, 0, GETDATE())-2, 0)
 		LEFT JOIN [RptgAndAnalytics].[Reference].[Agencies] Agy 
 			ON RIGHT('000'+ CAST(CAST(DIInv.Agency AS INTEGER) - 700 AS VARCHAR(3)), 3) = Agy.AgencyCode
 		LEFT JOIN LifeNewBizDataStaging.dbo.DITeamName DITeam ON DIInv.Underwriter = DITeam.Full_Name
@@ -380,6 +371,6 @@ FROM
 			GROUP BY [Soliciting Agt #]) Advisors 
 				ON DIInv.[Servicing Agent] = Advisors.[Soliciting Agt #]
 		WHERE [Case Type] = 'Contract Change'
-		AND [Final Action Type] IS NULL	
+			AND [Final Action Type] IS NULL	
+			AND [STRT_DATE] >= DATEADD(yy, DATEDIFF(yy, 0, GETDATE())-2, 0)
 	) AS PolicyDetails
-	WHERE [Policy #] <> '8807932'
