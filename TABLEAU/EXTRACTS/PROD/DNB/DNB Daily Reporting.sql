@@ -2,8 +2,10 @@
 FILENAME: DNB Daily Reporting
 UPDATED BY: Bill Trombley
 LAST UPDATED: 4/3/2024
-CHANGES MADE: 6/7/2023 - Vertica Migration, OSDT3-4818 - Update Daily Submit Logic
+CHANGES MADE:
+6/7/2023 - Vertica Migration, OSDT3-4818 - Update Daily Submit Logic
 4/3/2024 - Limited time frame of pull to 3 years
+4/9/2024 - Added Channel, Account Manager ID, Account Manager Name fields
 */
 
 SELECT 
@@ -91,6 +93,10 @@ SELECT
 	,CAST([SignedReported] AS INTEGER) AS [SignedReported]
 	,ReceivedApprovedFiveDayBand = (SELECT FiveDayBand FROM LifeNewBizReporting.dbo.[LNB_CycleTimeBandsLOV] WHERE ReceivedApproved = CycleTimeDay)
 	,[Pyramid Indicator]
+	,[Channel]
+	,[Account Manager ID]
+	,[Account Manager Name]
+	,[UpdatedDate]
 FROM
 	(
 		SELECT DISTINCT a.[Submit Date]
@@ -282,6 +288,10 @@ FROM
 			WHEN e.BusPrcsCode = '0171' THEN 'Y' 
 			ELSE 'N' 
 		END AS 'Pyramid Indicator'
+		,CASE WHEN a.[MMSD] = 1 THEN 'MMSD' ELSE 'MMFA'END AS 'Channel'
+		,a.[AccountManagerID] AS 'Account Manager ID'
+		,a.[AccountManagerName] AS 'Account Manager Name'
+		,NULL AS [UpdatedDate]
 		FROM [LifeNewBizDataStaging].[dbo].[DINewBusinesReportingFile] a
 		LEFT JOIN LifeNewBizDataStaging.dbo.DITeamName b ON a.[UW ID] = b.MMID
 		LEFT JOIN LifeNewBizDataStaging.dbo.DIAndLifeConcur c ON a.[Policy #] = c.[Policy #] AND c.LOB = 'DI'
@@ -355,6 +365,10 @@ FROM
 			,NULL AS [SignedReported]
 			,[App Sign Date]
 			,NULL AS [Pyramid Indicator]
+			,NULL AS [Channel]
+			,NULL AS [Account Manager ID]
+			,NULL AS [Account Manager Name]
+			,[UpdatedDate]
 		FROM LifeNewBizDataStaging.dbo.DIPendingInventory DIInv
 		LEFT OUTER JOIN [LifeNewBizDataStaging].[dbo].[DINewBusinesReportingFile] DIFF 
 			ON [Policy Num] = [Policy #]
