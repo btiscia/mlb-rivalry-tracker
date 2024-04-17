@@ -1,3 +1,10 @@
+/*
+FILENAME: MMUS Work Allocation Summary
+CREATED BY: Nicolaus Nisula
+LAST UPDATED: 04/02/2024
+CHANGES MADE: New Data Source
+LAST UPDATED: 
+*/
 
 SELECT -- item count on view, productivity credit includes worktracking count in data.
       t1.completed_dt as "Completed Date"
