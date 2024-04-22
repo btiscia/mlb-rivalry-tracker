@@ -1,3 +1,10 @@
+/*
+FILENAME: LNB Policy Detail
+CREATED BY: Bill Trombley
+LAST UPDATED: 4/22/2024
+CHANGES MADE: Limited the time frame of the extract to 3 years.
+*/
+
 SELECT
 	   A.PolicyNumber, 
        A.PolicyNumberINT,
@@ -186,9 +193,6 @@ SELECT
 	   LEFT OUTER JOIN [LifeNewBizReporting].[dbo].[LNB_UWPathsLOV] I ON C.UWPath = I.DetailedUWPath
 	   LEFT OUTER JOIN [LifeNewBizReporting].[dbo].[LNBDHPPolicyLevelExtract] J ON A.PolicyNumber = J.PolicyNumber
 
-	   WHERE
-	   ApplicationReceivedDate >= '2016-01-01'
---	   AND ApplicationReceivedDate >= DATEADD(year,-3,GETDATE())
-       AND ((IssueDate >= '2016-01-01'
-	   AND IssueDate >= DATEADD(YEAR,-3,GETDATE()))
+	   WHERE YEAR(ApplicationReceivedDate) BETWEEN YEAR(GETDATE()) - 2 AND YEAR(GETDATE())
+	   AND (YEAR(IssueDate) BETWEEN YEAR(GETDATE()) - 2 AND YEAR(GETDATE())
 	   OR IssueDate IS NULL)
