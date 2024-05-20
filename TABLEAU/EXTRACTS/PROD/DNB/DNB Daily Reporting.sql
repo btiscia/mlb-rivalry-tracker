@@ -1,11 +1,11 @@
 /*
 FILENAME: DNB Daily Reporting
 UPDATED BY: Bill Trombley
-LAST UPDATED: 4/3/2024
-CHANGES MADE:
-6/7/2023 - Vertica Migration, OSDT3-4818 - Update Daily Submit Logic
+LAST UPDATED: 5/17/2024
+CHANGES MADE: 6/7/2023 - Vertica Migration, OSDT3-4818 - Update Daily Submit Logic
 4/3/2024 - Limited time frame of pull to 3 years
 4/9/2024 - Added Channel, Account Manager ID, Account Manager Name fields
+5/17/2024 - Switched the Agency table from [RptgAndAnalytics].[Reference].[Agencies] to [LifeNewBizDataStaging].[dbo].[Agency]
 */
 
 SELECT 
@@ -135,7 +135,7 @@ FROM
 		,a.[App Type]
 		,a.[Contract State]
 		,a.Agency AS 'Firm'
-		,d.AgencyDisplayName AS 'Firm Name'
+		,d.[agency_id_and_name] AS 'Firm Name'
 		,a.[Soliciting Agt #] AS 'Soliciting Advisor'
 		,a.[Soliciting Agt Name] AS 'Soliciting Advisor Name'
 		,a.[Soliciting Agt Type] AS 'Soliciting Advisor Type'
@@ -295,7 +295,7 @@ FROM
 		FROM [LifeNewBizDataStaging].[dbo].[DINewBusinesReportingFile] a
 		LEFT JOIN LifeNewBizDataStaging.dbo.DITeamName b ON a.[UW ID] = b.MMID
 		LEFT JOIN LifeNewBizDataStaging.dbo.DIAndLifeConcur c ON a.[Policy #] = c.[Policy #] AND c.LOB = 'DI'
-		LEFT JOIN [RptgAndAnalytics].[Reference].[Agencies] d ON a.Agency = d.AgencyCode
+		LEFT JOIN [LifeNewBizDataStaging].[dbo].[Agency] d ON a.Agency = d.[agency_id_no_prefix]
 		LEFT JOIN [LifeNewBizDataStaging].[dbo].[DIPyramidIndicator] e ON a.[Policy #] = e.PolicyNum
 		WHERE a.[Submit Date] >= DATEADD(yy, DATEDIFF(yy, 0, GETDATE())-2, 0)
 		
@@ -328,7 +328,7 @@ FROM
 			,[Case Type] AS [App Type]
 			,NULL AS [Contract State]
 			,RIGHT('000'+ CAST(CAST(DIInv.Agency AS INTEGER) - 700 AS VARCHAR(3)), 3) AS [Firm]
-			,Agy.AgencyDisplayName AS [Firm Name]
+			,Agy.[agency_id_and_name] AS [Firm Name]
 			,[Servicing Agent] AS [Soliciting Advisor]
 			,AdvisorName AS [Soliciting Advisor Name]
 			,AdvisorType AS [Soliciting Advisor Type]
@@ -373,8 +373,8 @@ FROM
 		LEFT OUTER JOIN [LifeNewBizDataStaging].[dbo].[DINewBusinesReportingFile] DIFF 
 			ON [Policy Num] = [Policy #]
 			AND [Submit Date] >= DATEADD(yy, DATEDIFF(yy, 0, GETDATE())-2, 0)
-		LEFT JOIN [RptgAndAnalytics].[Reference].[Agencies] Agy 
-			ON RIGHT('000'+ CAST(CAST(DIInv.Agency AS INTEGER) - 700 AS VARCHAR(3)), 3) = Agy.AgencyCode
+		LEFT JOIN [LifeNewBizDataStaging].[dbo].[Agency] Agy 
+			ON RIGHT('000'+ CAST(CAST(DIInv.Agency AS INTEGER) - 700 AS VARCHAR(3)), 3) = Agy.[agency_id_no_prefix]
 		LEFT JOIN LifeNewBizDataStaging.dbo.DITeamName DITeam ON DIInv.Underwriter = DITeam.Full_Name
 		LEFT JOIN (
 			SELECT DISTINCT
