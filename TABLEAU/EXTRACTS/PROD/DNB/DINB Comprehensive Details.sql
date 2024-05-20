@@ -1,9 +1,9 @@
 /*
-Name: DINB Comprehensive Details
-Author: Bill Trombley
-Updated By: Bill Trombley
-Last Updated: 2/5/2024
-Comments: Modify Channel code to use new MMSD indicator
+FILENAME: DINB Comprehensive Details
+UPDATED BY: Bill Trombley
+LAST UPDATED: 5/17/2024
+CHANGES MADE: 2/5/2024 - Modify Channel code to use new MMSD indicator
+5/17/2024 - Removed references to [RptgAndAnalytics].[Reference].[Agencies]. Cleaned up the code.
 */
 
 SELECT
@@ -16,12 +16,10 @@ SELECT
 ,T1.[Soliciting Agt Name] AS [Advisor Name]
 ,T1.[Market] AS [Market Type]
 ,CASE WHEN T1.[Market] = 'Worksite' THEN T1.[Market] ELSE 'Indiv and Small Biz' END AS [Market Type Grouping]
-
 ,CASE WHEN T1.[Market] = 'Worksite' AND T1.[UW Type] = 'Fully U/W' THEN 'Fully U/W' 
 		  WHEN T1.[Market] = 'Worksite' AND T1.[UW Type] = 'GSI' THEN 'GSI' 
 		  WHEN T1.[Graded] = 'Yes' THEN 'w/ Graded Premium' 
  END AS [Market Breakdown]
-
 ,T1.[UW Type]
 ,T1.[Product]
 ,T1.[Product Type]
@@ -38,22 +36,18 @@ SELECT
 ,T1.[EZApp] AS [EZApp Ind]
 ,T1.[ESign] AS [ESign Ind]
 ,T1.[EZIssue] AS [EZ Issue Ind]
-
 ,CASE 
    WHEN T1.[App Sign Date] IS NOT NULL AND T1.[App Sign Date] <= T1.[First FA Date]
    AND T1.[App Sign Date] <= T1.[Apvd Date]
    AND T1.[Issue Date] IS NOT NULL
    THEN DateDiff(dd,T1.[App Sign Date],T1.[Issue Date]) 
  END AS [AppSignedToIssueCycleTime]
-
 ,CASE
    WHEN T1.[UW Type] = 'GSI' THEN DateDiff(dd, T1.[App Sign Date], T1.[Issue Date]) 
  END AS [GSI_AppSignedToIssueCycleTime]
-
 ,CASE
    WHEN T1.[UW Type] = 'Fully U/W' THEN DateDiff(dd, T1.[App Sign Date], T1.[Issue Date]) 
  END AS [Fully_UW_AppSignedIssueCycleTime]
- 
 ,NULL as [PlanMetric]
 ,NULL as [Daily KPI Plan]
 ,NULL as [Daily MTD Plan]
@@ -61,39 +55,30 @@ SELECT
 ,(SELECT BUSINESS_DAY 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Submit Date] = [SHORT_DT]) AS [Submit Business Day]
-
 ,(SELECT PREV_BD 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Submit Date] = [SHORT_DT]) AS [Submit Previous Business Day]
-
 ,(SELECT BUSINESS_DAY 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Issue Date] = [SHORT_DT]) AS [Issue Business Day]
-
 ,(SELECT [PREV_BD] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Issue Date] = [SHORT_DT]) AS [Issue Previous Business Day]
-
 ,(SELECT [PREV_BD] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE SHORT_DT = CAST(GETDATE() AS DATE)) AS [PreviousBusinessDayOfToday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Submit Date] = [SHORT_DT]) AS [Submit Date Is Holiday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Issue Date] = [SHORT_DT]) AS [Issue Date is Holiday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Cur Status Date] = [SHORT_DT]) AS [Current Status Date is Holiday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE T1.[Reported Date] = [SHORT_DT]) AS [Reported Date is Holiday]
-
 ,[Case Status]
  ,CASE  
       WHEN [Cur Status] LIKE 'APPR%' OR [Cur Status] LIKE 'RESUBMIT%' THEN 'Placed'
@@ -101,13 +86,11 @@ SELECT
       WHEN [Cur Status] LIKE 'NOT TAKEN%'THEN 'Not Taken'
       WHEN [Cur Status] LIKE 'POSTP%' THEN 'Postpone'
  END [Placement Status]
- 
  ,CASE 
       WHEN T1.[Case Status] LIKE 'SUBMIT%' AND T1.[Issue Date] IS NULL THEN 'Submitted, Not Approved'
       WHEN T1.[Case Status] LIKE 'Issue%' OR T1.[Case Status] LIKE 'Approve%' AND T1.[Issue Date] IS NOT NULL THEN 'Issued, Not Reported'
 		WHEN T1.[Case Status] LIKE 'Issue%' OR T1.[Case Status] LIKE 'Approve%' THEN 'Approved, Not Issued'
  END AS [Pending Status]
-
  ,CASE 
 	WHEN ([Case Status] LIKE 'Issue%' OR [Case Status] LIKE 'Approve%') AND [Issue Date] IS NOT NULL THEN [Issue Date]
     WHEN ([Case Status] LIKE 'Issue%' OR [Case Status] LIKE 'Approve%') AND [Issue Date] IS NULL THEN [Apvd Date]
@@ -115,19 +98,10 @@ SELECT
     WHEN ([Submit Date] <> '1900-01-01' and [Submit Date] IS NOT NULL) THEN [Submit Date]
     ELSE [App Capture Date]
  END AS AgingStartDate
-
-
 ,T1.[App Capture Date]
 ,T1.[First FA]
 ,T1.[First FA Date]
-
-
-
 FROM [LifeNewBizDataStaging].[dbo].[DINewBusinesReportingFile] T1
-
-Left Join [RptgAndAnalytics].[Reference].[Agencies] T2
-ON T1.[Agency] = T2.[OriginalAgencyCode]
-
 WHERE (MMIPOInd <> 'Yes' 
 	OR 
 	MMIPOInd IS NULL)
@@ -184,11 +158,8 @@ SELECT [System]
 ,[App Capture Date]
 ,[First FA]
 ,[First FA Date]
-
 FROM
-
 (SELECT
- 
 'Plan' AS [System]
 ,NULL AS [Policy Number]
 ,NULL AS [Premium]
@@ -224,11 +195,9 @@ END AS [Reported Date]
 ,Null as [EZApp Ind]
 ,Null as [ESign Ind]
 ,Null as [EZ Issue Ind]
-
 ,Null as [AppSignedToIssueCycleTime]
 ,Null as [GSI_AppSignedToIssueCycleTime]
 ,Null as [Fully_UW_AppSignedToIssueCycleTime]
-
 ,[Volumetric1] AS [PlanMetric]
 ,[Daily KPI Plan]
 ,[Daily MTD Plan]
@@ -236,39 +205,30 @@ END AS [Reported Date]
 ,(SELECT [BUSINESS_DAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Submit Business Day]
-
 ,(SELECT [PREV_BD]
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Submit Previous Business Day]
-
 ,(SELECT [BUSINESS_DAY]
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Issue Business Day]
-
 ,(SELECT [PREV_BD] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Issue Previous Business Day]
-
 ,(SELECT [PREV_BD] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE SHORT_DT = CAST(GETDATE() AS DATE)) AS [PreviousBusinessDayOfToday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Submit Date Is Holiday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Issue Date is Holiday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Current Status Date is Holiday]
-
 ,(SELECT [IS_HOLIDAY] 
    FROM [RptgAndAnalytics].[StrdRptg].[DMA_DATE_DIM]
    WHERE [Date of Year] = [SHORT_DT]) AS [Reported Date is Holiday]
-
 ,NULL AS [Case Status]
 ,NULL AS [Placement Status]
 ,NULL AS [Pending Status]
@@ -276,7 +236,6 @@ END AS [Reported Date]
 ,NULL AS [App Capture Date]
 ,NULL AS [First FA]
 ,NULL AS [First FA Date]
-
 FROM [RptgAndAnalytics].[StrdRptg].[KPIPlans]
 WHERE LOB = 'DI'
 AND Product1 IN ('SmBiz','Indiv','Worksite')
