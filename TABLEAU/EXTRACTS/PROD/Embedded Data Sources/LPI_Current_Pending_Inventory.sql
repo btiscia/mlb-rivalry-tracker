@@ -3,6 +3,8 @@ FILENAME: LPI CURRENT PENDING INVENTORY - VERTICA TESTING
 CREATED BY: John Avgoutakis
 LAST UPDATED: 08/27/2021
 CHANGES MADE: Removed insured full name and added inused last name.
+REVISED:  06/07//2024 - LC
+CHANGES MADE:  Digitial Operations Indicator added
 */
 
 SELECT 
@@ -40,6 +42,8 @@ SELECT
 , group_nm AS GroupName
 , group_type_nm AS GroupTypeName
 , row_process_dtm AS "Trans Date"
+, CASE WHEN dig_ops_ind = 0 THEN 'N'
+	ELSE 'Y' END AS "DigOps Ind"
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id = 5
 OR work_event_department_id = 5)
