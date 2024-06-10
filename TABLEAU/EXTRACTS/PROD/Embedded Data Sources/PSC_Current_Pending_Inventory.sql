@@ -3,6 +3,8 @@ FILENAME: PSC CURRENT PENDING INVENTORY
 CREATED BY: John Avgoutakis
 LAST UPDATED: 08/24/2021
 CHANGES MADE: Created.
+REVISED:  06/07//2024 - LC
+CHANGES MADE:  Digitial Operations Indicator added
 */
 
 SELECT 
@@ -40,11 +42,14 @@ SELECT
 , group_type_nm AS GroupTypeName
 , row_process_dtm AS "Trans Date"
 , apm_grp_ident AS "Group Number"
-,CASE WHEN 
+, CASE WHEN 
 	pol_nr IS NULL AND apm_grp_ident IS NOT NULL 
 	THEN apm_grp_ident 
 	ELSE pol_nr
 	END AS "Policy / Group #"
+, CASE WHEN dig_ops_ind = 0 THEN 'N'	
+	ELSE 'Y' END AS "DigOps Ind"
+
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id = 4
 OR work_event_department_id = 4)
