@@ -5,6 +5,8 @@ LAST UPDATED: 11/15/2022
 CHANGES MADE: 09/16/2021 - Created
 11/15/2022 - Added in product_type_desc
 3/2/2023 - Added in face_amt
+REVISED:  06/07//2024 - LC
+CHANGES MADE:  Digitial Operations Indicator added
 */
 
 SELECT 
@@ -53,6 +55,8 @@ SELECT
 	END AS "DNT Indicator"
 , initcap(product_type_desc) AS "Product"
 , face_amt AS "Face Amount"
+, CASE WHEN dig_ops_ind = 0 THEN 'N'	
+	ELSE 'Y' END AS "DigOps Ind"
 FROM dma_vw.rpt_cats_curr_pend_vw
 WHERE (employee_department_id IN (7,8)
 OR work_event_department_id IN (7,8))
