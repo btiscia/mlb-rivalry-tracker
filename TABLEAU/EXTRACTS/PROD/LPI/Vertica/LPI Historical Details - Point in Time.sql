@@ -4,7 +4,8 @@ UPDATED BY: Jess Madru
 LAST UPDATED: 9/5/2023
 CHANGES MADE: Vertica SQL Creation.
 9/21/2022 - Productivity credits changed
-9/5/2023 - Added fields for Work Distribution reporting 
+9/5/2023 - Added fields for Work Distribution reporting
+6/12/2024- Added Digital Operations Indicator 
 */
 
 SELECT
@@ -19,7 +20,7 @@ SELECT
 , T1.employee_team_nm AS "Team Name"
 , T1.work_event_function_nm AS "Function Name"
 , T1.work_event_segment_nm AS "Segment Name"
-, T1.work_event_nm AS "Work Event Name"
+, T1.work_event_nm AS "Work Event"
 , T1.priority_nm AS "Priority"
 , T1.admn_sys_cde AS "Admin System"
 , T1.process_nm AS "Process Name"
@@ -35,7 +36,7 @@ SELECT
 , T1.work_event_primary_role_nm AS "Primary Role Name"
 , T1.work_event_system_nm AS "System Name"
 , T1.work_event_num AS "Work Event Number"
-, T1.work_event_department_id AS "Work Event Department ID"
+, T1.work_event_department_id AS "Work Department Event ID"
 , T1.department_cd AS "Department Code"
 , T1.division_cd AS "Division Code"
 , CASE WHEN T1.bcc_ind = 0 THEN 'N' ELSE 'Y' END AS "Society 1851"
@@ -77,9 +78,12 @@ SELECT
      then 'US Employee'
      else 'Unknown'
      end as "Completed By Type"
-, COALESCE(T1.employee_last_nm || ', ' || T1.employee_first_nm, 'Unknown') AS 'Logged By'	
+, COALESCE(T1.logged_by_last_nm || ', ' || T1.logged_by_first_nm, 'Unknown') AS 'Logged By'	
+, CASE WHEN dig_ops_ind = 0 THEN 'N'			
+	ELSE 'Y' END AS "DigOps Ind"		
 FROM dma_vw.fact_integrated_lpi_pit_vw AS T1	
 LEFT JOIN (SELECT *  FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) AS T2 ON T1.work_event_function_id = T2.function_id	AND T1.employee_department_id = T2.department_id	
+WHERE	
 T1.trans_type_id in (1,3)
 AND T1.work_event_num <> 4763
 AND YEAR(T1.report_dt) >= YEAR(CURRENT_DATE) - 3 --returns current year and 3 full years
