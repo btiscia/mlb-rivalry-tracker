@@ -4,6 +4,8 @@ CREATED BY: John Avgoutakis
 LAST UPDATED: 11/07/2022
 CHANGES MADE: 02/14/2022 - Repointed to Vertica.
 11/07/2022 - Added in product_type_desc
+REVISED:  06/07//2024 - LC
+CHANGES MADE:  Digitial Operations Indicator added
 */
 
 
@@ -42,5 +44,7 @@ SELECT
 	, T1.sht_cmnt_des AS "Comments"
 	, T1.row_process_dtm AS "Transaction Date"	
     , upper(T1.product_type_desc) AS "Product"
+    , CASE WHEN dig_ops_ind = 0 THEN 'N'			
+            ELSE 'Y' END AS "DigOps Ind"	
 FROM dma_vw.fact_integrated_lac_pit_vw T1
 WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)
