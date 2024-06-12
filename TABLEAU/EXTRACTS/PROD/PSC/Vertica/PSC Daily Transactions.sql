@@ -3,7 +3,8 @@ FILENAME: PS DAILY TRANSACTIONS
 CREATED BY: John Avgoutakis
 LAST UPDATED: 03/18/2022
 CHANGES MADE: Repointed to Vertica.
-CHANGES MADE:  Production Credits changed 9/22/2022
+REVISED:  06/07//2024 - LC
+CHANGES MADE:  Digitial Operations Indicator added
 */
 
 
@@ -44,7 +45,7 @@ SELECT
 	, CASE WHEN T1.source_transaction_id IS NULL THEN 0 ELSE 1 END AS "Completed Flag"	
 	, T1.sht_cmnt_des AS "Comments"
 	, T1.row_process_dtm AS "Transaction Date"
-
-	
+        , CASE WHEN dig_ops_ind = 0 THEN 'N'
+            ELSE 'Y' END AS "DigOps Ind"	
 FROM dma_vw.fact_integrated_psc_pit_vw T1
 WHERE "Date" >= (Current_Date - INTERVAL '3' MONTH)
