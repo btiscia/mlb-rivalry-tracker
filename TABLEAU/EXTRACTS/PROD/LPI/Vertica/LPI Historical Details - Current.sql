@@ -3,7 +3,7 @@ FILENAME: LPI HISTORICAL DETAILS CURRENT
 CREATED BY: John Avgoutakis
 LAST UPDATED: 1/24/2022
 CHANGES MADE: Vertica SQL Creation.
-Change made 9/21/2022 Productivity credits changed.  
+6/13/2024 : Added Digital Operations Indicator
 */
 
 
@@ -50,7 +50,7 @@ SELECT
 	, T1.tat AS "Total TAT Days"
 	, 1 AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-    , T1.prod_credit AS "Productivity Credits"  -- added 9/19/22
+        , T1.prod_credit AS "Productivity Credits"  -- added 9/19/22
 	--, T1.current_prod_credit AS "Productivity Credits" -- Removed 9/19/22
 	, T2.goal_val AS "IGO Goal"
 	, flex_ind AS "Flex Count"
@@ -59,6 +59,7 @@ SELECT
 	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
+    , CASE WHEN dig_ops_ind = 0 THEN 'N' ELSE 'Y' END AS "DigOps Ind"
 FROM dma_vw.fact_integrated_lpi_curr_vw T1
 LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
 WHERE T1.trans_type_id IN (1,3)

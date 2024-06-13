@@ -1,11 +1,13 @@
 /*
 FILENAME: LAC HISTORICAL DETAILS PIT
-UPDATED BY: Jess Madru
-LAST UPDATED: 09/15/2023
+UPDATED BY: Bill Tiscia
+LAST UPDATED: 11/08/2023
 CHANGES MADE: 01/18/2022 - Repointed to Vertica and removed pending transactions.
 11/07/2022 - Added in product_type_desc
 02/07/2023 - Added in face_amt
-8/17/2023 - Added fields for Work Distribution Reporting
+08/17/2023 - Added fields for Work Distribution Reporting
+11/20/2023 - Added in channel
+06/07/2024 - Added in Digital Operation Indicator
 */
 
 
@@ -35,7 +37,7 @@ SELECT
 	, T1.site_nm AS "Site Name"
 	, T1.work_event_organization_nm AS "Work Event Organization Name"
 	, T1.work_event_department_nm AS "Work Event Department Name"
-  , T1.work_event_department_id as "Work Event Department ID"
+    , T1.work_event_department_id as "Work Event Department ID"
 	, T1.work_event_primary_role_nm AS "Primary Role Name"
 	, T1.work_event_system_nm AS "System Name"
 	, T1.work_event_num AS "Work Event Number"
@@ -45,26 +47,27 @@ SELECT
 	, T1.completed_dt as "Completed Date"
 	, T1.long_completed_dt AS "Completed Date Stamp"
 	, T1.NIGO_des AS "NIGODescription"
-	, CASE WHEN igo_ind = 1 AND nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
-	, CASE WHEN igo_ind = 1 AND nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
+	, CASE WHEN T1.igo_ind = 1 AND T1.nigo_cd = '-99' THEN 1 ELSE 0 END AS "NIGO Count"
+	, CASE WHEN T1.igo_ind = 1 AND T1.nigo_cd = '090' THEN 1 ELSE 0 END AS "IGO Count"
 	, T1.igo_ind AS "IGO NIGO Count"
 	, T1.sht_cmnt_des AS "Short Comments"
-	, CASE WHEN T1.met_expected_ind = 1 AND days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
+	, CASE WHEN T1.met_expected_ind = 1 AND T1.days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met Expected Count"
 	, T1.met_expected_ind AS "Met Expected Ind Count"
 	, T1.days_past_tat AS "Total TAT Days"
 	, 1 AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
 	, T1.prod_credit AS "Productivity Credits"
 	, T2.goal_val AS "IGO Goal"
-	, flex_ind AS "Flex Count"
-	, CASE WHEN days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
-	, CASE WHEN days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
-	, CASE WHEN days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
-	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
-	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
-	, days_pending as "Days Pending"
-  , upper(T1.product_type_desc) AS "Product"
-  , t1.face_amt AS "Face Amount"
+	, T1.flex_ind AS "Flex Count"
+	, CASE WHEN T1.days_past_tat <= 0 THEN 1 ELSE 0 END AS "Met TAT Count"
+	, CASE WHEN T1.days_past_tat = 1 THEN 1 ELSE 0 END AS "Past TAT 1"
+	, CASE WHEN T1.days_past_tat = 2 THEN 1 ELSE 0 END AS "Past TAT 2"
+	, CASE WHEN T1.days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
+	, CASE WHEN T1.days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
+	, T1.days_pending as "Days Pending"
+    , upper(T1.product_type_desc) AS "Product"
+    , T1.face_amt AS "Face Amount"
+    , CASE WHEN T1.mmsd_ind = True THEN 'MMSD' ELSE 'MMFA' END AS "Channel"
 	, CASE
      when T1.role_grade_id = 14
      then 'Bot'
@@ -82,7 +85,8 @@ SELECT
      then 'US Employee'
      else 'Unknown'
      end as "Completed By Type"
+   , CASE WHEN dig_ops_ind = 0 THEN 'N' ELSE 'Y' END AS "DigOps Ind"
 FROM dma_vw.fact_integrated_lac_pit_vw T1
-LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id 
+LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id
 WHERE T1.trans_type_id IN (1,3)
 AND YEAR(T1.report_dt) >= YEAR(CURRENT_DATE) - 3 --returns current year and 3 full years

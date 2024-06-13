@@ -4,6 +4,7 @@ CREATED BY: John Avgoutakis
 LAST UPDATED: 1/18/2022
 CHANGES MADE: Pointed to Vertica and added item_count.
 CHANGES MADE:  Production Credits changed 9/22/2022
+CHANGES MADE: Updated Digital Operations Indicator on 6/13/2024
 */
 
 
@@ -50,7 +51,7 @@ SELECT
 	, T1.days_past_tat AS "Total TAT Days"
 	, T1.item_count AS "Transaction Count"
 	, T1.row_process_dtm AS "Transaction Date"
-    , T1.prod_credit AS "Productivity Credits"  -- added 9/20/22
+        , T1.prod_credit AS "Productivity Credits"  -- added 9/20/22
 	--, T1.current_prod_credit AS "Productivity Credits" --removed 9/20/2022
 	, T2.goal_val AS "IGO Goal"
 	, flex_ind AS "Flex Count"
@@ -60,6 +61,7 @@ SELECT
 	, CASE WHEN days_past_tat = 3 THEN 1 ELSE 0 END AS "Past TAT 3"
 	, CASE WHEN days_past_tat >= 4 THEN 1 ELSE 0 END AS "Past TAT 4+"
 	--, CASE WHEN T1.trans_type_id = 2 AND T1.logged_dt < CURRENT_DATE() AND (CompRec.CompDate >T1.load_dt OR CompRec.CompDate is NULL) THEN 1 ELSE 0 END AS "EOD Pending Indicator"
+        , CASE WHEN dig_ops_ind = 0 THEN 'N' ELSE 'Y' END AS "DigOps Ind"  -- updated 6/13/2024
 
 FROM dma_vw.fact_integrated_psc_curr_vw T1
 
