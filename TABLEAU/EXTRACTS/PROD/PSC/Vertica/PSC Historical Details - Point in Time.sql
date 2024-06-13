@@ -3,6 +3,7 @@ FILENAME: PSC HISTORICAL DETAILS PIT
 UPDATED BY: Jess Madru
 LAST UPDATED: 9/14/2023
 CHANGES MADE: Vertica SQL Creation, added fields to support Work Distribution reporting
+CHANGES MADE: Digital Operations Indicator on 6/13/2024
 */
 
 
@@ -77,6 +78,7 @@ SELECT
      	else 'Unknown'
      	end as "Completed By Type"
 	, COALESCE(T1.logged_by_last_nm || ', ' || T1.logged_by_first_nm, 'Unknown') AS 'Logged By'
+    ,CASE WHEN dig_ops_ind = 0 THEN 'N' ELSE 'Y' END AS "DigOps Ind"
 FROM dma_vw.fact_integrated_psc_pit_vw T1
 LEFT JOIN (SELECT * FROM dma.dma_dim_goal_curr WHERE goal_type_id = 5) T2 ON T1.work_event_function_id = T2.function_id AND T1.employee_department_id = T2.department_id
 WHERE T1.trans_type_id IN (1,3)
