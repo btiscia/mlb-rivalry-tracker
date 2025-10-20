@@ -1,4 +1,4 @@
-mlbstatsapi
+MLB-StatsAPI
 pandas
 matplotlib
 seaborn

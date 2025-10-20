@@ -1,6 +1,6 @@
 # MLB Rivalry Tracker
 
-This project uses the `mlbstatsapi` to analyze the historic rivalry between two MLB teams in a given timeframe. It pulls game data, tracks wins, and visualizes trends.
+This Python app uses `mlbstatsapi` to analyze and visualize MLB rivalries between any two teams over a custom year range.
 
 ## Features
 - Pulls game data using MLB Stats API
