@@ -79,36 +79,27 @@ csv_filename = f"output/Rivalry_Data_{team1_name}_vs_{team2_name}_{start_year}_t
 df.to_csv(csv_filename, index=False)
 print(f"CSV export completed: {csv_filename}")
 
-# === LINE CHART: Wins Per Year (Excluding Unknown) ===
-df_filtered = df[df['winner'] != 'Unknown']
-win_counts_filtered = df_filtered.groupby(['year', 'winner']).size().unstack(fill_value=0)
 
-plt.figure(figsize=(14, 7))
-ax = win_counts_filtered.plot(
-    kind='line',
-    marker='o',
-    linewidth=2,
-    color=[team1_color, team2_color],
-    ax=plt.gca()
+# === LINE CHART: Wins Per Year ===
+fig_line = px.line(
+    win_counts,
+    markers=True,
+    title=f'Rivalry Wins Per Year: {team1_name} vs {team2_name} ({start_year}–{end_year})',
+    labels={'value': 'Number of Wins', 'year': 'Year'},
+    color_discrete_map={team1_name: team1_color, team2_name: team2_color}
 )
-plt.title(f'Rivalry Wins Per Year: {team1_name} vs {team2_name} ({start_year}–{end_year})')
-plt.xlabel('Year')
-plt.ylabel('Number of Wins')
-ax.grid(False)
-ax.xaxis.get_major_locator().set_params(integer=True)
-plt.grid(True)
-plt.tight_layout()
-plt.savefig(f'output/Rivalry_Wins_{team1_name}_vs_{team2_name}_{start_year}_to_{end_year}_Excluding_Unknown.png')
-plt.show()
+fig_line.write_json(f'output/Rivalry_Wins_LineChart.json')
+fig_line.write_image(f'output/Rivalry_Wins_LineChart.png')
 
-# === BAR CHART: Total Wins Excluding 'Unknown' ===
-total_wins_filtered = df_filtered['winner'].value_counts()
-plt.figure(figsize=(8, 6))
-total_wins_filtered.plot(kind='bar', color=[team1_color, team2_color])
-plt.title('Total Wins by Team (Excluding Unknown)')
-plt.xlabel('Team')
-plt.ylabel('Number of Wins')
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.savefig('output/Total_Wins_Bar_Chart_Excluding_Unknown.png')
-plt.show()
+# === BAR CHART: Total Wins ===
+total_wins_filtered = df['winner'].value_counts()
+fig_bar = px.bar(
+    total_wins_filtered,
+    title='Total Wins by Team',
+    labels={'index': 'Team', 'value': 'Number of Wins'},
+    color=total_wins_filtered.index.map({team1_name: team1_color, team2_name: team2_color})
+)
+fig_bar.write_json('output/Total_Wins_Bar_Chart.json')
+fig_bar.write_image('output/Total_Wins_Bar_Chart.png')
+
+print("CSV and visualizations have been generated successfully.")
