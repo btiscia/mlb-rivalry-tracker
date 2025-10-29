@@ -1,7 +1,8 @@
 import statsapi
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 import os
+import argparse
 
 # === TEAM CODE MAPPING (ID + COLOR + NAME) ===
 team_code_map = {
@@ -40,66 +41,92 @@ team_code_map = {
     'nlas': {'id': 160, 'color': '#EE0A46', 'name': 'NL All-Stars'}
 }
 
-# === USER INPUT ===
-team1_code = input("Enter first team code (e.g., 'nya'): ").lower()
-team2_code = input("Enter second team code (e.g., 'bos'): ").lower()
-start_year = int(input("Enter start year (e.g., 1995): "))
-end_year = int(input("Enter end year (e.g., 2004): "))
+def analyze_team_rivalry(team1_code, team2_code, start_year, end_year, output_dir='output'):
+    # Validate team codes
+    if team1_code not in team_code_map or team2_code not in team_code_map:
+        raise ValueError("Invalid team code entered.")
 
-# Validate team codes
-if team1_code not in team_code_map or team2_code not in team_code_map:
-    raise ValueError("Invalid team code entered.")
+    team1 = team_code_map[team1_code]
+    team2 = team_code_map[team2_code]
 
-team1_id = team_code_map[team1_code]['id']
-team2_id = team_code_map[team2_code]['id']
-team1_color = team_code_map[team1_code]['color']
-team2_color = team_code_map[team2_code]['color']
-team1_name = team_code_map[team1_code]['name']
-team2_name = team_code_map[team2_code]['name']
+    # === DATA COLLECTION BY SEASON ===
+    games = []
+    for year in range(start_year, end_year + 1):
+        schedule = statsapi.schedule(team=team1['id'], opponent=team2['id'], season=year)
+        for game in schedule:
+            if game.get('status') == 'Final':  # ✅ Only include completed games
+                winner = game.get('winning_team', 'Unknown')
+                games.append({
+                    'date': game['game_date'],
+                    'winner': winner
+                })
 
-# === DATA COLLECTION BY SEASON ===
-games = []
-for year in range(start_year, end_year + 1):
-    schedule = statsapi.schedule(team=team1_id, opponent=team2_id, season=year)
-    for game in schedule:
-        winner = game.get('winning_team', 'Unknown')
-        games.append({
-            'date': game['game_date'],
-            'winner': winner
-        })
+    # === DATA ANALYSIS ===
+    df = pd.DataFrame(games)
+    df['year'] = pd.to_datetime(df['date']).dt.year
+    win_counts = df.groupby(['year', 'winner']).size().unstack(fill_value=0)
 
-# === DATA ANALYSIS ===
-df = pd.DataFrame(games)
-df['year'] = pd.to_datetime(df['date']).dt.year
-win_counts = df.groupby(['year', 'winner']).size().unstack(fill_value=0)
+    # Determine total wins for color assignment
+    total_wins = df['winner'].value_counts()
+    if len(total_wins) < 2:
+        raise ValueError("Not enough data to compare teams.")
+    winner_team = total_wins.idxmax()
+    loser_team = total_wins.idxmin()
 
-# === EXPORT TO CSV ===
-os.makedirs('output', exist_ok=True)
-csv_filename = f"output/Rivalry_Data_{team1_name}_vs_{team2_name}_{start_year}_to_{end_year}.csv"
-df.to_csv(csv_filename, index=False)
-print(f"CSV export completed: {csv_filename}")
+    # Dynamic color mapping
+    color_map = {
+        winner_team: '#00B0F0',  # Blue for more wins
+        loser_team: '#C00000'    # Red for fewer wins
+    }
 
+    # === EXPORT TO CSV ===
+    os.makedirs(output_dir, exist_ok=True)
+    csv_filename = f"{output_dir}/Rivalry_Data_{team1['name']}_vs_{team2['name']}_{start_year}_to_{end_year}.csv"
+    df.to_csv(csv_filename, index=False)
+    print(f"CSV export completed: {csv_filename}")
 
-# === LINE CHART: Wins Per Year ===
-fig_line = px.line(
-    win_counts,
-    markers=True,
-    title=f'Rivalry Wins Per Year: {team1_name} vs {team2_name} ({start_year}–{end_year})',
-    labels={'value': 'Number of Wins', 'year': 'Year'},
-    color_discrete_map={team1_name: team1_color, team2_name: team2_color}
-)
-fig_line.write_json(f'output/Rivalry_Wins_LineChart.json')
-fig_line.write_image(f'output/Rivalry_Wins_LineChart.png')
+    # === LINE CHART: Wins Per Year ===
+    fig_line = px.line(
+        win_counts,
+        markers=True,
+        title=f'Rivalry Wins Per Year: {team1["name"]} vs {team2["name"]} ({start_year}–{end_year})',
+        labels={'value': 'Number of Wins', 'year': 'Year'},
+        color_discrete_map=color_map
+    )
+    fig_line.write_json(f'{output_dir}/Rivalry_Wins_LineChart.json')
+    fig_line.write_image(f'{output_dir}/Rivalry_Wins_LineChart.png')
 
-# === BAR CHART: Total Wins ===
-total_wins_filtered = df['winner'].value_counts()
-fig_bar = px.bar(
-    total_wins_filtered,
-    title='Total Wins by Team',
-    labels={'index': 'Team', 'value': 'Number of Wins'},
-    color=total_wins_filtered.index.map({team1_name: team1_color, team2_name: team2_color})
-)
-fig_bar.write_json('output/Total_Wins_Bar_Chart.json')
-fig_bar.write_image('output/Total_Wins_Bar_Chart.png')
+    # === BAR CHART: Total Wins ===
+    bar_df = total_wins.reset_index()
+    bar_df.columns = ['Team', 'Wins']
 
-print("CSV and visualizations have been generated successfully.")
+    fig_bar = px.bar(
+        bar_df,
+        x='Team',
+        y='Wins',
+        color='Team',  # ✅ Legend shows team names
+        title='Total Wins by Team',
+        labels={'Team': 'Team', 'Wins': 'Number of Wins'},
+        color_discrete_map=color_map
+    )
+
+    # ✅ Remove legend
+    fig_bar.update_layout(showlegend=False)
+
+    fig_bar.write_json(f'{output_dir}/Total_Wins_Bar_Chart.json')
+    fig_bar.write_image(f'{output_dir}/Total_Wins_Bar_Chart.png')
+
+    print("CSV and visualizations have been generated successfully.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Analyze MLB team rivalry.")
+    parser.add_argument("team1", help="First team code (e.g., 'nya')")
+    parser.add_argument("team2", help="Second team code (e.g., 'bos')")
+    parser.add_argument("start_year", type=int, help="Start year (e.g., 1995)")
+    parser.add_argument("end_year", type=int, help="End year (e.g., 2004)")
+    args = parser.parse_args()
+
+    analyze_team_rivalry(args.team1.lower(), args.team2.lower(), args.start_year, args.end_year)
+
+# Example usage in Terminal:
+# python rivalry_tracker.py nya bos 1995 2004

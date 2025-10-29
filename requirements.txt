@@ -2,3 +2,6 @@ MLB-StatsAPI
 pandas
 matplotlib
 seaborn
+plotly
+argparse
+kaleido
