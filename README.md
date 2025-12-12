@@ -10,15 +10,17 @@ This Python app uses `mlbstatsapi` to analyze and visualize MLB rivalries betwee
 
 ## How to Run
 
-1. Create Virtual Environment
+1. Clone this repo
+
+2. Create Virtual Environment
 
    `python -m venv venv`
-2. Activate Virtual Environment
+3. Activate Virtual Environment
 
    `venv\Scripts\activate`
-3. Install Requirements
+4. Install Requirements
 
    `pip install -r requirements.txt`
-4. Run program with two team codes and a range of years (see team code list below)
+5. Run program with two team codes and a range of years (see team code list below)
 
    `python rivalry_tracker.py nya bos 1995 2004`
