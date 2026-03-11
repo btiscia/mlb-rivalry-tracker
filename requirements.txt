@@ -1,7 +1,12 @@
-MLB-StatsAPI
-pandas
-matplotlib
-seaborn
-plotly
-argparse
-kaleido
+# MLB Rivalry Tracker Dependencies
+
+# Core
+MLB-StatsAPI>=1.7.0
+pandas>=2.0.0
+
+# Visualization
+plotly>=5.0.0
+matplotlib>=3.7.0
+
+# Optional
+seaborn>=0.12.0
