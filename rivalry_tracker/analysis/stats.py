@@ -302,6 +302,10 @@ class RivalryAnalyzer:
 
         df['date'] = pd.to_datetime(df['date'])
         df['year'] = df['date'].dt.year
+        
+        # Ensure scores are numeric (API sometimes returns strings)
+        df['home_score'] = pd.to_numeric(df['home_score'], errors='coerce').fillna(0).astype(int)
+        df['away_score'] = pd.to_numeric(df['away_score'], errors='coerce').fillna(0).astype(int)
 
         # Count wins by team and year
         wins_by_year = df.groupby(['year', 'winner']).size().unstack(fill_value=0)

@@ -284,6 +284,62 @@ class RivalryCharts:
         plt.savefig(filepath, dpi=150)
         plt.close()
 
+    def _save_home_away_png(self, stats: RivalryStats, filepath: Path) -> None:
+        """Create home/away chart PNG using matplotlib.
+        
+        Args:
+            stats: RivalryStats object with the data.
+            filepath: Path where the PNG will be saved.
+        """
+        if not stats.home_away_splits:
+            return
+            
+        plt.figure(figsize=(10, 6))
+        
+        team_names = list(stats.home_away_splits.keys())
+        x = range(len(team_names))
+        width = 0.35
+        
+        home_wins = [stats.home_away_splits[t].home_wins for t in team_names]
+        away_wins = [stats.home_away_splits[t].away_wins for t in team_names]
+        
+        bars1 = plt.bar([i - width/2 for i in x], home_wins, width, label='Home', color='#2E7D32')
+        bars2 = plt.bar([i + width/2 for i in x], away_wins, width, label='Away', color='#1565C0')
+        
+        plt.xlabel('Team')
+        plt.ylabel('Wins')
+        plt.title(f'Home/Away Wins: {stats.team1_name} vs {stats.team2_name}')
+        plt.xticks(x, team_names)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(filepath, dpi=150)
+        plt.close()
+
+    def _save_run_diff_png(self, stats: RivalryStats, filepath: Path) -> None:
+        """Create run differential chart PNG using matplotlib.
+        
+        Args:
+            stats: RivalryStats object with the data.
+            filepath: Path where the PNG will be saved.
+        """
+        if not stats.run_differentials:
+            return
+            
+        plt.figure(figsize=(8, 6))
+        
+        team_names = list(stats.run_differentials.keys())
+        differentials = [stats.run_differentials[t].differential for t in team_names]
+        colors = ['#2E7D32' if d >= 0 else '#C62828' for d in differentials]
+        
+        plt.bar(team_names, differentials, color=colors)
+        plt.axhline(y=0, color='gray', linestyle='--', linewidth=1)
+        plt.xlabel('Team')
+        plt.ylabel('Run Differential')
+        plt.title(f'Run Differential: {stats.team1_name} vs {stats.team2_name}')
+        plt.tight_layout()
+        plt.savefig(filepath, dpi=150)
+        plt.close()
+
     def _get_file_prefix(self, stats: RivalryStats) -> str:
         """Generate a file name prefix for outputs.
         
@@ -430,7 +486,7 @@ class RivalryCharts:
         if save_json:
             fig.write_json(self.output_dir / f"{prefix}_HomeAway.json")
         if save_png:
-            fig.write_image(self.output_dir / f"{prefix}_HomeAway.png")
+            self._save_home_away_png(stats, self.output_dir / f"{prefix}_HomeAway.png")
         if show:
             fig.show()
         
@@ -484,7 +540,7 @@ class RivalryCharts:
         if save_json:
             fig.write_json(self.output_dir / f"{prefix}_RunDiff.json")
         if save_png:
-            fig.write_image(self.output_dir / f"{prefix}_RunDiff.png")
+            self._save_run_diff_png(stats, self.output_dir / f"{prefix}_RunDiff.png")
         if show:
             fig.show()
         
@@ -676,21 +732,33 @@ class RivalryCharts:
         
         # Create additional charts if data available
         if stats.home_away_splits:
-            home_away_fig = self.create_home_away_chart(stats, save_json, save_png, show)
-            results['figures']['home_away'] = home_away_fig
+            try:
+                home_away_fig = self.create_home_away_chart(stats, save_json, save_png, show)
+                results['figures']['home_away'] = home_away_fig
+            except Exception as e:
+                logger.warning(f"Failed to create home/away chart: {e}")
         
         if stats.run_differentials:
-            run_diff_fig = self.create_run_differential_chart(stats, save_json, save_png, show)
-            results['figures']['run_diff'] = run_diff_fig
+            try:
+                run_diff_fig = self.create_run_differential_chart(stats, save_json, save_png, show)
+                results['figures']['run_diff'] = run_diff_fig
+            except Exception as e:
+                logger.warning(f"Failed to create run differential chart: {e}")
         
         # Export to Excel
         if save_excel:
-            excel_path = self.export_to_excel(stats)
-            results['files'].append(excel_path)
+            try:
+                excel_path = self.export_to_excel(stats)
+                results['files'].append(excel_path)
+            except Exception as e:
+                logger.warning(f"Failed to export Excel: {e}")
         
         # Export to HTML
         if save_html:
-            html_path = self.export_to_html(stats, line_fig, bar_fig)
-            results['files'].append(html_path)
+            try:
+                html_path = self.export_to_html(stats, line_fig, bar_fig)
+                results['files'].append(html_path)
+            except Exception as e:
+                logger.warning(f"Failed to export HTML: {e}")
         
         return results
