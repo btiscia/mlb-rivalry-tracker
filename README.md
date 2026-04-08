@@ -1,38 +1,69 @@
 # MLB Rivalry Tracker
 
+[![CI](https://github.com/btiscia/mlb-rivalry-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/btiscia/mlb-rivalry-tracker/actions/workflows/ci.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+
 This Python app uses `mlbstatsapi` to analyze and visualize MLB rivalries between any two teams over a custom year range.
 
 ## Features
 
-- Pulls game data using MLB Stats API
-- **Parallel API fetching** for faster data retrieval
-- **Caching** to avoid redundant API calls
-- **Retry logic** with exponential backoff
-- Analyzes win/loss trends
-- Visualizes rivalry dynamics with interactive charts
+- **Data Collection**
+  - Pulls game data using MLB Stats API
+  - Parallel API fetching for faster data retrieval
+  - Smart caching to avoid redundant API calls
+  - Retry logic with exponential backoff
 
-## How to Run
+- **Analysis**
+  - Win/loss records and trends
+  - Home/away performance splits
+  - Longest win streaks
+  - Run differential statistics
 
-1. Clone this repo
+- **Visualization & Export**
+  - Interactive charts (Plotly)
+  - PNG image export
+  - JSON chart data
+  - CSV data export
+  - Excel workbook with multiple sheets
+  - Interactive HTML reports
 
-2. Create Virtual Environment
+## Installation
 
-   `python -m venv venv`
-3. Activate Virtual Environment
+### From Source
 
-   `venv\Scripts\activate`
-4. Install Requirements
+```bash
+# Clone the repo
+git clone https://github.com/btiscia/mlb-rivalry-tracker.git
+cd mlb-rivalry-tracker
 
-   `pip install -r requirements.txt`
-5. Run program with two team codes and a range of years (see team code list below)
+# Create virtual environment
+python -m venv venv
 
-   ```bash
-   # New module-style usage (recommended)
-   python -m rivalry_tracker nya bos 1995 2004
+# Activate (Windows)
+venv\Scripts\activate
 
-   # Or use the legacy script
-   python rivalry_tracker.py nya bos 1995 2004
-   ```
+# Activate (macOS/Linux)
+source venv/bin/activate
+
+# Install
+pip install -e .
+```
+
+### Using pip
+
+```bash
+pip install -r requirements.txt
+```
+
+## Quick Start
+
+```bash
+# Yankees vs Red Sox, 1995-2004
+python -m rivalry_tracker nya bos 1995 2004
+
+# List all team codes
+python -m rivalry_tracker --list-teams
+```
 
 ## Command-Line Options
 
@@ -45,17 +76,24 @@ Positional arguments:
   start_year      Start year (e.g., 1995)
   end_year        End year (e.g., 2004)
 
-Optional arguments:
+Output Options:
   -o, --output    Output directory (default: output)
-  --cache-dir     Cache directory (default: .cache)
-  --no-cache      Disable caching (always fetch from API)
-  --clear-cache   Clear the cache and exit
   --no-png        Skip PNG image generation
   --no-json       Skip JSON chart data generation
   --no-csv        Skip CSV data export
+  --no-excel      Skip Excel workbook export
+  --no-html       Skip HTML report generation
   --show          Display charts in browser
-  -l, --list-teams List all available team codes
-  -v, --verbose   Enable verbose output
+
+Cache Options:
+  --cache-dir     Cache directory (default: .cache)
+  --no-cache      Disable caching (always fetch from API)
+  --clear-cache   Clear the cache and exit
+
+Other Options:
+  -l, --list-teams  List all available team codes
+  -v, --verbose     Enable verbose output
+  --version         Show version number
 ```
 
 ## Examples
@@ -67,28 +105,87 @@ python -m rivalry_tracker nya bos 1995 2004
 # Cardinals vs Cubs with custom output folder
 python -m rivalry_tracker sln chn 2000 2020 --output results/
 
-# List all team codes
-python -m rivalry_tracker --list-teams
+# Generate only CSV and PNG (no Excel/HTML)
+python -m rivalry_tracker nya bos 2010 2020 --no-excel --no-html
 
 # Force fresh API calls (skip cache)
 python -m rivalry_tracker nya bos 1990 2000 --no-cache
+
+# Display charts in browser
+python -m rivalry_tracker lan sfn 2015 2023 --show
 ```
+
+## Output Files
+
+When you run an analysis, the following files are generated in the output directory:
+
+| File | Description |
+|------|-------------|
+| `Rivalry_*_Line.png` | Line chart showing wins per year |
+| `Rivalry_*_Bar.png` | Bar chart showing total wins |
+| `Rivalry_*_HomeAway.png` | Home/away split comparison |
+| `Rivalry_*_RunDiff.png` | Run differential chart |
+| `Rivalry_*.csv` | Raw game data |
+| `Rivalry_*.xlsx` | Excel workbook with all stats |
+| `Rivalry_*_Report.html` | Interactive HTML report |
 
 ## Project Structure
 
 ```
-rivalry_tracker/
-├── __init__.py          # Package initialization
-├── __main__.py          # Entry point for python -m
-├── main.py              # Main orchestration
-├── cli.py               # Command-line interface
-├── config.py            # Team mappings & constants
-├── api/
-│   └── fetcher.py       # API calls with caching & retry
-├── analysis/
-│   └── stats.py         # Data processing
-└── visualization/
-    └── charts.py        # Chart generation
+mlb-rivalry-tracker/
+├── rivalry_tracker/
+│   ├── __init__.py          # Package exports
+│   ├── __main__.py          # Entry point for python -m
+│   ├── main.py              # Main orchestration
+│   ├── cli.py               # Command-line interface
+│   ├── config.py            # Team mappings & constants
+│   ├── api/
+│   │   └── fetcher.py       # API calls with caching & retry
+│   ├── analysis/
+│   │   └── stats.py         # Statistical analysis
+│   └── visualization/
+│       └── charts.py        # Chart generation & exports
+├── tests/                   # Test suite
+├── .github/workflows/       # CI/CD configuration
+├── pyproject.toml           # Project configuration
+├── requirements.txt         # Dependencies
+├── CONTRIBUTING.md          # Contribution guidelines
+└── README.md
+```
+
+## Python API
+
+You can also use the package programmatically:
+
+```python
+from rivalry_tracker import (
+    get_team, 
+    RivalryFetcher, 
+    RivalryAnalyzer, 
+    RivalryCharts
+)
+
+# Get team info
+yankees = get_team('nya')
+red_sox = get_team('bos')
+
+# Fetch data
+fetcher = RivalryFetcher(use_cache=True)
+games = fetcher.fetch_rivalry_data(yankees, red_sox, 2020, 2023)
+
+# Analyze
+analyzer = RivalryAnalyzer(yankees, red_sox)
+stats = analyzer.analyze(games, 2020, 2023)
+print(analyzer.to_summary(stats))
+
+# Access detailed statistics
+print(f"Yankees home record: {stats.home_away_splits['New York Yankees'].home_wins}-{stats.home_away_splits['New York Yankees'].home_losses}")
+print(f"Longest Yankees streak: {stats.longest_win_streaks['New York Yankees'].length} games")
+print(f"Yankees run differential: {stats.run_differentials['New York Yankees'].differential:+d}")
+
+# Generate charts
+charts = RivalryCharts(output_dir='output')
+charts.create_all_charts(stats)
 ```
 
 ## Team Code List
@@ -113,7 +210,7 @@ rivalry_tracker/
 | Miami Marlins          | mia       |
 | Milwaukee Brewers      | mil       |
 | Minnesota Twins        | min       |
-| Montreal Expos         | mon       |
+| Montreal Expos*        | mon       |
 | New York Mets          | nyn       |
 | New York Yankees       | nya       |
 | NL All-Stars           | nlas      |
@@ -127,4 +224,31 @@ rivalry_tracker/
 | Tampa Bay Rays         | tba       |
 | Texas Rangers          | tex       |
 | Toronto Blue Jays      | tor       |
-| Washington Nationals   | was       |
+| Washington Nationals*  | was       |
+
+*Note: Montreal Expos and Washington Nationals share the same MLB ID (120) because the Expos relocated to become the Nationals in 2005.
+
+## Development
+
+```bash
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=rivalry_tracker
+
+# Lint code
+ruff check .
+
+# Type check
+mypy rivalry_tracker
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+
+## License
+
+MIT

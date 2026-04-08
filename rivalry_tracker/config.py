@@ -1,4 +1,12 @@
-"""Configuration and team mappings for MLB Rivalry Tracker."""
+"""Configuration and team mappings for MLB Rivalry Tracker.
+
+This module contains all configuration constants, team mappings, and
+utility functions for team code validation.
+
+Note:
+    The Montreal Expos and Washington Nationals share the same MLB ID (120)
+    because the Expos relocated to become the Nationals in 2005.
+"""
 
 from dataclasses import dataclass
 from typing import Dict, Optional
@@ -6,13 +14,21 @@ from typing import Dict, Optional
 
 @dataclass(frozen=True)
 class TeamInfo:
-    """Immutable team information."""
+    """Immutable team information.
+    
+    Attributes:
+        id: Official MLB team ID used by the Stats API.
+        color: Team's primary color in hex format (#RRGGBB).
+        name: Team's official full name.
+    """
     id: int
     color: str
     name: str
 
 
 # === TEAM CODE MAPPING (ID + COLOR + NAME) ===
+# Note: Expos (id=120) and Nationals (id=120) share the same ID
+# because the Expos relocated to become the Nationals in 2005.
 TEAM_CODE_MAP: Dict[str, TeamInfo] = {
     'ana': TeamInfo(id=108, color='#BA0021', name='Los Angeles Angels'),
     'ari': TeamInfo(id=109, color='#A71930', name='Arizona Diamondbacks'),
@@ -31,7 +47,7 @@ TEAM_CODE_MAP: Dict[str, TeamInfo] = {
     'mia': TeamInfo(id=146, color='#0077C8', name='Miami Marlins'),
     'mil': TeamInfo(id=158, color='#12284B', name='Milwaukee Brewers'),
     'min': TeamInfo(id=142, color='#002B5C', name='Minnesota Twins'),
-    'mon': TeamInfo(id=120, color='#67ABE5', name='Montreal Expos'),
+    'mon': TeamInfo(id=120, color='#67ABE5', name='Montreal Expos'),  # Shares ID with WAS
     'nya': TeamInfo(id=147, color='#132448', name='New York Yankees'),
     'nyn': TeamInfo(id=121, color='#002D72', name='New York Mets'),
     'oak': TeamInfo(id=133, color='#003831', name='Oakland Athletics'),
@@ -44,14 +60,14 @@ TEAM_CODE_MAP: Dict[str, TeamInfo] = {
     'tba': TeamInfo(id=139, color='#092C5C', name='Tampa Bay Rays'),
     'tex': TeamInfo(id=140, color='#003278', name='Texas Rangers'),
     'tor': TeamInfo(id=141, color='#134A8E', name='Toronto Blue Jays'),
-    'was': TeamInfo(id=120, color='#AB0003', name='Washington Nationals'),
+    'was': TeamInfo(id=120, color='#AB0003', name='Washington Nationals'),  # Shares ID with MON
     'alas': TeamInfo(id=159, color='#041E42', name='AL All-Stars'),
     'nlas': TeamInfo(id=160, color='#EE0A46', name='NL All-Stars'),
 }
 
 # Chart color constants
-WINNER_COLOR = '#00B0F0'  # Blue for more wins
-LOSER_COLOR = '#C00000'   # Red for fewer wins
+WINNER_COLOR = '#00B0F0'  # Blue for team with more wins
+LOSER_COLOR = '#C00000'   # Red for team with fewer wins
 
 # Default settings
 DEFAULT_OUTPUT_DIR = 'output'
@@ -62,12 +78,35 @@ API_RETRY_DELAY = 1.0  # seconds
 
 
 def get_team(code: str) -> Optional[TeamInfo]:
-    """Get team info by code (case-insensitive)."""
+    """Get team info by code (case-insensitive).
+    
+    Args:
+        code: Team code (e.g., 'nya', 'bos').
+        
+    Returns:
+        TeamInfo object if found, None otherwise.
+        
+    Example:
+        >>> team = get_team('nya')
+        >>> print(team.name)
+        New York Yankees
+    """
     return TEAM_CODE_MAP.get(code.lower())
 
 
 def validate_team_codes(*codes: str) -> None:
-    """Validate that all team codes exist."""
+    """Validate that all team codes exist.
+    
+    Args:
+        *codes: Variable number of team codes to validate.
+        
+    Raises:
+        ValueError: If any team code is invalid.
+        
+    Example:
+        >>> validate_team_codes('nya', 'bos')  # OK
+        >>> validate_team_codes('nya', 'xyz')  # Raises ValueError
+    """
     for code in codes:
         if code.lower() not in TEAM_CODE_MAP:
             valid_codes = ', '.join(sorted(TEAM_CODE_MAP.keys()))
@@ -77,9 +116,16 @@ def validate_team_codes(*codes: str) -> None:
 
 
 def list_teams() -> None:
-    """Print all available team codes and names."""
+    """Print all available team codes and names to stdout.
+    
+    Outputs a formatted table of team codes and full names, sorted alphabetically
+    by team name.
+    """
     print("\nAvailable Teams:")
-    print("-" * 40)
+    print("-" * 45)
     for code, team in sorted(TEAM_CODE_MAP.items(), key=lambda x: x[1].name):
         print(f"  {code:5} - {team.name}")
+    print()
+    print("Note: Montreal Expos (mon) and Washington Nationals (was)")
+    print("      share the same MLB ID due to franchise relocation.")
     print()

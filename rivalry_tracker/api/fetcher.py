@@ -1,4 +1,9 @@
-"""API fetcher with caching, parallel requests, and retry logic."""
+"""API fetcher with caching, parallel requests, and retry logic.
+
+This module provides a robust interface to the MLB Stats API with features
+including automatic caching, parallel fetching, exponential backoff retry,
+and progress tracking.
+"""
 
 import hashlib
 import json
@@ -8,9 +13,15 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import statsapi
+
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
 
 from ..config import (
     API_RETRY_ATTEMPTS,
@@ -23,9 +34,33 @@ from ..config import (
 logger = logging.getLogger(__name__)
 
 
+class APIError(Exception):
+    """Raised when an API request fails after all retries."""
+    
+    def __init__(self, message: str, year: Optional[int] = None, cause: Optional[Exception] = None):
+        self.year = year
+        self.cause = cause
+        super().__init__(message)
+
+
+class CacheError(Exception):
+    """Raised when a cache operation fails."""
+    pass
+
+
 @dataclass
 class GameResult:
-    """Represents a single game result."""
+    """Represents a single game result.
+    
+    Attributes:
+        date: Game date in YYYY-MM-DD format.
+        winner: Name of the winning team.
+        home_team: Name of the home team.
+        away_team: Name of the away team.
+        home_score: Runs scored by the home team.
+        away_score: Runs scored by the away team.
+        game_id: Unique MLB game identifier.
+    """
     date: str
     winner: str
     home_team: str
@@ -36,14 +71,36 @@ class GameResult:
 
 
 class RivalryFetcher:
-    """Fetches rivalry data from MLB Stats API with caching and parallel requests."""
+    """Fetches rivalry data from MLB Stats API with caching and parallel requests.
+    
+    This class provides efficient data fetching with built-in caching to avoid
+    redundant API calls, parallel requests for faster data retrieval, and
+    automatic retry with exponential backoff for reliability.
+    
+    Attributes:
+        cache_dir: Directory for storing cached responses.
+        max_workers: Maximum number of parallel API requests.
+        use_cache: Whether to use caching.
+    
+    Example:
+        >>> fetcher = RivalryFetcher(cache_dir='.cache', use_cache=True)
+        >>> games = fetcher.fetch_rivalry_data(yankees, red_sox, 2020, 2023)
+        >>> print(f"Found {len(games)} games")
+    """
 
     def __init__(
         self,
         cache_dir: str = DEFAULT_CACHE_DIR,
         max_workers: int = MAX_API_WORKERS,
         use_cache: bool = True,
-    ):
+    ) -> None:
+        """Initialize the fetcher.
+        
+        Args:
+            cache_dir: Directory path for storing cached API responses.
+            max_workers: Maximum number of concurrent API requests.
+            use_cache: Whether to enable response caching.
+        """
         self.cache_dir = Path(cache_dir)
         self.max_workers = max_workers
         self.use_cache = use_cache
@@ -52,16 +109,39 @@ class RivalryFetcher:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_cache_key(self, team1_id: int, team2_id: int, year: int) -> str:
-        """Generate a unique cache key for a query."""
+        """Generate a unique cache key for a query.
+        
+        Args:
+            team1_id: First team's MLB ID.
+            team2_id: Second team's MLB ID.
+            year: Season year.
+            
+        Returns:
+            MD5 hash string used as cache key.
+        """
         key = f"{team1_id}_{team2_id}_{year}"
         return hashlib.md5(key.encode()).hexdigest()
 
     def _get_cache_path(self, cache_key: str) -> Path:
-        """Get the cache file path for a given key."""
+        """Get the cache file path for a given key.
+        
+        Args:
+            cache_key: Cache key string.
+            
+        Returns:
+            Path object for the cache file.
+        """
         return self.cache_dir / f"{cache_key}.json"
 
     def _load_from_cache(self, cache_key: str) -> Optional[List[Dict[str, Any]]]:
-        """Load data from cache if available."""
+        """Load data from cache if available.
+        
+        Args:
+            cache_key: Cache key to look up.
+            
+        Returns:
+            Cached data if found and valid, None otherwise.
+        """
         if not self.use_cache:
             return None
 
@@ -72,12 +152,17 @@ class RivalryFetcher:
                     logger.debug(f"Cache hit: {cache_key}")
                     return json.load(f)
             except (json.JSONDecodeError, IOError) as e:
-                logger.warning(f"Cache read error: {e}")
+                logger.warning(f"Cache read error for {cache_key}: {e}")
                 return None
         return None
 
     def _save_to_cache(self, cache_key: str, data: List[Dict[str, Any]]) -> None:
-        """Save data to cache."""
+        """Save data to cache.
+        
+        Args:
+            cache_key: Cache key for storing the data.
+            data: Data to cache.
+        """
         if not self.use_cache:
             return
 
@@ -87,7 +172,7 @@ class RivalryFetcher:
                 json.dump(data, f)
             logger.debug(f"Cached: {cache_key}")
         except IOError as e:
-            logger.warning(f"Cache write error: {e}")
+            logger.warning(f"Cache write error for {cache_key}: {e}")
 
     def _fetch_season_with_retry(
         self,
@@ -96,7 +181,20 @@ class RivalryFetcher:
         year: int,
         retries: int = API_RETRY_ATTEMPTS,
     ) -> List[Dict[str, Any]]:
-        """Fetch a single season's data with retry logic."""
+        """Fetch a single season's data with retry logic.
+        
+        Args:
+            team1_id: First team's MLB ID.
+            team2_id: Second team's MLB ID.
+            year: Season year to fetch.
+            retries: Maximum number of retry attempts.
+            
+        Returns:
+            List of game dictionaries from the API.
+            
+        Raises:
+            APIError: If all retry attempts fail.
+        """
         cache_key = self._get_cache_key(team1_id, team2_id, year)
         
         # Try cache first
@@ -105,7 +203,7 @@ class RivalryFetcher:
             return cached
 
         # Fetch from API with retries
-        last_error = None
+        last_error: Optional[Exception] = None
         for attempt in range(retries):
             try:
                 logger.info(f"Fetching {year} (attempt {attempt + 1}/{retries})")
@@ -119,6 +217,15 @@ class RivalryFetcher:
                 self._save_to_cache(cache_key, schedule)
                 return schedule
 
+            except ConnectionError as e:
+                last_error = e
+                logger.warning(f"Connection error for {year}: {e}")
+                logger.info("Check your internet connection and try again.")
+                if attempt < retries - 1:
+                    delay = API_RETRY_DELAY * (2 ** attempt)
+                    logger.info(f"Retrying in {delay:.1f}s...")
+                    time.sleep(delay)
+
             except Exception as e:
                 last_error = e
                 logger.warning(f"API error for {year}: {e}")
@@ -127,8 +234,12 @@ class RivalryFetcher:
                     logger.info(f"Retrying in {delay:.1f}s...")
                     time.sleep(delay)
 
-        logger.error(f"Failed to fetch {year} after {retries} attempts")
-        raise RuntimeError(f"API request failed for {year}: {last_error}")
+        error_msg = f"Failed to fetch data for {year} after {retries} attempts."
+        if last_error:
+            error_msg += f" Last error: {last_error}"
+        
+        logger.error(error_msg)
+        raise APIError(error_msg, year=year, cause=last_error)
 
     def fetch_rivalry_data(
         self,
@@ -136,28 +247,42 @@ class RivalryFetcher:
         team2: TeamInfo,
         start_year: int,
         end_year: int,
-        progress_callback: Optional[callable] = None,
+        progress_callback: Optional[Callable[[int, int, int], None]] = None,
+        show_progress: bool = True,
     ) -> List[GameResult]:
-        """
-        Fetch all rivalry games between two teams in parallel.
+        """Fetch all rivalry games between two teams in parallel.
 
         Args:
-            team1: First team info
-            team2: Second team info
-            start_year: Starting year (inclusive)
-            end_year: Ending year (inclusive)
-            progress_callback: Optional callback for progress updates
+            team1: First team info object.
+            team2: Second team info object.
+            start_year: Starting year (inclusive).
+            end_year: Ending year (inclusive).
+            progress_callback: Optional callback function(completed, total, year).
+            show_progress: Whether to show tqdm progress bar.
 
         Returns:
-            List of GameResult objects for completed games
+            List of GameResult objects for completed games, sorted by date.
+            
+        Raises:
+            APIError: If fetching fails for any year.
+            ValueError: If year range is invalid.
         """
+        if start_year > end_year:
+            raise ValueError(f"start_year ({start_year}) must be <= end_year ({end_year})")
+        
         years = list(range(start_year, end_year + 1))
         all_games: List[GameResult] = []
         completed = 0
         total = len(years)
+        errors: List[str] = []
 
         def fetch_year(year: int) -> List[Dict[str, Any]]:
             return self._fetch_season_with_retry(team1.id, team2.id, year)
+
+        # Create progress bar if tqdm available and requested
+        pbar = None
+        if show_progress and TQDM_AVAILABLE:
+            pbar = tqdm(total=total, desc="Fetching seasons", unit="year")
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             future_to_year = {
@@ -186,17 +311,42 @@ class RivalryFetcher:
                     
                     if progress_callback:
                         progress_callback(completed, total, year)
+                    
+                    if pbar:
+                        pbar.update(1)
+                        pbar.set_postfix(year=year)
+
+                except APIError as e:
+                    errors.append(str(e))
+                    logger.error(f"Error fetching {year}: {e}")
+                    if pbar:
+                        pbar.update(1)
 
                 except Exception as e:
-                    logger.error(f"Error fetching {year}: {e}")
-                    # Continue with other years even if one fails
+                    errors.append(f"Unexpected error for {year}: {e}")
+                    logger.error(f"Unexpected error fetching {year}: {e}")
+                    if pbar:
+                        pbar.update(1)
+
+        if pbar:
+            pbar.close()
+
+        # Report errors if any
+        if errors:
+            logger.warning(f"Completed with {len(errors)} error(s)")
+            for err in errors:
+                logger.warning(f"  - {err}")
 
         # Sort by date
         all_games.sort(key=lambda g: g.date)
         return all_games
 
     def clear_cache(self) -> int:
-        """Clear all cached data. Returns number of files deleted."""
+        """Clear all cached data.
+        
+        Returns:
+            Number of cache files deleted.
+        """
         if not self.cache_dir.exists():
             return 0
 
@@ -209,3 +359,21 @@ class RivalryFetcher:
                 logger.warning(f"Failed to delete {cache_file}: {e}")
         
         return count
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get statistics about the cache.
+        
+        Returns:
+            Dictionary with cache statistics (file count, total size).
+        """
+        if not self.cache_dir.exists():
+            return {'file_count': 0, 'total_size_bytes': 0}
+        
+        files = list(self.cache_dir.glob("*.json"))
+        total_size = sum(f.stat().st_size for f in files)
+        
+        return {
+            'file_count': len(files),
+            'total_size_bytes': total_size,
+            'total_size_mb': total_size / (1024 * 1024),
+        }
